@@ -17,6 +17,7 @@ DOMAIN_SKILLS = SKILL_ROOT / "domain-skills"
 ENV_FILE = SKILL_ROOT / ".env"
 
 STEP_RE = re.compile(r"^\d+\.\s*\[(\w+)\]\s*(.+)$")
+STEP_SEP = " -> "
 
 
 def _load_env():
@@ -48,8 +49,8 @@ def parse_step(line):
     if not m:
         return None
     action, rest = m.group(1), m.group(2).strip()
-    if " → " in rest:
-        target, value = rest.split(" → ", 1)
+    if STEP_SEP in rest:
+        target, value = rest.split(STEP_SEP, 1)
         return action, target.strip(), value.strip()
     return action, rest, None
 
@@ -65,7 +66,7 @@ def load_recipe(site, recipe_name):
         for section in sections:
             if section.strip().startswith(recipe_name):
                 return content
-    raise FileNotFoundError(f"Recipe '{recipe_name}' not found for {site}")
+    raise FileNotFoundError(f"Recipe '{recipe_name}' not found for {site} (checked nav.md, forms.md)")
 
 
 async def execute_step(page, action, target, value):
@@ -121,17 +122,12 @@ async def run_recipe(site, recipe_name, headless=False, max_retries=2):
     folder = DOMAIN_SKILLS / slugify(site)
     if not folder.exists():
         raise FileNotFoundError(f"Site {site} not mapped. Run map_site first.")
-    
-    recipe_file = None
-    for fname in ["nav.md", "forms.md"]:
-        fpath = folder / fname
-        if fpath.exists():
-            recipe_file = fpath
-            break
-    if not recipe_file:
-        raise FileNotFoundError(f"No recipe file found for {site}")
-    
-    content = recipe_file.read_text()
+
+    try:
+        content = load_recipe(site, recipe_name)
+    except FileNotFoundError:
+        raise
+
     in_section = False
     steps = []
     for line in content.splitlines():
@@ -144,9 +140,9 @@ async def run_recipe(site, recipe_name, headless=False, max_retries=2):
             parsed = parse_step(line)
             if parsed:
                 steps.append(parsed)
-    
+
     if not steps:
-        raise ValueError(f"No steps found for recipe '{recipe_name}' in {recipe_file}")
+        raise ValueError(f"No steps found for recipe '{recipe_name}' in domain-skills")
     
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=headless)
@@ -155,7 +151,7 @@ async def run_recipe(site, recipe_name, headless=False, max_retries=2):
         
         failure = None
         for i, (action, target, value) in enumerate(steps):
-            print(f"Step {i+1}: [{action}] {target}" + (f" → {value}" if value else ""))
+            print(f"Step {i+1}: [{action}] {target}" + (f" -> {value}" if value else ""))
             ok = await execute_step(page, action, target, value)
             if not ok:
                 failure = {"step": i+1, "action": action, "target": target, "value": value}
@@ -163,6 +159,8 @@ async def run_recipe(site, recipe_name, headless=False, max_retries=2):
         
         if failure:
             print(f"Step {failure['step']} failed: [{failure['action']}] {failure['target']}")
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent))
             from heal import heal
             healed = await heal(site, recipe_name, failure, page, max_retries)
             await browser.close()

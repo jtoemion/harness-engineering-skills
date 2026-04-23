@@ -60,8 +60,8 @@ Steps in nav.md / forms.md use this format:
 
 1. [goto] https://site.com/login
 2. [wait] #username field visible
-3. [type] #username → {USERNAME}
-4. [type] #password → {PASSWORD}
+3. [type] #username -> {USERNAME}
+4. [type] #password -> {PASSWORD}
 5. [click] button[type=submit]
 6. [wait] .dashboard loaded
 7. [verify] url contains /dashboard

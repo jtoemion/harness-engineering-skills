@@ -8,14 +8,35 @@ Usage:
     run_recipe("students.ezralms.com", "login")
 """
 
-import asyncio, re, sys
+import asyncio, os, re, sys
 from pathlib import Path
 from playwright.async_api import async_playwright
 
 SKILL_ROOT = Path(__file__).parent.parent
 DOMAIN_SKILLS = SKILL_ROOT / "domain-skills"
+ENV_FILE = SKILL_ROOT / ".env"
 
 STEP_RE = re.compile(r"^\d+\.\s*\[(\w+)\]\s*(.+)$")
+
+
+def _load_env():
+    if ENV_FILE.exists():
+        for line in ENV_FILE.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+_load_env()
+
+
+def _sub_env(value):
+    if not value:
+        return value
+    for k, v in os.environ.items():
+        value = value.replace(f"{{{k}}}", v)
+    return value
 
 
 def slugify(hostname):
@@ -48,6 +69,8 @@ def load_recipe(site, recipe_name):
 
 
 async def execute_step(page, action, target, value):
+    value = _sub_env(value) if value else None
+
     if action == "goto":
         await page.goto(target, wait_until="domcontentloaded")
         return True
@@ -73,6 +96,12 @@ async def execute_step(page, action, target, value):
             return False
         await el.click()
         return True
+    elif action == "submit":
+        form = await page.query_selector(target)
+        if form:
+            await form.evaluate("f => f.submit()")
+            return True
+        return False
     elif action == "verify":
         result = await page.evaluate(target)
         return value in str(result) if result else False
@@ -82,10 +111,13 @@ async def execute_step(page, action, target, value):
                 return True
             await asyncio.sleep(0.5)
         return False
+    elif action == "screenshot":
+        await page.screenshot(path=value)
+        return True
     return False
 
 
-async def run_recipe(site, recipe_name, headless=True, max_retries=2):
+async def run_recipe(site, recipe_name, headless=False, max_retries=2):
     folder = DOMAIN_SKILLS / slugify(site)
     if not folder.exists():
         raise FileNotFoundError(f"Site {site} not mapped. Run map_site first.")

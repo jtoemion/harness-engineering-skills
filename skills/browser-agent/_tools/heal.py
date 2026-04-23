@@ -4,12 +4,29 @@ heal.py — Autorepair: detect failure, LLM diagnose, write fix, retry.
 Called automatically by run_recipe.py on step failure.
 """
 
-import sys, time, yaml
+import asyncio, json, os, time, yaml
 from pathlib import Path
 
 SKILL_ROOT = Path(__file__).parent.parent
 DOMAIN_SKILLS = SKILL_ROOT / "domain-skills"
 GLOBAL_FAILURES = SKILL_ROOT / "_global-failures.yaml"
+ENV_FILE = SKILL_ROOT / ".env"
+
+
+def _load_env():
+    if ENV_FILE.exists():
+        for line in ENV_FILE.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+_load_env()
+
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "openrouter/free")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 
 def slugify(hostname):
@@ -34,8 +51,8 @@ async def capture_failure_context(page, site, recipe_name, failure):
     }
 
 
-def query_llm_for_fix(site, context, domain_skill_excerpt=""):
-    prompt = f"""A recipe step failed on {site}.
+def _build_prompt(site, context, domain_skill_excerpt):
+    return f"""A recipe step failed on {site}.
 
 Recipe: {context['recipe']}
 Failed step: {context['failed_step']}
@@ -46,19 +63,73 @@ DOM snippet: {context['dom_snippet'][:500] if context['dom_snippet'] else 'N/A'}
 Domain skill excerpt:
 {domain_skill_excerpt[:1000] if domain_skill_excerpt else 'No domain skill found.'}
 
-Suggest a fix. Return JSON:
-{{
-  "symptom": "what went wrong",
-  "fix": "concrete action to take",
-  "confidence": "high|medium|low",
-  "is_cross_site": true|false,
-  "cross_site_notes": "if cross_site=true, what sites does this apply to"
-}}
+Suggest a fix for the failed step. Return ONLY valid JSON:
+{{"symptom": "...", "fix": "...", "confidence": "high|medium|low", "is_cross_site": true|false, "cross_site_notes": "..."}}
 """
-    print(f"[heal] Would ask LLM: {prompt[:200]}...")
+
+
+def _call_openrouter(prompt):
+    import urllib.request, urllib.error
+    data = json.dumps({
+        "model": OPENROUTER_MODEL,
+        "messages": [{"role": "user", "content": prompt}]
+    }).encode()
+    req = urllib.request.Request(
+        "https://openrouter.ai/api/v1/chat/completions",
+        data=data,
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://browser-agent.local",
+            "X-Title": "browser-agent"
+        }
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        result = json.loads(resp.read())
+    return result["choices"][0]["message"]["content"]
+
+
+def _call_gemini(prompt):
+    import urllib.request, urllib.error
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    data = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode()
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        result = json.loads(resp.read())
+    return result["candidates"][0]["content"]["parts"][0]["text"]
+
+
+def _parse_json_response(text):
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    if text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return json.loads(text.strip())
+
+
+def query_llm_for_fix(site, context, domain_skill_excerpt=""):
+    prompt = _build_prompt(site, context, domain_skill_excerpt)
+
+    if OPENROUTER_API_KEY:
+        try:
+            raw = _call_openrouter(prompt)
+            return _parse_json_response(raw)
+        except Exception as e:
+            print(f"[heal] OpenRouter failed: {e}")
+
+    if GEMINI_API_KEY:
+        try:
+            raw = _call_gemini(prompt)
+            return _parse_json_response(raw)
+        except Exception as e:
+            print(f"[heal] Gemini fallback failed: {e}")
+
     return {
         "symptom": "Unknown",
-        "fix": "Unknown — LLM not wired up yet",
+        "fix": "Unknown — no API keys configured",
         "confidence": "low",
         "is_cross_site": False,
         "cross_site_notes": ""
@@ -131,7 +202,9 @@ async def heal(site, recipe_name, failure, page=None, max_retries=2):
             domain_skill_excerpt = fpath.read_text()
             break
 
-    diagnosis = query_llm_for_fix(site, context, domain_skill_excerpt)
+    diagnosis = await asyncio.get_event_loop().run_in_executor(
+        None, query_llm_for_fix, site, context, domain_skill_excerpt
+    )
     append_fix_to_failures_md(site, recipe_name, failure, diagnosis)
 
     if diagnosis.get("is_cross_site"):

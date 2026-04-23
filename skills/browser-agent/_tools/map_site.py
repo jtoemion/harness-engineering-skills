@@ -23,7 +23,7 @@ def slugify(hostname):
 def ensure_site_folder(site):
     folder = DOMAIN_SKILLS / slugify(site)
     folder.mkdir(parents=True, exist_ok=True)
-    for fname in ["README.md", "nav.md", "forms.md", "apis.md", "failures.md"]:
+    for fname in ["README.md", "nav.md", "forms.md", "apis.md", "troubleshooting.md"]:
         fpath = folder / fname
         if not fpath.exists():
             fpath.write_text("")

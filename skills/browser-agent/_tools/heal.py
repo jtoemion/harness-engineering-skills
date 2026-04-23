@@ -138,7 +138,7 @@ def query_llm_for_fix(site, context, domain_skill_excerpt=""):
 
 def append_fix_to_failures_md(site, recipe_name, failure, diagnosis):
     folder = DOMAIN_SKILLS / slugify(site)
-    fpath = folder / "failures.md"
+    fpath = folder / "troubleshooting.md"
     entry = [
         f"## {site}: {diagnosis['symptom'][:50]}",
         "",

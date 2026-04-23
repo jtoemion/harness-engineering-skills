@@ -1,0 +1,254 @@
+# Skill Router — Single Source of Truth
+# Agent reads THIS FILE ONLY to decide which skill to load.
+# Never browse skill folders — route through this file first.
+# FIRST MATCH on condition wins. Higher weight = higher priority on ties.
+
+version: "2.0"
+updated: "2026-04-22"
+
+skills_root: "C:\\Users\\jtoem\\.config\\opencode\\skills"
+
+# ROUTING TABLE — evaluated top-to-bottom, first match wins
+routing:
+  - id: "session-close"
+    condition: "user says 'close session' or 'end session' or 'wrap up session'"
+    skill_path: "harness/SESSION_CLOSE.md"
+    mode_required: "full"
+    weight: 100
+    note: "Mandatory in FULL mode. In QUICK mode, acknowledge and list what was done."
+
+  - id: "cold-start"
+    condition: "no .memory/ directory exists AND project work requested"
+    skill_path: "harness/COLD_START.md"
+    mode_required: "full"
+    weight: 99
+
+  - id: "e2e-scaffold"
+    condition: "user says 'e2e scaffold' or 'set up e2e testing' or 'e2e infrastructure'"
+    skill_path: "harness/e2e-scaffold/SKILL.md"
+    mode_required: "any"
+    weight: 95
+    prerequisites:
+      - check: "Test framework initialized"
+        how: "Look for tests/, Tests/, __tests__/, or test runner config"
+        fail_message: "Run test framework setup first (no test directory found)"
+
+  - id: "test-review"
+    condition: "user says 'review tests' or 'evaluate test quality' or 'test review' or 'test quality'"
+    skill_path: "harness/test-review/SKILL.md"
+    mode_required: "any"
+    weight: 90
+
+  - id: "document-project"
+    condition: "user says 'document this project' or 'generate project docs' or 'full project documentation'"
+    skill_path: "harness/document-project/SKILL.md"
+    mode_required: "any"
+    weight: 85
+
+  - id: "project-context"
+    condition: "user says 'project context' or 'generate context' or '.context' or 'AI rules for this project'"
+    skill_path: "harness/project-context/SKILL.md"
+    mode_required: "any"
+    weight: 80
+
+  - id: "workflow-builder"
+    condition: "user says 'build a workflow' or 'create a skill' or 'convert a skill' or 'quality check workflow' or 'analyze skill'"
+    skill_path: "harness/workflow-builder/SKILL.md"
+    mode_required: "any"
+    weight: 75
+
+  - id: "ultrathink"
+    condition: "user explicitly types 'ULTRATHINK' in their prompt"
+    skill_path: "superpowers/ultrathink-mode/SKILL.md"
+    mode_required: "any"
+    weight: 100
+
+  - id: "systematic-debugging"
+    condition: "bug encountered, test failure, or unexpected behavior — before proposing fixes"
+    skill_path: "superpowers/systematic-debugging/SKILL.md"
+    mode_required: "any"
+    weight: 70
+
+  - id: "test-driven-development"
+    condition: "implementing any feature or bugfix, BEFORE writing implementation code"
+    skill_path: "superpowers/test-driven-development/SKILL.md"
+    mode_required: "any"
+    weight: 65
+
+  - id: "parallel-agents"
+    condition: "2+ independent tasks that can run without shared state or sequential dependencies"
+    skill_path: "superpowers/dispatching-parallel-agents/SKILL.md"
+    mode_required: "any"
+    weight: 60
+
+  - id: "verification-before-completion"
+    condition: "about to claim work is complete, fixed, or passing — before committing or creating PRs"
+    skill_path: "superpowers/verification-before-completion/SKILL.md"
+    mode_required: "any"
+    weight: 55
+
+  - id: "receiving-code-review"
+    condition: "received code review feedback, deciding what to implement"
+    skill_path: "superpowers/receiving-code-review/SKILL.md"
+    mode_required: "any"
+    weight: 50
+
+  - id: "requesting-code-review"
+    condition: "completed task, implementing major feature, or before merging — verify work meets requirements"
+    skill_path: "superpowers/requesting-code-review/SKILL.md"
+    mode_required: "any"
+    weight: 45
+
+  - id: "brainstorming"
+    condition: "creative work — creating features, building components, adding functionality, or modifying behavior"
+    skill_path: "superpowers/brainstorming/SKILL.md"
+    mode_required: "any"
+    weight: 40
+
+  - id: "writing-plans"
+    condition: "have a spec or requirements for a multi-step task, before touching code"
+    skill_path: "superpowers/writing-plans/SKILL.md"
+    mode_required: "any"
+    weight: 35
+
+  - id: "browser-agent"
+    condition: "browser automation, automate browser, map site, browser agent, autorepair"
+    skill_path: "browser-agent/SKILL.md"
+    mode_required: "any"
+    weight: 35
+
+  - id: "executing-plans"
+    condition: "have a written implementation plan to execute in a separate session with review checkpoints"
+    skill_path: "superpowers/executing-plans/SKILL.md"
+    mode_required: "any"
+    weight: 30
+
+  - id: "architectural-impact"
+    condition: "changes touch data, databases, new features, business logic, API endpoints, or more than one layer"
+    skill_path: "superpowers/architectural-impact/SKILL.md"
+    mode_required: "any"
+    weight: 25
+
+  - id: "frontend-avant-garde"
+    condition: "UI, UX, visual design, component architecture, styling, animations, layout, or frontend refactoring"
+    skill_path: "superpowers/frontend-avant-garde/SKILL.md"
+    mode_required: "any"
+    weight: 24
+
+  - id: "using-git-worktrees"
+    condition: "starting feature work that needs isolation from current workspace"
+    skill_path: "superpowers/using-git-worktrees/SKILL.md"
+    mode_required: "any"
+    weight: 20
+
+  - id: "finishing-branch"
+    condition: "implementation complete, all tests pass, ready to integrate — merge, PR, or cleanup"
+    skill_path: "superpowers/finishing-a-development-branch/SKILL.md"
+    mode_required: "any"
+    weight: 15
+
+  - id: "scope-guard"
+    condition: "task is about to touch files outside its declared scope — scope creep detection"
+    skill_path: "superpowers/scope-guard/SKILL.md"
+    mode_required: "any"
+    weight: 14
+
+  - id: "dev-journey-log"
+    condition: "any code file touched, feature added/removed, route/component/schema/config changed"
+    skill_path: "superpowers/dev-journey-log/SKILL.md"
+    mode_required: "any"
+    weight: 10
+
+  - id: "karpathy-guidelines"
+    condition: "writing, reviewing, or refactoring code — reduce overcomplication, surface assumptions"
+    skill_path: "karpathy-guidelines/SKILL.md"
+    mode_required: "any"
+    weight: 5
+
+  - id: "vault-ops"
+    condition: "vault|vault-ops|obsidian vault"
+    skill_path: "superpowers/vault-ops/SKILL.md"
+    mode_required: "both"
+    weight: 5
+    note: "Core Obsidian vault read/write/query/patch/link/sync operations"
+
+  - id: "knowledge-graph"
+    condition: "knowledge graph|graph|pattern graph|mistake graph|cross-project"
+    skill_path: "superpowers/knowledge-graph/SKILL.md"
+    mode_required: "both"
+    weight: 6
+    note: "Graph intelligence — surface mistakes, patterns, decisions across projects"
+
+  - id: "session-graph"
+    condition: "session close|session-graph|close session|atomic close"
+    skill_path: "superpowers/session-graph/SKILL.md"
+    mode_required: "full"
+    weight: 8
+    note: "Session close with graph awareness — creates linked notes"
+
+# DISAMBIGUATION — handle commonly confused skills
+disambiguation:
+  - confused:
+      - test-review
+      - test-driven-development
+      - e2e-scaffold
+    rule: |
+      test-review = "Are my EXISTING tests good quality?" (review/audit)
+      test-driven-development = "Am I WRITING new code? Write tests first!" (process)
+      e2e-scaffold = "Do I need E2E test INFRASTRUCTURE setup?" (scaffolding)
+
+  - confused:
+      - document-project
+      - project-context
+    rule: |
+      document-project = Full documentation generator (3 scan modes, produces architecture docs, dev guides, etc.)
+      project-context = Lightweight persistent rules file (~100 lines, gotchas + patterns for AI)
+
+  - confused:
+      - workflow-builder
+      - writing-skills
+      - conductor
+    rule: |
+      workflow-builder = Design, analyze, or convert workflow SKILL structures (outcome-driven design)
+      writing-skills = TDD process for creating individual skills (test with subagent, write, verify)
+      conductor = Route complex multi-skill requests to the right sub-skill orchestration
+
+  - confused:
+      - requesting-code-review
+      - receiving-code-review
+    rule: |
+      requesting = You COMPLETED work, want review before merging
+      receiving = You RECEIVED feedback, deciding what to implement
+
+  - confused:
+      - systematic-debugging
+      - test-driven-development
+    rule: |
+      systematic-debugging = Something is BROKEN (bug, failure, unexpected behavior) — find root cause
+      test-driven-development = You're BUILDING something new (feature, bugfix) — write tests first
+
+  - confused:
+      - writing-plans
+      - executing-plans
+    rule: |
+      writing-plans = Have requirements, need a plan BEFORE coding
+      executing-plans = Have a written plan, need to IMPLEMENT it
+
+# MODE GUARDS — skills that require specific modes
+mode_guards:
+  - skill_id: "session-close"
+    requires: "full"
+    fallback: "Acknowledge request. List what was done. Cannot run full session close in QUICK mode."
+
+  - skill_id: "cold-start"
+    requires: "full"
+    fallback: "COLD START requires FULL mode. Create .memory/ directory first."
+
+# ANTI-RATIONALIZATION — prevent common wrong routing decisions
+routing_rules:
+  - rule: "NEVER load a skill based on keyword match alone. Check the condition AND context."
+  - rule: "When multiple skills could apply, use weight to resolve. If weights are equal, use disambiguation table."
+  - rule: "QUICK mode skills must not depend on .memory/ or harness state."
+  - rule: "If no routing condition matches, proceed without loading any skill. Do NOT guess."
+  - rule: "karpathy-guidelines loads on boot in both modes. Do not load it again via routing."
+  - rule: "dev-journey-log and scope-guard fire AUTOMATICALLY on their trigger conditions. No user request needed."

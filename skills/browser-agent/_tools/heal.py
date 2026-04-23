@@ -1,19 +1,13 @@
 """
 heal.py — Autorepair: detect failure, LLM diagnose, write fix, retry.
 
-Called automatically by run-recipe.py on step failure.
+Called automatically by run_recipe.py on step failure.
 """
 
-import sys, time, json, yaml
+import sys, time, yaml
 from pathlib import Path
 
-HARNESS = Path("C:/Users/jtoem/Repo/browser-harness")
-sys.path.insert(0, str(HARNESS))
-from helpers import (
-    page_info, screenshot, js, wait, wait_for_load
-)
-
-SKILL_ROOT = Path("C:/Users/jtoem/.config/opencode/skills/browser-agent")
+SKILL_ROOT = Path(__file__).parent.parent
 DOMAIN_SKILLS = SKILL_ROOT / "domain-skills"
 GLOBAL_FAILURES = SKILL_ROOT / "_global-failures.yaml"
 
@@ -22,18 +16,18 @@ def slugify(hostname):
     return hostname.replace(".", "-").replace(":", "-")
 
 
-def capture_failure_context(site, recipe_name, failure):
-    info = page_info()
-    shot_path = f"C:/Users/jtoem/.config/opencode/skills/browser-agent/_debug_{int(time.time())}.png"
+async def capture_failure_context(page, site, recipe_name, failure):
     try:
-        screenshot(shot_path)
+        await page.screenshot(path=str(SKILL_ROOT / f"_debug_{int(time.time())}.png"))
     except Exception:
-        shot_path = None
-    dom_snippet = js("document.body.innerHTML[:1000]") or ""
+        pass
+    try:
+        dom_snippet = await page.evaluate("document.body.innerHTML[:1000]")
+    except Exception:
+        dom_snippet = ""
     return {
-        "url": info.get("url", ""),
-        "title": info.get("title", ""),
-        "screenshot": shot_path,
+        "url": page.url,
+        "title": await page.title() if page else "",
         "dom_snippet": dom_snippet,
         "recipe": recipe_name,
         "failed_step": failure
@@ -118,15 +112,17 @@ def append_global_failure(diagnosis):
     GLOBAL_FAILURES.write_text(yaml.dump(data))
 
 
-def retry_step(site, recipe_name, failure):
+async def retry_step(page, failure):
     from run_recipe import execute_step
     action, target, value = failure["action"], failure["target"], failure.get("value")
-    return execute_step(action, target, value)
+    return await execute_step(page, action, target, value)
 
 
-def heal(site, recipe_name, failure, max_retries=2):
+async def heal(site, recipe_name, failure, page=None, max_retries=2):
     print(f"[heal] Diagnosing failure for {site}/{recipe_name}")
-    context = capture_failure_context(site, recipe_name, failure)
+
+    context = await capture_failure_context(page, site, recipe_name, failure)
+
     domain_skill_excerpt = ""
     folder = DOMAIN_SKILLS / slugify(site)
     for fname in ["nav.md", "forms.md"]:
@@ -134,18 +130,23 @@ def heal(site, recipe_name, failure, max_retries=2):
         if fpath.exists():
             domain_skill_excerpt = fpath.read_text()
             break
+
     diagnosis = query_llm_for_fix(site, context, domain_skill_excerpt)
     append_fix_to_failures_md(site, recipe_name, failure, diagnosis)
+
     if diagnosis.get("is_cross_site"):
         append_global_failure(diagnosis)
+
     if diagnosis["confidence"] == "low":
         print(f"[heal] Low confidence — escalating to user")
         return False
+
     for attempt in range(max_retries):
         print(f"[heal] Retry {attempt + 1}/{max_retries}")
-        ok = retry_step(site, recipe_name, failure)
+        ok = await retry_step(page, failure)
         if ok:
             print(f"[heal] Retry {attempt + 1} succeeded")
             return True
+
     print(f"[heal] All retries exhausted — escalating to user")
     return False

@@ -111,7 +111,7 @@ async def execute_step(page, action, target, value):
         return value in str(result) if result else False
     elif action == "wait_url":
         for _ in range(30):
-            if value in page.url:
+            if target in page.url:
                 return True
             await asyncio.sleep(0.5)
         return False

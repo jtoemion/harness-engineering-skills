@@ -8,6 +8,6 @@
 4. [click] button[type=submit]
 5. [wait] #pin
 6. [type] #pin -> {EZRALMS_PIN}
-7. [click] button[type=submit]
+7. [press_enter] #pin
 8. [wait_url] students.ezralms.com
 9. [screenshot] C:/Users/jtoem/ezralms_logged_in.png

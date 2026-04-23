@@ -97,6 +97,9 @@ async def execute_step(page, action, target, value):
             return False
         await el.click()
         return True
+    elif action == "press_enter":
+        await page.press(target, "Enter")
+        return True
     elif action == "submit":
         form = await page.query_selector(target)
         if form:

@@ -11,20 +11,10 @@ Browser automation skill that discovers site structure, executes deterministic r
 
 ```bash
 # Map a new site
-browser-harness <<'PY'
-import sys
-sys.path.insert(0, "C:/Users/jtoem/.config/opencode/skills/browser-agent/_tools")
-from map_site import map_site
-map_site("students.ezralms.com")
-PY
+python -m _tools.map_site students.ezralms.com
 
 # Run a recipe
-browser-harness <<'PY'
-import sys
-sys.path.insert(0, "C:/Users/jtoem/.config/opencode/skills/browser-agent/_tools")
-from run_recipe import run_recipe
-run_recipe("students.ezralms.com", "login")
-PY
+python -m _tools.run_recipe students.ezralms.com login
 ```
 
 ## Architecture
@@ -33,8 +23,8 @@ PY
 browser-agent/
 ├── _global-failures.yaml    # Cross-site fix index
 ├── _tools/
-│   ├── map-site.py          # Auto-discover site structure
-│   ├── run-recipe.py        # Execute deterministic recipe
+│   ├── map_site.py          # Auto-discover site structure (Playwright)
+│   ├── run_recipe.py       # Execute deterministic recipe (Playwright)
 │   └── heal.py              # Autorepair with LLM + 2 retries
 └── domain-skills/           # Per-site knowledge (auto-created)
     └── <site>/
@@ -98,4 +88,4 @@ When a recipe step fails:
 ## Reference
 
 - Design: `DESIGN.md`
-- Browser harness helpers: `C:\Users\jtoem\Repo\browser-harness\helpers.py`
+- Tech stack: Playwright (`playwright.async_api`)

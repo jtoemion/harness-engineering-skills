@@ -1,0 +1,13 @@
+{
+  "session_id": "YYYY-MM-DD-HHMM",
+  "mode": "quick|full",
+  "state": "ACTIVE",
+  "boot_time": "ISO8601",
+  "last_checkpoint": null,
+  "mistakes_checked": false,
+  "verification_logged": false,
+  "skills_loaded": [],
+  "routing_log": [],
+  "ill_captures_since_synthesis": 0,
+  "close_step": null
+}

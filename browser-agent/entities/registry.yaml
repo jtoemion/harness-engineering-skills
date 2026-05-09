@@ -1,0 +1,163 @@
+# Central Entity Registry
+# All known entities for football news wikilinking
+# Format: "Display Name": "wikilink-name"
+
+_clubs:
+  # English Premier League
+  Manchester City: Manchester-City
+  Manchester United: Manchester-United
+  Man City: Manchester-City
+  Man United: Manchester-United
+  Arsenal: Arsenal-FC
+  Liverpool: Liverpool-FC
+  Chelsea: Chelsea-FC
+  Tottenham: Tottenham-Hotspur
+  Newcastle: Newcastle-United
+  Brighton: Brighton-Hove-Albion
+  Aston Villa: Aston-Villa
+  West Ham: West-Ham-United
+  Bournemouth: Bournemouth
+  Brentford: Brentford
+  Fulham: Fulham
+  Crystal Palace: Crystal-Palace
+  Everton: Everton
+  Nottingham Forest: Nottingham-Forest
+  Leicester: Leicester-City
+  Wolves: Wolverhampton-Wanderers
+  Ipswich: Ipswich-Town
+  Southampton: Southampton
+
+  # Spanish La Liga
+  Real Madrid: Real-Madrid
+  Barcelona: FC-Barcelona
+  Atletico Madrid: Atletico-Madrid
+  Sevilla: Sevilla-FC
+  Real Betis: Real-Betis
+  Athletic Bilbao: Athletic-Bilbao
+  Real Sociedad: Real-Sociedad
+  Villarreal: Villarreal
+  Valencia: Valencia
+  Getafe: Getafe
+  Osasuna: Osasuna
+
+  # Italian Serie A
+  Inter Milan: Inter-Milan
+  AC Milan: AC-Milan
+  Juventus: Juventus
+  Napoli: Napoli
+  Roma: AS-Roma
+  Lazio: Lazio
+  Fiorentina: Fiorentina
+  Bologna: Bologna
+  Atalanta: Atalanta
+
+  # German Bundesliga
+  Bayern Munich: Bayern-Munich
+  Borussia Dortmund: Borussia-Dortmund
+  RB Leipzig: RB-Leipzig
+  Bayer Leverkusen: Bayer-04-Leverkusen
+  Eintracht Frankfurt: Eintracht-Frankfurt
+  Dortmund: Borussia-Dortmund
+
+  # French Ligue 1
+  PSG: Paris-Saint-Germain
+  Marseille: Olympique-Marseille
+  Lyon: Olympique-Lyon
+  Monaco: AS-Monaco
+  Lille: Lille
+  Nice: Nice
+
+_players:
+  # Premier League Stars
+  Erling Haaland: Erling-Haaland
+  Bukayo Saka: Bukayo-Saka
+  Martin Ødegaard: Martin-Odegaard
+  Declan Rice: Declan-Rice
+  Phil Foden: Phil-Foden
+  Kevin De Bruyne: Kevin-De-Bruyne
+  Rodri: Rodri
+  Bernardo Silva: Bernardo-Silva
+  William Saliba: William-Saliba
+  Gabriel: Gabriel
+  Ben White: Ben-White
+  Oleksandr Zinchenko: Oleksandr-Zinchenko
+  Jurrien Timber: Jurrien-Timber
+  Thomas Partey: Thomas-Partey
+  Martinelli: Gabriel-Martinelli
+  Leandro Trossard: Leandro-Trossard
+
+  # Other Key Players
+  Kylian Mbappe: Kylian-Mbappe
+  Vinicius Jr: Vinicius-Jr
+  Jude Bellingham: Jude-Bellingham
+  Federico Valverde: Federico-Valverde
+  Harry Kane: Harry-Kane
+  Marcus Rashford: Marcus-Rashford
+  Bruno Fernandes: Bruno-Fernandes
+  Paul Pogba: Paul-Pogba
+  Scott McTominay: Scott-McTominay
+  Kobbie Mainoo: Kobbie-Mainoo
+  Savinho: Savinho
+  Cole Palmer: Cole-Palmer
+  Mohamed Salah: Mohamed-Salah
+  Darwin Nunez: Darwin-Nunez
+  Luis Diaz: Luis-Diaz
+  Son Heung-min: Son-Heung-min
+  Son: Son-Heung-min
+  Richarlison: Richarlison
+  James Maddison: James-Maddison
+  James: James-Maddison
+  Brennan Johnson: Brennan-Johnson
+  Dominic Solanke: Dominic-Solanke
+
+_managers:
+  Pep Guardiola: Pep-Guardiola
+  Mikel Arteta: Mikel-Arteta
+  Jurgen Klopp: Jurgen-Klopp
+  Arne Slot: Arne-Slot
+  Carlo Ancelotti: Carlo-Ancelotti
+  Xabi Alonso: Xabi-Alonso
+  Diego Simeone: Diego-Simeone
+  Unai Emery: Unai-Emery
+  Antonio Conte: Antonio-Conte
+  Enzo Maresca: Enzo-Maresca
+  Ruben Amorim: Ruben-Amorim
+  Erik ten Hag: Erik-ten-Hag
+  Thomas Tuchel: Thomas-Tuchel
+  Mauricio Pochettino: Mauricio-Pochettino
+
+_competitions:
+  Premier League: Premier-League
+  La Liga: La-Liga
+  Bundesliga: Bundesliga
+  Serie A: Serie-A
+  Ligue 1: Ligue-1
+  Champions League: Champions-League
+  Europa League: Europa-League
+  FA Cup: FA-Cup
+  Carabao Cup: Carabao-Cup
+  League Cup: Carabao-Cup
+  World Cup: World-Cup
+  Euro: Euro
+  UEFA Nations League: Nations-League
+
+_nations:
+  England: England
+  Spain: Spain
+  France: France
+  Germany: Germany
+  Italy: Italy
+  Portugal: Portugal
+  Brazil: Brazil
+  Argentina: Argentina
+  Netherlands: Netherlands
+  Belgium: Belgium
+  Croatia: Croatia
+  Denmark: Denmark
+  Norway: Norway
+  Wales: Wales
+  Scotland: Scotland
+
+# Unknown entities auto-created with type:
+# _auto_create_folder: clubs|players|persons|competitions|leagues|nations
+_auto_create: true

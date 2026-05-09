@@ -1,0 +1,39 @@
+# Project Context Quick Reference
+
+version: "1.0"
+
+purpose: "Persistent AI rules and patterns for this codebase"
+differs_from_memory: "Session memory resets. Project context persists."
+
+triggers:
+  generate: '"project context" or "generate context" or ".context"'
+  update: "Significant decision, pattern discovery, onboarding"
+
+template_sections:
+  - "Technology Stack & Versions"
+  - "Critical Implementation Rules"
+  - "Naming Conventions"
+  - "Common Patterns"
+  - "Architecture Decisions"
+  - "API Conventions"
+  - "Testing Requirements"
+  - "Known Gotchas"
+
+discovery_questions:
+  - "What tech stack and versions?"
+  - "What are the critical rules (must/must not)?"
+  - "What naming conventions are used?"
+  - "What common patterns should AI follow?"
+  - "What architectural decisions were made?"
+  - "What API conventions exist?"
+  - "What testing requirements exist?"
+  - "What gotchas should AI know about?"
+
+obsidian_mirror:
+  project: "00_HUMAN/02_Projects/[NAME]/Context/project-context.md"
+
+update_triggers:
+  - "New architectural decision"
+  - "Pattern discovered (caused bug)"
+  - "Conventions change"
+  - "Significant refactoring"

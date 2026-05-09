@@ -1,0 +1,65 @@
+name: document-project
+version: 1.0.0
+description: Comprehensive brownfield project documentation for AI agent context
+trigger_phrases:
+  - "document this project"
+  - "generate project docs"
+  - "project documentation"
+  - "document project"
+  - "scan this codebase"
+modes:
+  initial_scan:
+    description: "First-time full project documentation"
+    workflow: FULL_SCAN.md
+    produces:
+      - CONTEXT.md           # project root — AI agent entry point (≤4,000 tokens)
+      - project-overview.md
+      - architecture.md
+      - source-tree.md
+      - dev-guide.md
+  full_rescan:
+    description: "Re-document after significant changes"
+    workflow: FULL_SCAN.md
+    produces:
+      - CONTEXT.md           # project root — regenerated last, anchors re-validated
+      - project-overview.md
+      - architecture.md
+      - source-tree.md
+      - dev-guide.md
+  deep_dive:
+    description: "Exhaustive documentation of specific area"
+    workflow: DEEP_DIVE.md
+    produces:
+      - deep-dives/<area>.md
+scan_levels:
+  quick:
+    files: "Config, README, entry points"
+    estimated_time: "5 min"
+  deep:
+    files: "+ source dirs, key modules, tests"
+    estimated_time: "20 min"
+  exhaustive:
+    files: "+ every source file"
+    estimated_time: "60 min"
+project_types:
+  - web_app
+  - api
+  - mobile
+  - desktop
+  - game
+  - library
+output_dir: .docs/
+state_file: .docs/.scan-state.json
+validation: CHECKLIST.md
+key_principles:
+  - write_as_you_go: "Write each output file immediately after its scan phase"
+  - no_placeholders: "Never leave TODO or placeholder content in output"
+  - no_sampling: "Full file review only, never guess from partial reads"
+  - resumable: "State file enables pause/resume across sessions"
+  - ai_context_first: "Documentation optimized for AI agent consumption"
+  - newspaper_logic: "All output files follow inverted-pyramid lede-first scannable non-linear format"
+  - lede_first: "First 3 lines of every file tell the AI what it MUST know"
+  - scannable_tables: "Use tables for constraints, modules, gotchas — not prose paragraphs"
+  - inline_hard_stuff: "Most violated rules appear verbatim inline, not behind a link"
+  - stack_classification: "Tech stack must be classified as core|infrastructure|inactive|planned — not flat lists"
+  - constraints_at_top: "Critical constraints appear before mid-file, not buried"

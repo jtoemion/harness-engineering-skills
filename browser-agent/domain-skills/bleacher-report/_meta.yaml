@@ -1,0 +1,12 @@
+# Bleacher Report Football - Navigation Recipes
+
+## URL Patterns
+- Article: `https://bleacherreport.com/football/{slug}`
+- Section: `https://bleacherreport.com/football/{section}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://bleacherreport.com/football
+2. [wait] 3 seconds
+3. [extract] article links

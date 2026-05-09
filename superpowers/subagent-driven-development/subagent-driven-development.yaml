@@ -1,0 +1,66 @@
+# Subagent-Driven Development Quick Reference
+
+version: "1.0"
+
+process:
+  per_task:
+    - "Extract full task text + context (never let subagent read plan)"
+    - "CREATE SUBAGENT_BRIEF.md (compact, max 1 page)"
+    - "DISPATCH implementer subagent with brief"
+    - "SUBAGENT writes SUBAGENT_RESULT.md"
+    - "READ RESULT only, UPDATE memory"
+    - "CHECK harness/MISTAKES.md"
+    - "DISPATCH spec reviewer subagent"
+    - "If issues → implementer fixes → re-review"
+    - "DISPATCH code quality reviewer"
+    - "If issues → implementer fixes → re-review"
+    - "MARK task complete, LOG to SESSIONS.md"
+    - "REPEAT for next task"
+  after_all_tasks:
+    - "DISPATCH final code reviewer"
+    - "USE finishing-a-development-branch skill"
+
+review_order:
+  - "SPEC COMPLIANCE first"
+  - "CODE QUALITY second"
+  - "Wrong order = red flag"
+
+subagent_routes:
+  implementer: "general agent"
+  spec_reviewer: "general agent"
+  code_quality_reviewer: "general agent"
+  final_reviewer: "general agent"
+
+harness_integration:
+  boot: "Run harness boot sequence BEFORE any task"
+  mistakes_check: "Before each task, check harness/MISTAKES.md"
+  subagent_protocol: "Uses harness/SUBAGENT_PROTOCOL.md"
+  session_close: "After all tasks + final review, run harness SESSION_CLOSE"
+
+red_flags:
+  - "Start on main/master without consent"
+  - "Skip spec OR code quality reviews"
+  - "Proceed with unfixed issues"
+  - "Dispatch multiple implementers in parallel"
+  - "Make subagent read plan"
+  - "Skip review loops"
+  - "Start quality before spec compliance"
+  - "Ignore harness mistakes check"
+
+required_skills:
+  - "superpowers:using-git-worktrees"
+  - "superpowers:writing-plans"
+  - "superpowers:requesting-code-review"
+  - "superpowers:finishing-a-development-branch"
+  - "superpowers:test-driven-development"
+
+cost:
+  - "More subagent invocations (implementer + 2 reviewers per task)"
+  - "Review loops add iterations"
+  - "But catches issues early (cheaper than debugging later)"
+
+advantages:
+  - "Fresh context per task (no confusion)"
+  - "Parallel-safe (subagents don't interfere)"
+  - "Subagent can ask questions"
+  - "Two-stage review: spec compliance, then code quality"

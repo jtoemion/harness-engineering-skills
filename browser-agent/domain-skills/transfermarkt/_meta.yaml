@@ -1,0 +1,14 @@
+# Transfermarkt - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.transfermarkt.com/{slug}`
+- Section: `https://www.transfermarkt.com/{section}`
+- Player Profile: `https://www.transfermarkt.com/{player-name}/profile/{id}`
+- Club Profile: `https://www.transfermarkt.com/{club-name}//startseite/verein/{id}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.transfermarkt.com
+2. [wait] 3 seconds
+3. [scrape] news articles and transfers

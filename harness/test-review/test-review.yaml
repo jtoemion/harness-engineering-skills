@@ -1,0 +1,55 @@
+name: test-review
+description: Review test quality across 4 dimensions
+trigger: "review tests | evaluate test quality | test review"
+
+dimensions:
+  determinism:
+    focus: Same results every run
+    weight: 30%
+    checks:
+      - No timing dependencies
+      - No shared mutable state
+      - Proper async handling
+      - No reliance on execution order
+  isolation:
+    focus: Any order, no leakage
+    weight: 30%
+    checks:
+      - No inter-test dependencies
+      - No shared state leakage
+      - Proper setup/teardown
+      - Independent test data
+  maintainability:
+    focus: Easy to understand and update
+    weight: 25%
+    checks:
+      - Descriptive test names
+      - No hardcoded magic values
+      - DRY principles applied
+      - Minimal coupling to implementation
+  performance:
+    focus: Fast enough, no unnecessary waits
+    weight: 15%
+    checks:
+      - No unnecessary sleeps/waits
+      - Efficient fixture management
+      - Proper async patterns
+      - No redundant setup
+
+severity_levels:
+  critical: Tests are unreliable or produce wrong results
+  important: Tests are fragile or hard to maintain
+  minor: Tests could be improved but work acceptably
+
+process:
+  - Discovery: Find test files, identify framework, count tests
+  - Analysis: Evaluate against 4 dimensions
+  - Scoring: Rate each dimension 0-100, calculate weighted total
+  - Report: Generate structured findings with severity ratings
+
+files:
+  SKILL.md: Main entry point
+  test-review.yaml: This quick reference
+  REVIEW_DIMENSIONS.md: Detailed evaluation criteria
+  REVIEW_PROCESS.md: Step-by-step process
+  FINDINGS_TEMPLATE.md: Output report template

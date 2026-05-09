@@ -1,0 +1,309 @@
+# News Quality Filter Configuration
+# Used by scrape_articles.py to filter IN/OUT articles
+
+filter_out:
+  # Trackers & Live Updates
+  - tracker
+  - latest goals
+  - score update
+  - live blog
+  - running blog
+  - minute-by-minute
+  - live ticker
+
+  # Non-Article Pages
+  - terms and conditions
+  - privacy policy
+  - cookie policy
+  - legal
+  - sitemap
+  - sign in
+  - log in
+  - register
+  - subscribe
+
+  # Women's Football (EXCLUDE ALL)
+  - women's football
+  - women's soccer
+  - women's world cup
+  - wsl
+  - womens super league
+  - nwsl
+  - women's champions league
+  - women's league
+  - women's cup
+
+  # Rankings & Standings
+  - rankings
+  - power rankings
+  - standings
+  - tables
+  - leaderboard
+  - form guide
+
+  # Match Reports & Previews
+  - vs
+  - preview
+  - build-up
+  - talking points
+  - match report
+  - match analysis
+
+  # Live & Gossip Columns
+  - paper talk
+  - papers
+  - daily mail
+  - express
+  - mirror
+  - telegraph
+  - star
+  - record
+
+  # Team-Specific Gossip
+  - efl latest
+  - championship latest
+  - league one latest
+  - prem league latest
+  - la liga latest
+  - serie a latest
+  - bundesliga latest
+  - ligue 1 latest
+  - scottish latest
+
+  # Betting & Fantasy
+  - odds
+  - betting
+  - betting tips
+  - fantasy
+  - fantasy football
+  - fantasy premier league
+  - fpl
+  - draft
+
+  # General Roundups
+  - roundup
+  - recap
+  - morning digest
+  - daily briefing
+  - top stories
+  - newspaper roundup
+  - back pages
+
+  # Video & Audio Content
+  - video
+  - podcast
+  - watch
+  - daily digest
+
+  # Transfer Gossip - most variations
+  - transfer news
+  - transfer rumours
+  - transfer gossip
+  - transfer talk
+  - transfer centre
+  - transfers live
+  - transfer latest
+
+  # Predictions
+  - prediction
+  - predictions
+  - best bets
+
+  # Social Media Reactions
+  - reaction
+  - reacts to
+  - social media
+  - viral
+
+filter_in:
+  # Breaking/Exclusive
+  - breaking
+  - exclusive
+  - exclusive story
+  - revealed
+  - understands
+
+  # Transfer Done Deals
+  - done deal
+  - here we go
+  - signed
+  - signs for
+  - joins
+  - leaves
+  - sold
+  - transfer complete
+  - medical today
+  - agree fee
+  - bid accepted
+  - bid rejected
+  - buyout
+  - release clause
+  - personal terms agreed
+  - contract signed
+
+  # Managerial Changes
+  - sacked
+  - dismisses
+  - fires
+  - appoints
+  - appointed
+  - resigns
+  - steps down
+  - new manager
+  - manager leaves
+
+  # Records & Milestones
+  - record
+  - milestone
+  - all time
+  - first time in history
+  - becomes
+  - surpasses
+  - breaks record
+  - reaches milestone
+
+  # Deaths & Tragedies
+  - dies
+  - passed away
+  - tragically
+  - in memoriam
+  - obituary
+  - killed
+  - accident
+
+  # Competition Results (NOT match reports)
+  - wins the league
+  - wins the cup
+  - champions
+  - qualify
+  - qualified
+  - eliminated
+  - knocked out
+  - relegated
+  - promoted
+
+  # Scandals & Discipline
+  - investigation
+  - scandal
+  - corruption
+  - banned
+  - suspended
+  - sanction
+  - allegations
+  - charges
+  - arrest
+  - lawsuit
+
+  # Ownership & Finance
+  - takeover
+  - takeover bid
+  - sold to
+  - bought by
+  - investment
+  - merger
+  - debt
+  - profit
+  - loss
+
+# X.com Tweet Filters (for scrape_tweets.py)
+
+x_filter_out:
+  # Low-value tweet types
+  - quote tweet
+  - retweet
+  - reply to
+  - subscribed
+  - follow for
+  - turn on notifications
+  - enable notifications
+
+x_filter_in:
+  # High-value tweet signals
+  - breaking
+  - exclusive
+  - done deal
+  - here we go
+  - confirmed
+  - sources say
+  - understands
+  - bid accepted
+  - medical
+  - agreement
+  - announces
+
+# Source Configurations
+
+sources:
+  bbc:
+    url: https://www.bbc.com/sport/football
+    selectors:
+      - "a[href*='/sport/football/articles/']"
+      - "a[href*='/sport/football/']"
+    article_containers:
+      - "article"
+      - ".article-body"
+      - ".story-body"
+
+  sky:
+    url: https://www.skysports.com/football/news
+    selectors:
+      - "a[href*='/football/news/'][href$='/'][not(contains(@href, 'live-blog'))]"
+      - "a[href*='/football/story-telling/']"
+      - "a[href*='/football/interview/']"
+      - "a[href*='/football/feature/']"
+      - ".news-list__link[href*='/news/']"
+    article_containers:
+      - ".article"
+      - ".news-article"
+      - ".sdc-news-article"
+      - ".article-body"
+
+  the_athletic:
+    url: https://www.theathletic.com/football
+    selectors:
+      - "article a"
+      - ".headline a"
+      - "a[href*='/news/']"
+    article_containers:
+      - "article"
+      - ".content-body"
+
+  transfermarkt:
+    url: https://www.transfermarkt.com
+    selectors:
+      - ".news-table a"
+      - ".item a[href*='/news/']"
+    article_containers:
+      - "article"
+      - ".main-content"
+
+  marca:
+    url: https://www.marca.com/futbol
+    selectors:
+      - ".titular-noticia"
+      - ".container-tags a"
+      - "a[href*='/noticia/']"
+    article_containers:
+      - "article"
+      - ".articulo"
+
+  goal:
+    url: https://www.goal.com
+    selectors:
+      - "article a"
+      - ".headline a"
+      - "a[href*='/news/']"
+    article_containers:
+      - "article"
+      - ".article-body"
+
+  talksport:
+    url: https://www.talksport.com/football
+    selectors:
+      - "article a"
+      - ".headline a"
+      - "h2 a"
+      - "h3 a"
+    article_containers:
+      - "article"
+      - ".content"

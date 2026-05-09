@@ -1,0 +1,11 @@
+# Gazzetta dello Sport - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.gazzetta.it/calcio/{slug}`
+- Section: `https://www.gazzetta.it/calcio/`
+
+## football-news
+
+1. [goto] https://www.gazzetta.it/calcio/
+2. [wait] 3 seconds
+3. [extract] article links

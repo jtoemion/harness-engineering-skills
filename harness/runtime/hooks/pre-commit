@@ -1,0 +1,12 @@
+#!/bin/bash
+python skills/harness/runtime/harness.py _hook-check-session
+if [ $? -ne 0 ]; then
+    echo "COMMIT BLOCKED: Session not closed."
+    echo "Run: python skills/harness/runtime/harness.py close"
+    exit 1
+fi
+python skills/harness/runtime/memory_watch.py --check-staleness
+if [ $? -ne 0 ]; then
+    echo "COMMIT BLOCKED: Memory staleness check failed."
+    exit 1
+fi

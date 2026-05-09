@@ -1,0 +1,158 @@
+# Memorybank Quick Reference Schema
+
+version: "2.0"
+mode: "FULL MODE ONLY"
+quick_mode: "No memory. No checkpoint. Just answer."
+
+project_code: "[2-3 letter uppercase code, e.g. FW, BMW]"
+
+vault_paths:
+  memory: "00_Memory/"
+  sessions: "01_Sessions/"
+  mistakes: "02_Mistakes/"
+  patterns: "03_Patterns/"
+  decisions: "03_Patterns/"
+  index: "04_Index/"
+  templates: "05_Templates/"
+  staging: "00_Memory/.session-close-staging/"
+
+rest_api:
+  enabled: "if OBSIDIAN_REST_KEY env variable is set"
+  key_env: "OBSIDIAN_REST_KEY"
+  global_vault: "ANTIGRAVITY_GLOBAL_VAULT"
+
+global_vault:
+  path: "${ANTIGRAVITY_GLOBAL_VAULT}"
+  default: "C:\\Users\\jtoem\\Obsidian\\AntigravityV\\"
+  mistakes: "${ANTIGRAVITY_GLOBAL_VAULT}/00_Global/Mistakes/"
+  patterns: "${ANTIGRAVITY_GLOBAL_VAULT}/00_Global/Patterns/"
+  decisions: "${ANTIGRAVITY_GLOBAL_VAULT}/00_Global/Decisions/"
+  projects_index: "${ANTIGRAVITY_GLOBAL_VAULT}/02_Index/Projects.md"
+
+memory_files:
+  - name: projectbrief.md
+    path: "00_Memory/projectbrief.md"
+    purpose: "Project definition"
+    update_trigger: "Never (manual)"
+    frontmatter_type: "projectbrief"
+  - name: systemPatterns.md
+    path: "00_Memory/systemPatterns.md"
+    purpose: "Architecture conventions"
+    update_trigger: "Architectural change"
+    frontmatter_type: "systemPatterns"
+  - name: techContext.md
+    path: "00_Memory/techContext.md"
+    purpose: "Tech stack details"
+    update_trigger: "Stack change"
+    frontmatter_type: "techContext"
+  - name: activeContext.md
+    path: "00_Memory/activeContext.md"
+    purpose: "Current task/blockers"
+    update_trigger: "Every task change"
+    frontmatter_type: "activeContext"
+  - name: progress.md
+    path: "00_Memory/progress.md"
+    purpose: "Task tracking"
+    update_trigger: "Every completed task"
+    frontmatter_type: "progress"
+  - name: SESSIONS.md
+    path: "00_Memory/SESSIONS.md"
+    purpose: "Session index (links to individual notes)"
+    update_trigger: "Every session end"
+    frontmatter_type: "sessions-index"
+
+individual_notes:
+  - folder: "01_Sessions/"
+    id_format: "YYYY-MM-DD-slug"
+    frontmatter_type: "session"
+  - folder: "02_Mistakes/"
+    id_format: "{CODE}-M###-slug"
+    frontmatter_type: "mistake"
+  - folder: "03_Patterns/"
+    id_format: "{CODE}-P###-slug"
+    frontmatter_type: "pattern"
+  - folder: "03_Patterns/"
+    id_format: "{CODE}-D###-slug"
+    frontmatter_type: "decision"
+
+obsidian_mirror:
+  project: "00_Memory/ ↔ 00_HUMAN/02_Projects/[NAME]/Memory/ (legacy)"
+  global: "02_Mistakes/ + 03_Patterns/ → ${ANTIGRAVITY_GLOBAL_VAULT}/00_Global/"
+
+phase1_boot:
+  steps:
+    - "Detect vault type: check .obsidian/ for Obsidian vault, fall back to .memory/ for legacy"
+    - "Check for 00_Memory/.session-close-staging/ (incomplete close recovery)"
+    - "If vault missing → check Obsidian mirror → COLD START if both missing"
+    - "Read all 5 canonical files from 00_Memory/"
+    - "Load active mistakes from 02_Mistakes/ (status != RESOLVED)"
+    - "Probe global vault via REST API (if available)"
+    - "Output Boot Status Report"
+  files_to_read:
+    - "00_Memory/projectbrief.md"
+    - "00_Memory/activeContext.md"
+    - "00_Memory/progress.md"
+    - "00_Memory/techContext.md"
+    - "00_Memory/systemPatterns.md"
+
+phase2_checkpoint:
+  trigger: "Completed task, code commit, architectural change, feature"
+  harness_enforcement:
+    - "Check MISTAKES.md for relevant past errors"
+    - "Surface lesson if found"
+    - "Stop if same approach failed before"
+  steps:
+    - "Update 00_Memory/activeContext.md"
+    - "Update 00_Memory/progress.md"
+    - "Update 00_Memory/techContext.md (if arch change)"
+    - "Update 00_Memory/systemPatterns.md (if patterns change)"
+    - "Create session note in 01_Sessions/"
+    - "Update 00_Memory/SESSIONS.md with [[link]] to new session"
+    - "Create mistake notes in 02_Mistakes/ (if applicable)"
+    - "Create pattern notes in 03_Patterns/ (if applicable)"
+    - "Create decision notes in 03_Patterns/ (if applicable)"
+    - "Update 04_Index/Dashboard.md"
+    - "Sync to global vault (if available)"
+    - "Output Checkpoint Confirmation"
+
+phase3_subagent_result:
+  trigger: "Subagent writes SUBAGENT_RESULT.md"
+  steps:
+    - "READ SUBAGENT_RESULT.md only"
+    - "EXTRACT: Status, Summary, Evidence, Next, Files"
+    - "LOG mistakes to 02_Mistakes/ as individual notes"
+    - "UPDATE 00_Memory/activeContext.md with findings"
+    - "CREATE session note in 01_Sessions/"
+    - "UPDATE 00_Memory/SESSIONS.md with [[link]]"
+    - "CREATE pattern notes in 03_Patterns/ (if applicable)"
+    - "UPDATE 04_Index/Dashboard.md"
+    - "SYNC to global vault (if available)"
+
+boot_status_report:
+  format: |
+    ⚡ ONLINE
+      Agent    : Antigravity [tool]
+      Time     : [YYYY-MM-DD HH:MM]
+      Vault    : [VAULT | LEGACY .memory/ | COLD START]
+      Memory   : [LOADED | PARTIAL: missing X | COLD START]
+      Harness  : [LOADED ✓]
+      Mistakes : [N] active found
+      Patterns : [N] global patterns loaded
+      Project  : [from projectbrief.md]
+      Task     : [from activeContext.md]
+      Next     : [from progress.md]
+      Skills   : CORE ✓ | MEMORY ✓ | KARPATHY ✓ | HARNESS ARMED ✓
+
+checkpoint_confirmation:
+  format: |
+    ⚡ CHECKPOINT
+      Context  : [updated summary]
+      Progress : [what changed]
+      Session  : 01_Sessions/YYYY-MM-DD-slug.md
+      Mistakes : [N] avoided | [N] made → [list note IDs]
+      Patterns : [N] new → [list note IDs]
+      Global   : [SYNCED | LOCAL-ONLY | UNAVAILABLE]
+
+applies_to:
+  quick_mode: false
+  full_mode: true

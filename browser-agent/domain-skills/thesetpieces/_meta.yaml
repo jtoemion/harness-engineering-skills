@@ -1,0 +1,8 @@
+# The Set Pieces - URL Patterns
+
+## URL Patterns
+- Homepage: `https://www.thesetpieces.com/`
+- Article: `https://www.thesetpieces.com/news/{slug}`
+- Section: `https://www.thesetpieces.com/{section}`
+
+## Available Recipes

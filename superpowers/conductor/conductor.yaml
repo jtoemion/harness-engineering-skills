@@ -1,0 +1,127 @@
+# Conductor Quick Reference
+
+version: "1.0"
+
+core_principle: "Design sequence, build pipeline, drive to completion"
+
+process:
+  phase1: "Intent analysis - classify + assign tier"
+  phase2: "Pipeline construction - skill sequence + budget"
+  phase3: "Pipeline proposal - present for approval"
+  phase4: "Await approval - explicit GO required"
+  phase5: "Orchestrated execution - announce + execute + pass forward"
+  phase6: "Completion - checkpoint + report"
+
+intent_matrix:
+  vague_idea: "brainstorming"
+  approved_spec: "writing-plans"
+  plan_ready: "executing-plans"
+  new_feature_crosslayer: "architectural-impact + writing-plans + TDD"
+  ui_component: "frontend-avant-garde + TDD"
+  bug_regression: "systematic-debugging + verification"
+  multiple_independent: "subagent-driven-development"
+  before_merge: "requesting-code-review"
+  feedback_received: "receiving-code-review"
+  new_branch: "using-git-worktrees"
+  branch_complete: "finishing-a-development-branch"
+  session_start: "memorybank Phase 1"
+  task_complete: "memorybank Phase 2"
+  file_touched: "dev-journey-log"
+  ultrathink: "ultrathink-mode (prepend)"
+  multi_concern: "conductor builds full pipeline"
+
+complexity_tiers:
+  simple:
+    definition: "Single concern, 1-2 skills"
+    behavior: "Skip pipeline, announce skill, execute directly"
+  moderate:
+    definition: "2-3 skills, clear sequence"
+    behavior: "Build pipeline, present for approval"
+  complex:
+    definition: "4+ skills or multi-layer"
+    behavior: "Full pipeline with mandatory session splitting"
+  ultrathink:
+    definition: "ULTRATHINK + any concern"
+    behavior: "Prepend ultrathink-mode, present for approval"
+
+context_budget:
+  max_stages_per_session: 3
+  max_skill_files_per_session: 3
+  stage_costs:
+    small: "single-file edit, test run, config change"
+    medium: "multi-file feature, refactor, new component"
+    large: "cross-layer change, new system, major redesign"
+  split_rules:
+    - "If pipeline >3 stages → auto-split into sessions"
+    - "If 2+ Large stages → mandatory split"
+
+atomic_task_rules:
+  - "Every task touches ≤3 files"
+  - "Every task has a verification step"
+  - "Every task describable in 2 sentences"
+  - "Scope lock: approved pipeline + explicit pause for new files"
+  - "scope-guard fires automatically on scope drift"
+
+skill_order:
+  canonical:
+    - "memorybank Phase 1 (always leads)"
+    - "ultrathink-mode (if ULTRATHINK triggered)"
+    - "brainstorming (before code if spec undefined)"
+    - "writing-plans (after spec approved)"
+    - "using-git-worktrees (before implementation)"
+    - "architectural-impact (before cross-layer code)"
+    - "test-driven-development (INSIDE implementation stages)"
+    - "subagent-driven-development (if parallel tasks)"
+    - "frontend-avant-garde (after architecture exists)"
+    - "frontend-design (for distinctive UI execution)"
+    - "requesting-code-review (after implementation)"
+    - "verification-before-completion (before declaring done)"
+    - "retrospective (after Complex/Ultrathink)"
+    - "finishing-a-development-branch (closing branch)"
+    - "dev-journey-log (after file touches)"
+    - "memorybank Phase 2 (always closes)"
+  notes:
+    - "test-driven-development runs inside implementation, not standalone"
+    - "ultrathink-mode modifies depth, not replacement"
+    - "scope-guard runs inline during implementation"
+
+proposal_format:
+  header:
+    - "⚡ CONDUCTOR — WORKFLOW PROPOSAL"
+    - "Request: [one-line summary]"
+    - "Intent: [primary goal]"
+    - "Tier: [Simple/Moderate/Complex/Ultrathink]"
+    - "Skills: [comma-separated list]"
+    - "Sessions: [1/2/N]"
+  stages:
+    - "STAGE N: [skill-name] [ANTIGRAVITY/SUPERPOWERS]"
+    - "Goal: [what this achieves]"
+    - "Scope: [files this stage may touch]"
+    - "Verify: [how to confirm completion]"
+    - "Cost: [Small/Medium/Large]"
+  footer:
+    - "Reply GO / ADJUST [N] / SKIP [N] / SWAP [N]"
+
+execution_announce:
+  - "⚡ STAGE [N] of [TOTAL] | [skill-name] [ANTIGRAVITY/SUPERPOWERS]"
+  - "Goal: [stage goal]"
+  - "Scope: [declared files]"
+
+stage_complete:
+  - "✓ STAGE [N] COMPLETE"
+  - "Produced: [what was created]"
+  - "Carrying: [context for next stage]"
+
+session_split:
+  - "⚠ SESSION SPLIT — Stages [N+1 to M] deferred"
+  - "Resume with: Continue pipeline from Stage [N+1]"
+  - "Carry forward: [minimal artifact/decision list]"
+  - "⚡ CHECKPOINT SAVED"
+
+completion:
+  - "⚡ PIPELINE COMPLETE"
+  - "Stages completed: [N]"
+  - "Skills invoked: [list]"
+  - "Artifacts created: [list]"
+  - "Memory: Checkpointed ✓"
+  - "Next priority: [from progress.md]"

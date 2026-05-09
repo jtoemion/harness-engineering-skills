@@ -1,0 +1,11 @@
+# Football365 - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.football365.co.uk/{slug}`
+- Section: `https://www.football365.co.uk/`
+
+## football-news
+
+1. [goto] https://www.football365.co.uk/
+2. [wait] 3 seconds
+3. [extract] article links

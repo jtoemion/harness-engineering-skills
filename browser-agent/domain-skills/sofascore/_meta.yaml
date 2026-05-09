@@ -1,0 +1,27 @@
+# Sofascore - URL Patterns
+
+## URL Patterns
+- Live Scores: `https://www.sofascore.com/`
+- Match: `https://www.sofascore.com/football/match/{match_id}`
+- Player: `https://www.sofascore.com/football/player/{player_slug}/{player_id}`
+- Team: `https://www.sofascore.com/football/team/{team_slug}/{team_id}`
+- Competition: `https://www.sofascore.com/football/competition/{competition_id}`
+
+## Available Recipes
+## football-live-scores
+
+1. [goto] https://www.sofascore.com/
+2. [wait] 3 seconds
+3. [scrape] live matches
+
+## match-details
+
+1. [goto] https://www.sofascore.com/football/match/{match_id}
+2. [wait] 2 seconds
+3. [scrape] match events, stats, lineups
+
+## player-profile
+
+1. [goto] https://www.sofascore.com/football/player/{player_slug}/{player_id}
+2. [wait] 2 seconds
+3. [scrape] player stats, career

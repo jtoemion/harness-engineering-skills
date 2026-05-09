@@ -1,0 +1,24 @@
+# 90min - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.90min.com/posts/{slug}`
+- Section: `https://www.90min.com/categories/{category}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.90min.com
+2. [wait] 3 seconds
+3. [extract] article links
+
+## latest-news
+
+1. [goto] https://www.90min.com/posts
+2. [wait] 3 seconds
+3. [scrape] article titles, excerpts, authors, dates
+
+## category-news
+
+1. [goto] https://www.90min.com/categories/{category}
+2. [wait] 3 seconds
+3. [extract] article links and metadata

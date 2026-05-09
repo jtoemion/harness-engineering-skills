@@ -1,0 +1,42 @@
+# Kicker (Germany) - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.kicker.de/{slug}`
+- Section: `https://www.kicker.de/fussball/`
+- Bundesliga: `https://www.kicker.de/bundesliga/spielplan/{slug}`
+- DFB-Pokal: `https://www.kicker.de/dfb-pokal/spielplan/{slug}`
+- Champions League: `https://www.kicker.de/champions-league/spielplan/{slug}`
+- Transfers: `https://www.kicker.de/transfers/{slug}`
+- Bundesliga Table: `https://www.kicker.de/bundesliga/spielplan`
+- 2. Bundesliga: `https://www.kicker.de/2-bundesliga/spielplan/{slug}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.kicker.de/fussball/
+2. [wait] 3 seconds
+3. [extract] article links
+
+## bundesliga-news
+
+1. [goto] https://www.kicker.de/bundesliga/spielplan
+2. [wait] 3 seconds
+3. [extract] article links
+
+## transfers-news
+
+1. [goto] https://www.kicker.de/transfers
+2. [wait] 3 seconds
+3. [extract] article links
+
+## dfb-pokal-news
+
+1. [goto] https://www.kicker.de/dfb-pokal/spielplan
+2. [wait] 3 seconds
+3. [extract] article links
+
+## 2-bundesliga-news
+
+1. [goto] https://www.kicker.de/2-bundesliga/spielplan
+2. [wait] 3 seconds
+3. [extract] article links

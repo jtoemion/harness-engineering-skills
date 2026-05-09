@@ -1,0 +1,12 @@
+# Record (Portugal) - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.record.pt/futebol/{slug}`
+- Section: `https://www.record.pt/futebol/`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.record.pt/futebol/
+2. [wait] 3 seconds
+3. [extract] article links

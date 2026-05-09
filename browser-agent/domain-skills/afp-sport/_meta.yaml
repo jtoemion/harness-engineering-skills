@@ -1,0 +1,12 @@
+# AFP Sport - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.afp.com/en/sports/news/{slug}`
+- Section: `https://www.afp.com/en/sports`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.afp.com/en/sports
+2. [wait] 3 seconds
+3. [scrape] article links and content

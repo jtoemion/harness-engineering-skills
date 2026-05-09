@@ -1,0 +1,86 @@
+# Test-Driven Development Quick Reference
+
+version: "1.0"
+
+iron_law: "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST"
+
+cycle:
+  red:
+    step: "Write failing test"
+    verify: "Watch test fail for expected reason (feature missing, not typo)"
+    rules:
+      - "One behavior"
+      - "Clear name describes behavior"
+      - "Real code (no mocks unless unavoidable)"
+  green:
+    step: "Write minimal code to pass test"
+    verify: "Test passes, other tests still pass, output pristine"
+    rules:
+      - "Simplest code to pass"
+      - "Don't add features"
+      - "Don't refactor other code"
+      - "Don't 'improve' beyond the test"
+  refactor:
+    step: "Clean up (after green only)"
+    verify: "Keep tests green"
+    rules:
+      - "Remove duplication"
+      - "Improve names"
+      - "Extract helpers"
+      - "Don't add behavior"
+
+good_tests:
+  minimal: "One thing. 'and' in name? Split it."
+  clear: "Name describes behavior, not 'test1'"
+  shows_intent: "Demonstrates desired API"
+
+bad_tests:
+  vague_name: "test('retry works')"
+  tests_mock: "Mocking instead of real behavior"
+  multiple_things: "test('validates email and domain and whitespace')"
+
+verification_checklist:
+  - "Every new function/method has a test"
+  - "Watched each test fail before implementing"
+  - "Each test failed for expected reason (feature missing, not typo)"
+  - "Wrote minimal code to pass each test"
+  - "All tests pass"
+  - "Output pristine (no errors, warnings)"
+  - "Tests use real code (mocks only if unavoidable)"
+  - "Edge cases and errors covered"
+
+when_stuck:
+  - "Don't know how to test → Write wished-for API, assertion first"
+  - "Test too complicated → Design too complicated, simplify interface"
+  - "Must mock everything → Code too coupled, use dependency injection"
+  - "Test setup huge → Extract helpers, still complex = simplify design"
+
+debugging_integration:
+  - "Bug found? Write failing test reproducing it"
+  - "Follow TDD cycle"
+  - "Test proves fix and prevents regression"
+  - "Never fix bugs without a test"
+
+red_flags:
+  - "Code before test"
+  - "Test after implementation"
+  - "Test passes immediately"
+  - "Can't explain why test failed"
+  - "Tests added 'later'"
+  - "Rationalizing 'just this once'"
+  - "'Already manually tested it'"
+  - "'Tests after achieve the same purpose'"
+  - "'Keep as reference' or 'adapt existing code'"
+  - "'Already spent X hours, deleting is wasteful'"
+
+rationalizations:
+  too_simple: "Simple code breaks. Test takes 30 seconds."
+  test_after: "Tests passing immediately prove nothing."
+  same_goals: "Tests-after = 'what does this do?' Tests-first = 'what should this do?'"
+  manual_tested: "Ad-hoc ≠ systematic. No record, can't re-run."
+  deleting_wasteful: "Sunk cost fallacy. Keeping unverified code is technical debt."
+  spirit_not_ritual: "TDD IS pragmatic. Pragmatic shortcuts = debugging in production."
+  explore_first: "Fine. Throw away exploration, start with TDD."
+  design_unclear: "Hard to test = hard to use. Listen to test."
+  slow_me_down: "TDD faster than debugging."
+  no_existing_tests: "You're improving it. Add tests for existing code."

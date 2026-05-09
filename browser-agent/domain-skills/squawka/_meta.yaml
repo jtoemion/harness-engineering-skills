@@ -1,0 +1,13 @@
+name: squawka
+description: "Domain skill for Squawka.com - football content, live scores, and statistics"
+urlPatterns:
+  - "*://*.squawka.com/*"
+  - "*://squawka.com/*"
+triggerKeywords:
+  - squawka
+  - football scores
+  - live football
+  - football statistics
+  - football news
+version: "1.0"
+author: Antigravity

@@ -1,0 +1,27 @@
+# WhoScored - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.whoscored.com/Articles/{slug}`
+- Section: `https://www.whoscored.com/{league}`
+- Match: `https://www.whoscored.com/Matches/{match-id}/{slug}`
+- Player: `https://www.whoscored.com/Players/{player-id}/{slug}`
+- Team: `https://www.whoscored.com/Teams/{team-id}/{slug}`
+
+## Available Recipes
+## match-stats
+
+1. [goto] https://www.whoscored.com/Matches
+2. [wait] 3 seconds
+3. [scrape] match stats and ratings
+
+## player-ratings
+
+1. [goto] https://www.whoscored.com/Players
+2. [wait] 3 seconds
+3. [scrape] player ratings and stats
+
+## league-standings
+
+1. [goto] https://www.whoscored.com/{league}/Standings
+2. [wait] 3 seconds
+3. [scrape] league standings

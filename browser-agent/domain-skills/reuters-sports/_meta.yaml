@@ -1,0 +1,16 @@
+# Reuters Sports - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.reuters.com/sports/{sport}/{slug}`
+- Section: `https://www.reuters.com/sports/{sport}`
+- Homepage: `https://www.reuters.com/sports`
+
+## Available Recipes
+
+## sports-news
+
+1. [goto] https://www.reuters.com/sports
+2. [wait] 3 seconds
+3. [scrape] article links and content
+
+(End of file - total 16 lines)

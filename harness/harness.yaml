@@ -1,0 +1,92 @@
+# Harness Quick Reference Schema
+
+version: "1.0"
+mode: "FULL MODE ONLY"
+quick_mode: "No harness. No memory. Just answer."
+
+state:
+  initialized: "2026-04-22"
+  last_review: "TBD"
+  mistakes_logged: 0
+
+applies_to:
+  quick_mode: false
+  full_mode: true
+
+components:
+  - name: BOOT_SEQUENCE.md
+    purpose: "Detailed boot procedure"
+    assumption: "Agent needs memory refresh every session"
+  - name: SUBAGENT_PROTOCOL.md
+    purpose: "Context blowup prevention via compacted summaries"
+    assumption: "Subagents act as context firewalls"
+  - name: SESSION_CLOSE.md
+    purpose: "Mandatory session documentation"
+    assumption: "Every session leaves a trail"
+  - name: MISTAKES_TRACKING.md
+    purpose: "Anti-repeat error log"
+    assumption: "Errors repeat without tracking"
+  - name: COLD_START.md
+    purpose: "No-memory initialization"
+    assumption: "New sessions begin from clean slate"
+  - name: MEMORY_LIFECYCLE.md
+    purpose: "Memory file schemas and mirror mapping"
+    assumption: "Memory provides orientation"
+  - name: VAULT_SCHEMA.md
+    purpose: "Obsidian vault structure, IDs, frontmatter schemas"
+    assumption: "Vault replaces .memory/ for persistent knowledge"
+
+vault_schema: "harness/VAULT_SCHEMA.md"
+
+boot_sequence:
+  - "READ harness/SKILL.md"
+  - "READ harness/MISTAKES.md"
+  - "READ memorybank/SKILL.md"
+  - "LOAD .memory/ per memorybank Phase 1"
+  - "READ karpathy-guidelines/SKILL.md"
+  - "OUTPUT Boot Status Report"
+
+session_close_steps:
+  - "Create SESSION_CLOSE.md with full documentation"
+  - "APPEND to .memory/SESSIONS.md → mirror"
+  - "UPDATE .memory/progress.md → mirror"
+  - "UPDATE .memory/activeContext.md → mirror"
+  - "LOG new mistakes to harness/MISTAKES.md"
+  - "GIT COMMIT if in repo"
+  - "OUTPUT summary"
+
+delegation_triggers:
+  - "Research reading 5+ files"
+  - "Implementation in 3+ files"
+  - "Total file read > 2000 lines"
+
+mistake_schema:
+  error: "What went wrong"
+  cause: "Root cause"
+  lesson: "How to prevent"
+  references: "Files:lines affected"
+  assumption: "What was incorrectly assumed"
+  status: "ACTIVE | RESOLVED | SUPERSEDED"
+
+subagent_brief_schema:
+  objective: "1 sentence"
+  constraints: "Must NOT do X | Must do Y"
+  success: "Specific measurable criteria"
+  context: "2 sentences max"
+  output: "Write to SUBAGENT_RESULT.md"
+
+subagent_result_schema:
+  status: "SUCCESS | PARTIAL | FAILED"
+  summary: "Max 500 words"
+  evidence: "file:line references"
+  next: "Recommended parent actions"
+  files: "Paths only"
+  mistakes: "Mistakes made during work"
+
+staleness_review:
+  trigger: "Every 10 sessions OR model upgrade"
+  components_reviewed:
+    - subagent_routing
+    - mistake_tracking
+    - memory_schemas
+    - sprint_contract

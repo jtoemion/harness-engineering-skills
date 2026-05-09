@@ -1,0 +1,66 @@
+version: "1.0"
+updated: "2026-04-25"
+failures:
+  - id: modal-overlay-blocks-click
+    symptom: "Modal overlay intercepts pointer events after PIN entry, blocking button clicks. Clicking submit button fails."
+    sites: ["students.ezralms.com"]
+    fix: "Use `[press_enter] #pin` to submit the PIN field instead of clicking a modal button. The PIN field fires form submit on Enter key."
+    confidence: high
+    first_seen: "2026-04-23"
+    last_verified: "2026-04-23"
+  - id: react-hydration-delay
+    symptom: "Element not found immediately after page load. Site uses React with Tailwind CSS; hydration causes elements to be unavailable briefly."
+    sites: ["students.ezralms.com"]
+    fix: "Add `[wait]` with 1s delay before interacting with elements post-navigation to allow React hydration to complete."
+    confidence: high
+    first_seen: "2026-04-23"
+    last_verified: "2026-04-23"
+  - id: firebase-long-polling
+    symptom: "page.wait_for_network_idle() never resolves on Firebase-backed pages due to ongoing long-polling connections."
+    sites: []
+    fix: "Use `[wait]` for element or text condition instead of networkidle when waiting on Firebase-backed pages."
+    confidence: high
+    first_seen: "2026-04-23"
+    last_verified: "2026-04-23"
+  - id: snapshot-uid-refresh
+    symptom: "UIDs in accessibility snapshots change on every navigation or page reload, making stored UIDs invalid."
+    sites: []
+    fix: "Use stable CSS/role selectors from selectors.md rather than snapshot UIDs, which are not persistent across navigations."
+    confidence: high
+    first_seen: "2026-04-23"
+    last_verified: "2026-04-23"
+  - id: unicode-separator-crash
+    symptom: "Windows console (cp1252) crashes when processing Unicode characters like '→' in recipe step output."
+    sites: []
+    fix: "Use ASCII ` -> ` as step separator in recipe files instead of Unicode arrow characters."
+    confidence: high
+    first_seen: "2026-04-23"
+    last_verified: "2026-04-23"
+  - id: powershell-json-arg-escaping
+    symptom: "opencode-browser CLI --args flag receives stripped JSON when called via PowerShell. Quotes get removed, leaving invalid JSON like {url:https://example.com}."
+    sites: []
+    fix: "Call CLI via node spawnSync with array args and shell:false, NOT through PowerShell directly. PowerShell mangles JSON string arguments."
+    confidence: high
+    first_seen: "2026-04-25"
+    last_verified: "2026-04-25"
+  - id: opencode-browser-cli-args-parsing-bug
+    symptom: "CLI parseJsonArg fails even with correctly formatted JSON passed via --args flag. getFlagValue splits on spaces but JSON contains unescaped spaces inside object values."
+    sites: []
+    fix: "DO NOT use --args flag. Pass JSON as positional argument process.argv[4] instead: `node cli.js tool browser_navigate '{\"url\":\"https://example.com\"}'`"
+    confidence: high
+    first_seen: "2026-04-25"
+    last_verified: "2026-04-25"
+  - id: x-dot-com-playwright-blocked
+    symptom: "Playwright headless browser detected and blocked on x.com. Page loads but interactions fail, elements not clickable, or completely different content rendered."
+    sites: ["x.com", "twitter.com"]
+    fix: "NEVER use Playwright for x.com. Use Chrome backend (opencode-browser extension) which uses real Chrome profile and avoids detection."
+    confidence: high
+    first_seen: "2026-04-25"
+    last_verified: "2026-04-25"
+  - id: opencode-browser-extension-chrome-compat
+    symptom: "Extension loads but browser_status shows hostConnected=false. Extension shows 'loaded' but cannot communicate with native host broker."
+    sites: []
+    fix: "Extension version 4.6.1 incompatible with Chrome 147. Use browser_status to verify connection. Broker works (CLI calls succeed) but extension-based browsing requires compatible Chrome."
+    confidence: high
+    first_seen: "2026-04-25"
+    last_verified: "2026-04-25"

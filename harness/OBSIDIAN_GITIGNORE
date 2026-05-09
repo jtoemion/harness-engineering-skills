@@ -1,0 +1,12 @@
+# Obsidian workspace (machine-specific)
+.obsidian/workspace.json
+
+# Obsidian cache (regenerated)
+.obsidian/cache/
+
+# Obsidian search index
+.obsidian/search-index.json
+
+# OS files
+.DS_Store
+Thumbs.db

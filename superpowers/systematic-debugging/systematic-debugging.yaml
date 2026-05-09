@@ -1,0 +1,108 @@
+# Systematic Debugging Quick Reference
+
+version: "1.0"
+
+iron_law: "NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST"
+
+four_phases:
+  phase1:
+    name: "Root Cause Investigation"
+    key_activities:
+      - "Read error messages carefully"
+      - "Reproduce consistently"
+      - "Check recent changes"
+      - "Gather evidence in multi-component systems"
+      - "Trace data flow"
+    success_criteria: "Understand WHAT and WHY"
+    if_not_completed: "Cannot propose fixes"
+  phase2:
+    name: "Pattern Analysis"
+    key_activities:
+      - "Find working examples"
+      - "Compare against references"
+      - "Identify differences"
+      - "Understand dependencies"
+    success_criteria: "Identify differences"
+  phase3:
+    name: "Hypothesis and Testing"
+    key_activities:
+      - "Form single hypothesis"
+      - "Test minimally (smallest change)"
+      - "Verify before continuing"
+    success_criteria: "Confirmed or new hypothesis"
+  phase4:
+    name: "Implementation"
+    key_activities:
+      - "Create failing test case"
+      - "Implement single fix"
+      - "Verify fix"
+      - "If 3+ fixes failed → question architecture"
+    success_criteria: "Bug resolved, tests pass"
+
+when_to_use:
+  - "Test failures"
+  - "Bugs in production"
+  - "Unexpected behavior"
+  - "Performance problems"
+  - "Build failures"
+  - "Integration issues"
+  especially_when:
+    - "Under time pressure"
+    - "'Just one quick fix' seems obvious"
+    - "Already tried multiple fixes"
+    - "Previous fix didn't work"
+    - "Don't fully understand issue"
+
+dont_skip_when:
+  - "Issue seems simple"
+  - "You're in a hurry"
+  - "Manager wants it fixed NOW"
+
+red_flags:
+  - "Quick fix for now, investigate later"
+  - "Just try changing X and see if it works"
+  - "Add multiple changes, run tests"
+  - "Skip the test, I'll manually verify"
+  - "It's probably X, let me fix that"
+  - "I don't fully understand but this might work"
+  - "Pattern says X but I'll adapt it differently"
+  - "Here are the main problems: [lists fixes without investigation]"
+  - "One more fix attempt (when already tried 2+)"
+  - "Each fix reveals new problem in different place"
+
+if_3_fixes_failed:
+  - "STOP"
+  - "Question architecture"
+  - "Pattern indicating architectural problem"
+  - "Each fix reveals new shared state/coupling/problem"
+  - "Fixes require massive refactoring"
+  - "Each fix creates new symptoms elsewhere"
+  action: "Discuss with human partner before attempting more fixes"
+
+human_partner_signals_wrong:
+  - "Is that not happening?" → assumed without verifying
+  - "Will it show us...?" → should have added evidence gathering
+  - "Stop guessing" → proposing fixes without understanding
+  - "Ultrathink this" → question fundamentals, not symptoms
+  - "We're stuck?" (frustrated) → approach isn't working
+  action: "STOP. Return to Phase 1."
+
+quick_reference_table:
+  phase1: "Root cause - read errors, reproduce, check changes"
+  phase2: "Pattern - find working examples, compare"
+  phase3: "Hypothesis - form theory, test minimally"
+  phase4: "Implementation - create test, fix, verify"
+
+no_root_cause_found:
+  - "Systematic investigation reveals truly environmental/timing-dependent/external issue"
+  - "You've completed the process"
+  - "Document what you investigated"
+  - "Implement appropriate handling (retry, timeout, error message)"
+  - "Add monitoring/logging for future investigation"
+  caveat: "95% of 'no root cause' cases are incomplete investigation"
+
+real_world_impact:
+  systematic: "15-30 minutes to fix"
+  random_fixes: "2-3 hours of thrashing"
+  first_time_fix_rate: "95% vs 40%"
+  new_bugs: "Near zero vs common"

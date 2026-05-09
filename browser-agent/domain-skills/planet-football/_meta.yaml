@@ -1,0 +1,14 @@
+# Planet Football - URL Patterns
+
+## URL Patterns
+- Homepage: `https://www.planetfootball.net`
+- Article: `https://www.planetfootball.net/{slug}`
+- Section: `https://www.planetfootball.net/{section}`
+- Category: `https://www.planetfootball.net/category/{category}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.planetfootball.net
+2. [wait] 3 seconds
+3. [scrape] news articles

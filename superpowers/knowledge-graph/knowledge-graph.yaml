@@ -1,0 +1,18 @@
+name: knowledge-graph
+version: 1.0
+description: Graph intelligence for cross-project knowledge surfacing
+operations:
+  - surface
+  - mistakes
+  - patterns
+  - decisions
+  - related
+  - cluster
+delegates_to: vault-ops
+related_skills:
+  - vault-ops
+  - session-graph
+  - harness
+related_docs:
+  - harness/VAULT_SCHEMA.md
+  - harness/ATOMIC_CLOSE.md

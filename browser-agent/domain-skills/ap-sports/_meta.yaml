@@ -1,0 +1,12 @@
+# AP Sports - Navigation Recipes
+
+## URL Patterns
+- Article: `https://apnews.com/sports/{slug}`
+- Section: `https://apnews.com/sports`
+
+## Available Recipes
+## sports-news
+
+1. [goto] https://apnews.com/sports
+2. [wait] 3 seconds
+3. [extract] article links

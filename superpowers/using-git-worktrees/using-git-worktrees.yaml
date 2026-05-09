@@ -1,0 +1,92 @@
+# Using Git Worktrees Quick Reference
+
+version: "1.0"
+
+core_principle: "Systematic directory selection + safety verification = reliable isolation"
+
+announce: "I'm using the using-git-worktrees skill to set up an isolated workspace."
+
+directory_selection:
+  priority:
+    - "Check .worktrees/ first (hidden, preferred)"
+    - "Check worktrees/ second"
+    - "Both exist → Use .worktrees/"
+    - "Neither exists → Check CLAUDE.md"
+    - "No CLAUDE.md → Ask user"
+  check_ignore:
+    - "For project-local: MUST verify directory is ignored"
+    - "git check-ignore -q .worktrees || git check-ignore -q worktrees"
+    - "If NOT ignored: Add to .gitignore + commit before creating"
+    - "For global (~/.config/superpowers/worktrees): No check needed"
+
+creation_steps:
+  - "Detect project name: project=$(basename $(git rev-parse --show-toplevel))"
+  - "Create worktree: git worktree add $path -b $branch_name"
+  - "Run project setup (auto-detect)"
+  - "Verify clean baseline: run tests"
+  - "Report location + test status"
+
+auto_detect_setup:
+  node: "if [ -f package.json ]; then npm install; fi"
+  rust: "if [ -f Cargo.toml ]; then cargo build; fi"
+  python: "if [ -f requirements.txt ]; then pip install -r requirements.txt; fi"
+  python_poetry: "if [ -f pyproject.toml ]; then poetry install; fi"
+  go: "if [ -f go.mod ]; then go mod download; fi"
+
+quick_reference:
+  - ".worktrees/ exists → Use it (verify ignored)"
+  - "worktrees/ exists → Use it (verify ignored)"
+  - "Both exist → Use .worktrees/"
+  - "Neither exists → Check CLAUDE.md → Ask user"
+  - "Directory not ignored → Add to .gitignore + commit"
+  - "Tests fail during baseline → Report failures + ask"
+  - "No package.json/Cargo.toml → Skip dependency install"
+
+common_mistakes:
+  skip_ignore_check:
+    problem: "Worktree contents get tracked, pollute git status"
+    fix: "Always use git check-ignore before creating project-local worktree"
+  assume_directory:
+    problem: "Creates inconsistency, violates project conventions"
+    fix: "Follow priority: existing > CLAUDE.md > ask"
+  proceed_failing_tests:
+    problem: "Can't distinguish new bugs from pre-existing issues"
+    fix: "Report failures, get explicit permission to proceed"
+  hardcode_setup:
+    problem: "Breaks on projects using different tools"
+    fix: "Auto-detect from project files"
+
+red_flags:
+  never:
+    - "Create worktree without verifying it's ignored (project-local)"
+    - "Skip baseline test verification"
+    - "Proceed with failing tests without asking"
+    - "Assume directory location when ambiguous"
+    - "Skip CLAUDE.md check"
+  always:
+    - "Follow directory priority: existing > CLAUDE.md > ask"
+    - "Verify directory is ignored for project-local"
+    - "Auto-detect and run project setup"
+    - "Verify clean test baseline"
+
+integration:
+  called_by:
+    - "brainstorming (Phase 4) - REQUIRED when design approved"
+    - "subagent-driven-development - REQUIRED before tasks"
+    - "executing-plans - REQUIRED before tasks"
+    - "Any skill needing isolated workspace"
+  pairs_with:
+    - "finishing-a-development-branch - REQUIRED for cleanup after work complete"
+
+example_workflow: |
+  You: I'm using the using-git-worktrees skill to set up an isolated workspace.
+
+  [Check .worktrees/ - exists]
+  [Verify ignored - git check-ignore confirms .worktrees/ is ignored]
+  [Create worktree: git worktree add .worktrees/auth -b feature/auth]
+  [Run npm install]
+  [Run npm test - 47 passing]
+
+  Worktree ready at /Users/jesse/myproject/.worktrees/auth
+  Tests passing (47 tests, 0 failures)
+  Ready to implement auth feature

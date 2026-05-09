@@ -1,0 +1,20 @@
+# A Bola (Portugal) - Metadata
+
+## URL Patterns
+- Article: `https://www.abola.pt/{section}/{slug}`
+- Homepage: `https://www.abola.pt/`
+- Football: `https://www.abola.pt/nn/{section}`
+- Stats: `https://www.abola.pt/nn/liga/resultados`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.abola.pt/
+2. [wait] 3 seconds
+3. [extract] article links
+
+## football-matches
+
+1. [goto] https://www.abola.pt/nn/liga/resultados
+2. [wait] 2 seconds
+3. [extract] match data

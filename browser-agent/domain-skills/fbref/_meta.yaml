@@ -1,0 +1,13 @@
+# FBref - Navigation Recipes
+
+## URL Patterns
+- Article: `https://fbref.com/en/players/{id}/{slug}`
+- Stats: `https://fbref.com/en/players/{id}/{slug}/stats`
+- Match: `https://fbref.com/en/matches/{id}/{slug}`
+
+## Available Recipes
+## player-stats
+
+1. [goto] https://fbref.com/en/players
+2. [wait] 3 seconds
+3. [scrape] player links and stats

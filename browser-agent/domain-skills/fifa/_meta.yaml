@@ -1,0 +1,9 @@
+# FIFA.com - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.fifa.com/{slug}`
+- News: `https://www.fifa.com/news`
+- Tournaments: `https://www.fifa.com/tournaments`
+- Rankings: `https://www.fifa.com/world-rankings`
+
+## Available Recipes

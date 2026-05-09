@@ -1,0 +1,12 @@
+# AS (Spain) - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.as.com/futbol/{slug}`
+- Section: `https://www.as.com/futbol/`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.as.com/futbol/
+2. [wait] 3 seconds
+3. [extract] article links

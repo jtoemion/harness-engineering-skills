@@ -1,0 +1,26 @@
+# Fotbollskanalen - Metadata
+
+## URL Patterns
+- Homepage: `https://www.fotbollskanalen.se/`
+- Article: `https://www.fotbollskanalen.se/artikel/{slug}`
+- Section (Nyheter): `https://www.fotbollskanalen.se/nyheter`
+- Section (Allsvenskan): `https://www.fotbollskanalen.se/allsvenskan`
+- Section (Damallsvenskan): `https://www.fotbollskanalen.se/damallsvenskan`
+- Section (Superettan): `https://www.fotbollskanalen.se/superettan`
+- Section (Euro ligor): `https://www.fotbollskanalen.se/europa`
+- Video: `https://www.fotbollskanalen.se/video/{slug}`
+- Program (Fotbollskanalen Europa): `https://www.fotbollskanalen.se/program/fotbollskanalen-europa`
+- Blog/Krnik: `https://www.fotbollskanalen.se/blogg/{author}`
+
+## Site Info
+- Primary language: Swedish
+- Target audience: Swedish football fans
+- Coverage: Allsvenskan, Damallsvenskan, Superettan, Swedish national teams, European leagues, Swedish expatriates
+- Content types: Articles, videos, podcasts, live blogs, match coverage
+
+## Known Selectors
+- Articles: `article`, `.article-card`, `a[href*="/artikel/"]`
+- Video: `.video-card`, `a[href*="/video/"]`
+- Navigation: `nav`, `.main-nav`, `a[href*="/nyheter"]`
+
+## Available Recipes

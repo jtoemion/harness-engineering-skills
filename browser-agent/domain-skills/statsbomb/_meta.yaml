@@ -1,0 +1,10 @@
+# StatsBomb - URL Patterns
+
+## URL Patterns
+- Player: `https://statsbomb.com/players/{id}`
+- Team: `https://statsbomb.com/teams/{id}`
+- Match: `https://statsbomb.com/matches/{id}`
+- Competition: `https://statsbomb.com/competitions/{id}`
+
+## Navigation Recipes
+See nav.md for available recipes.

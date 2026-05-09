@@ -1,0 +1,12 @@
+# Sport Bild - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.sportbild.de/fussball/{slug}`
+- Section: `https://www.sportbild.de/fussball/`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.sportbild.de/fussball/
+2. [wait] 3 seconds
+3. [extract] article links

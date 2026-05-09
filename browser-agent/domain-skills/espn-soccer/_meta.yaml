@@ -1,0 +1,14 @@
+---
+name: espn-soccer
+type: news-source
+url: https://www.espn.com/soccer
+category: football-news
+tested: 2026-04-24
+working: true
+priority: medium
+note: Mixed sports homepage - needs soccer filter
+---
+
+# ESPN Soccer Domain Skill
+
+Used by football-news subskill for scraping football news.

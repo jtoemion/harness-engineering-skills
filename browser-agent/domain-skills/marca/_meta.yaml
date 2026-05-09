@@ -1,0 +1,11 @@
+# Marca - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.marca.com/futbol/{slug}`
+- Section: `https://www.marca.com/futbol/`
+
+## football-news
+
+1. [goto] https://www.marca.com/futbol/
+2. [wait] 3 seconds
+3. [extract] article links

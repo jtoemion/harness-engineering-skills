@@ -1,0 +1,76 @@
+name: e2e-scaffold
+version: 1.0.0
+
+triggers:
+  - "e2e scaffold"
+  - "set up e2e testing"
+  - "e2e infrastructure"
+  - "scaffold e2e"
+
+inputs:
+  required:
+    - project_root: "Path to project root"
+    - test_framework: "Detected via ANALYZE.md (jest|vitest|pytest|xcode|unity|unreal|godot|other)"
+  optional:
+    - e2e_dir: "Override E2E test directory (default: auto-detected per project type)"
+    - state_manager: "Override state manager detection"
+    - domain_entities: "Override domain entity detection"
+
+outputs:
+  files:
+    - path: "<e2e_dir>/fixtures/BaseTestFixture"
+      desc: "Base test fixture with setup/teardown for project type"
+    - path: "<e2e_dir>/builders/ScenarioBuilder"
+      desc: "Fluent API for domain-specific test scenario construction"
+    - path: "<e2e_dir>/helpers/TestHelpers"
+      desc: "UI interaction, API calls, input simulation utilities"
+    - path: "<e2e_dir>/helpers/AsyncAssert"
+      desc: "Async condition waiting and assertion utilities"
+    - path: "<e2e_dir>/config/e2e.config"
+      desc: "E2E test configuration (timeouts, environments, flags)"
+    - path: "<e2e_dir>/tests/example.e2e.test"
+      desc: "Working example E2E test"
+    - path: "<e2e_dir>/README.md"
+      desc: "Usage guide for generated infrastructure"
+
+steps:
+  - id: analyze
+    file: ANALYZE.md
+    desc: "Detect project type, test framework, state mgmt, domain entities"
+    produces: "Analysis result (in-memory, passed to next step)"
+    
+  - id: generate
+    file: GENERATE.md
+    desc: "Generate E2E infrastructure based on analysis"
+    consumes: "Analysis result from step 1"
+    produces: "Infrastructure files written to disk"
+
+  - id: verify
+    file: VERIFY.md
+    desc: "Generate example test, verify infrastructure works"
+    consumes: "Generated infrastructure from step 2"
+    produces: "Example test + verification report"
+
+project_types:
+  web-app:
+    test_pattern: "e2e/**/*.e2e.{test,spec}.{js,ts}"
+    helpers_focus: "browser interaction, page navigation, DOM assertions"
+  api:
+    test_pattern: "e2e/**/*.e2e.{test,spec}.{js,ts,py}"
+    helpers_focus: "HTTP client, request builders, response assertions"
+  mobile:
+    test_pattern: "e2e/**/*.e2e.{test,spec}.{js,ts,swift,kt}"
+    helpers_focus: "device interaction, navigation, gesture simulation"
+  desktop:
+    test_pattern: "e2e/**/*.e2e.{test,spec}.{js,ts,py}"
+    helpers_focus: "window management, menu interaction, keyboard shortcuts"
+  game:
+    test_pattern: "Tests/PlayMode/**/*.cs (Unity) | e2e/**/*.e2e.test.*"
+    helpers_focus: "input simulation, scene loading, frame stepping"
+
+file_index:
+  - SKILL.md
+  - e2e-scaffold.yaml
+  - ANALYZE.md
+  - GENERATE.md
+  - VERIFY.md

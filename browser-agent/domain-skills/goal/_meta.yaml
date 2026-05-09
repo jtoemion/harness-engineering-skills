@@ -1,0 +1,11 @@
+# Goal.com - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.goal.com/en/news/{slug}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.goal.com
+2. [wait] 3 seconds
+3. [extract] article links

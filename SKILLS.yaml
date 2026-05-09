@@ -1,0 +1,251 @@
+# Skills Address Map
+# All skill paths for Antigravity agent configuration
+# 
+# ROUTING: Use skill-router.yaml for skill selection — never browse folders.
+# Detect mode with detect-mode.bat/sh (QUICK vs FULL).
+
+version: "2.0"
+updated: "2026-04-22"
+
+skills_root: "C:\\Users\\jtoem\\.config\\opencode\\skills"
+
+skills:
+  # Core Harness (project-agnostic)
+  harness:
+    path: "{SKILLS_ROOT}\\harness\\SKILL.md"
+    type: "core"
+
+  project-context:
+    path: "{SKILLS_ROOT}\\harness\\project-context\\SKILL.md"
+    type: "core"
+    category: "utility"
+
+  e2e-scaffold:
+    path: "{SKILLS_ROOT}\\harness\\e2e-scaffold\\SKILL.md"
+    type: "core"
+    category: "testing"
+
+  test-review:
+    path: "{SKILLS_ROOT}\\harness\\test-review\\SKILL.md"
+    type: "core"
+    category: "quality"
+
+  workflow-builder:
+    path: "{SKILLS_ROOT}\\harness\\workflow-builder\\SKILL.md"
+    type: "core"
+    category: "utility"
+
+  document-project:
+    path: "{SKILLS_ROOT}\\harness\\document-project\\SKILL.md"
+    type: "core"
+    category: "utility"
+
+  # Root level skills
+  karpathy-guidelines:
+    path: "{SKILLS_ROOT}\\karpathy-guidelines\\SKILL.md"
+    type: "core"
+
+  browser-agent:
+    path: "{SKILLS_ROOT}\\browser-agent\\SKILL.md"
+    type: "core"
+    category: "automation"
+
+  # Superpowers skills (from https://github.com/obra/superpowers)
+  memorybank:
+    path: "{SKILLS_ROOT}\\superpowers\\memorybank\\SKILL.md"
+    type: "superpowers"
+    category: "persona"
+
+  conductor:
+    path: "{SKILLS_ROOT}\\superpowers\\conductor\\SKILL.md"
+    type: "superpowers"
+    category: "persona"
+
+  subagent-driven-development:
+    path: "{SKILLS_ROOT}\\superpowers\\subagent-driven-development\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  test-driven-development:
+    path: "{SKILLS_ROOT}\\superpowers\\test-driven-development\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  systematic-debugging:
+    path: "{SKILLS_ROOT}\\superpowers\\systematic-debugging\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  receiving-code-review:
+    path: "{SKILLS_ROOT}\\superpowers\\receiving-code-review\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  using-git-worktrees:
+    path: "{SKILLS_ROOT}\\superpowers\\using-git-worktrees\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  finishing-a-development-branch:
+    path: "{SKILLS_ROOT}\\superpowers\\finishing-a-development-branch\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  verification-before-completion:
+    path: "{SKILLS_ROOT}\\superpowers\\verification-before-completion\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  requesting-code-review:
+    path: "{SKILLS_ROOT}\\superpowers\\requesting-code-review\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  brainstorming:
+    path: "{SKILLS_ROOT}\\superpowers\\brainstorming\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  writing-plans:
+    path: "{SKILLS_ROOT}\\superpowers\\writing-plans\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  executing-plans:
+    path: "{SKILLS_ROOT}\\superpowers\\executing-plans\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  architectural-impact:
+    path: "{SKILLS_ROOT}\\superpowers\\architectural-impact\\SKILL.md"
+    type: "superpowers"
+    category: "persona"
+
+  frontend-avant-garde:
+    path: "{SKILLS_ROOT}\\superpowers\\frontend-avant-garde\\SKILL.md"
+    type: "superpowers"
+    category: "persona"
+
+  ultrathink-mode:
+    path: "{SKILLS_ROOT}\\superpowers\\ultrathink-mode\\SKILL.md"
+    type: "superpowers"
+    category: "persona"
+
+  dispatching-parallel-agents:
+    path: "{SKILLS_ROOT}\\superpowers\\dispatching-parallel-agents\\SKILL.md"
+    type: "superpowers"
+    category: "process"
+
+  dev-journey-log:
+    path: "{SKILLS_ROOT}\\superpowers\\dev-journey-log\\SKILL.md"
+    type: "superpowers"
+    category: "utility"
+
+  scope-guard:
+    path: "{SKILLS_ROOT}\\superpowers\\scope-guard\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  retrospective:
+    path: "{SKILLS_ROOT}\\superpowers\\retrospective\\SKILL.md"
+    type: "superpowers"
+    category: "quality"
+
+  using-superpowers:
+    path: "{SKILLS_ROOT}\\superpowers\\using-superpowers\\SKILL.md"
+    type: "superpowers"
+    category: "utility"
+
+  writing-skills:
+    path: "{SKILLS_ROOT}\\superpowers\\writing-skills\\SKILL.md"
+    type: "superpowers"
+    category: "utility"
+
+  vault-ops:
+    path: "{SKILLS_ROOT}\\superpowers\\vault-ops\\SKILL.md"
+    type: "superpowers"
+    category: "utility"
+
+  knowledge-graph:
+    path: "{SKILLS_ROOT}\\superpowers\\knowledge-graph\\SKILL.md"
+    type: "superpowers"
+    category: "utility"
+
+  session-graph:
+    path: "{SKILLS_ROOT}\\superpowers\\session-graph\\SKILL.md"
+    type: "superpowers"
+    category: "utility"
+
+# Categories
+categories:
+  persona:
+    description: "Persona and architectural skills"
+    skills:
+      - memorybank
+      - conductor
+      - architectural-impact
+      - frontend-avant-garde
+      - ultrathink-mode
+
+  process:
+    description: "Process and planning skills"
+    skills:
+      - brainstorming
+      - writing-plans
+      - executing-plans
+      - subagent-driven-development
+      - test-driven-development
+      - systematic-debugging
+      - verification-before-completion
+      - dispatching-parallel-agents
+
+  quality:
+    description: "Quality assurance skills"
+    skills:
+      - requesting-code-review
+      - receiving-code-review
+      - using-git-worktrees
+      - finishing-a-development-branch
+      - scope-guard
+      - retrospective
+      - test-review
+
+  testing:
+    description: "Testing infrastructure and scaffolding"
+    skills:
+      - e2e-scaffold
+
+  automation:
+    description: "Browser automation and web interaction"
+    skills:
+      - browser-agent
+
+  utility:
+    description: "Utility skills"
+    skills:
+      - dev-journey-log
+      - using-superpowers
+      - writing-skills
+      - project-context
+      - workflow-builder
+      - document-project
+      - vault-ops
+      - knowledge-graph
+      - session-graph
+
+# Boot sequence paths (in order)
+boot_sequence:
+  quick:
+    - "{MASTER_PROTOCOL}"
+    - "{SKILLS_ROOT}\\karpathy-guidelines\\SKILL.md"
+  full:
+    - "{MASTER_PROTOCOL}"
+    - "{SKILLS_ROOT}\\harness\\SKILL.md"
+    - "{SKILLS_ROOT}\\harness\\MISTAKES.md"
+    - "VAULT_MISTAKES/" # status != RESOLVED
+    - "PROBE_REST_API" # enhanced vs file-only mode
+    - ".session-close-staging/" # atomic close recovery
+    - "{SKILLS_ROOT}\\superpowers\\memorybank\\SKILL.md"
+    - ".memory\\" # loaded per memorybank Phase 1
+    - "{SKILLS_ROOT}\\karpathy-guidelines\\SKILL.md"
+    - "GLOBAL_VAULT" # cross-project mistakes, patterns

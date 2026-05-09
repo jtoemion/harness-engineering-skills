@@ -1,0 +1,13 @@
+# NOS Sport - Metadata
+
+## URL Patterns
+- Match: `https://nos.nl/wedstrijd/{id}`
+- Article: `https://nos.nl/sport/{category}`
+- Topic: `https://nos.nl/topic/{topic}`
+
+## Available Recipes
+## match-center
+
+1. [goto] https://nos.nl/wedstrijd/{id}
+2. [wait] 3 seconds
+3. [scrape] live scores, stats, timeline

@@ -1,0 +1,25 @@
+name: vault-ops
+version: 1.0
+description: Core Obsidian vault operations
+operations:
+  - read
+  - write
+  - query
+  - patch
+  - link
+  - search
+  - sync
+modes:
+  file_only: "Glob + YAML parse, no Obsidian dependency"
+  enhanced: "Local REST API + Dataview, requires Obsidian running"
+env_vars:
+  ANTIGRAVITY_GLOBAL_VAULT: "Path to global vault (default: C:\\Users\\jtoem\\Obsidian\\AntigravityV\\)"
+  OBSIDIAN_REST_KEY: "Local REST API key (gitignored, never hardcoded)"
+related_skills:
+  - knowledge-graph
+  - session-graph
+  - harness
+related_docs:
+  - harness/VAULT_SCHEMA.md
+  - harness/ATOMIC_CLOSE.md
+  - harness/OBSIDIAN_GITIGNORE

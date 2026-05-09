@@ -1,0 +1,59 @@
+# Tuttosport Domain Skill Metadata
+# Italian sports newspaper specializing in football (Juventus focus), motorsport, basketball
+
+name: Tuttosport
+lang: it
+country: IT
+domain: tuttosport.com
+category: sports-newspaper
+
+url_patterns:
+  homepage: "https://www.tuttosport.com/"
+  football: "https://www.tuttosport.com/football"
+ Serie_A: "https://www.tuttosport.com/football/serie-a"
+  Serie_B: "https://www.tuttosport.com/football/serie-b"
+  Champions_League: "https://www.tuttosport.com/football/champions-league"
+  Juventus: "https://www.tuttosport.com/football/juventus"
+  Inter: "https://www.tuttosport.com/football/inter"
+  Milan: "https://www.tuttosport.com/football/milan"
+  motorsport: "https://www.tuttosport.com/motorsport"
+  Formula1: "https://www.tuttosport.com/motorsport/formula-1"
+  MotoGP: "https://www.tuttosport.com/motorsport/motogp"
+  basketball: "https://www.tuttosport.com/basketball"
+  Serie_A_Basket: "https://www.tuttosport.com/basketball/serie-a"
+  search: "https://www.tuttosport.com/search?q={query}"
+
+news_sections:
+  - football
+  - motorsport
+  - basketball
+  - cycling
+  - tennis
+
+default_section: football
+
+selectors:
+  article: "article, [data-article], .article-item"
+  headline: "h1, h2.title, [data-headline]"
+  content: ".article-body, .content, [data-content]"
+  author: ".author, .byline, [data-author]"
+  date: "time, .date, [data-date]"
+  image: "img[src*='tuttosport'], .hero-image img"
+  related: ".related-articles, [data-related]"
+  nav_menu: "nav, .menu, [data-nav]"
+  section_links: "[data-section], .section-link"
+
+detection:
+  keywords:
+    - tuttosport
+    - calcio
+    - formula 1
+    - moto
+    - basket
+  favicon_pattern: "tuttosport"
+
+quirks:
+  - Heavy Juventus coverage (Torino-based, Turin focus)
+  - Daily print edition emphasis
+  - Sport-specific subsections
+  - Italian-language interface only

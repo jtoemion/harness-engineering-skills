@@ -1,0 +1,14 @@
+# Guardian Football - Metadata
+
+## URL Patterns
+- Article: `https://www.theguardian.com/football/{slug}`
+- Section: `https://www.theguardian.com/football`
+- Live Blog: `https://www.theguardian.com/football/live/{slug}`
+- Match: `https://www.theguardian.com/football/match/{id}`
+
+## Available Recipes
+## guardian-football-news
+
+1. [goto] https://www.theguardian.com/football
+2. [wait] 3 seconds
+3. [scrape] article links and content

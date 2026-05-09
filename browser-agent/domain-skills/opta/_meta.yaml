@@ -1,0 +1,20 @@
+# OptaJoe (X/Twitter) - Navigation Recipes
+
+## URL Patterns
+- Profile: `https://x.com/OptaJoe`
+- Post: `https://x.com/OptaJoe/status/{id}`
+- Likes: `https://x.com/OptaJoe/with_replies`
+
+## Available Recipes
+## opta-joe-profile
+
+1. [goto] https://x.com/OptaJoe
+2. [wait] 3 seconds
+3. [scroll] 3 times (to load more posts)
+4. [scrape] post content, metrics, and timestamps
+
+## opta-joe-post
+
+1. [goto] https://x.com/OptaJoe/status/{id}
+2. [wait] 2 seconds
+3. [scrape] post content, author info, and engagement metrics

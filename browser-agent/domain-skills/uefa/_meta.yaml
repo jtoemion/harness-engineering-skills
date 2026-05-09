@@ -1,0 +1,23 @@
+# UEFA - Navigation Recipes
+
+## URL Patterns
+- Home: `https://www.uefa.com`
+- Competition: `https://www.uefa.com/{competition}/`
+- Match: `https://www.uefa.com/{competition}/match/{id}`
+- Player: `https://www.uefa.com/players/{id}`
+- Team: `https://www.uefa.com/teams/{id}`
+- News: `https://www.uefa.com/news/`
+
+## Available Recipes
+## uefa-news
+
+1. [goto] https://www.uefa.com
+2. [wait] 3 seconds
+3. [scrape] news articles
+
+## uefa-competitions
+
+1. [goto] https://www.uefa.com
+2. [wait] 2 seconds
+3. [click] competitions section
+4. [scrape] tournament brackets and schedules

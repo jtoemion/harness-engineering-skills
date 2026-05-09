@@ -1,0 +1,17 @@
+# De Telegraaf - Metadata
+
+## URL Patterns
+- Sport: `https://www.telegraaf.nl/sport/`
+- Article: `https://www.telegraaf.nl/sport/{category}/{slug}`
+- Video: `https://www.telegraaf.nl/sport/video/`
+
+## Domain
+- Base: telegraaf.nl
+- Sport Section: /sport
+
+## Language
+- nl
+
+## Notes
+- Dutch newspaper, owned by DPG Media
+- Sport section covers football, eredivisie, ajax, feyenoord

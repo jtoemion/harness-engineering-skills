@@ -1,0 +1,12 @@
+# L'Equipe - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.lequipe.fr/Football/{slug}`
+- Section: `https://www.lequipe.fr/Football/`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.lequipe.fr/Football/
+2. [wait] 3 seconds
+3. [extract] article links

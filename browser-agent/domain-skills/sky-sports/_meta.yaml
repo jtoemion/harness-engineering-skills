@@ -1,0 +1,12 @@
+# Sky Sports - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.skysports.com/football/{slug}`
+- Section: `https://www.skysports.com/football/{section}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.skysports.com/football
+2. [wait] 3 seconds
+3. [scrape] article links and content

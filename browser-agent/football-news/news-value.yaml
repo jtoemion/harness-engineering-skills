@@ -1,0 +1,108 @@
+# Football News Value Index
+# Grades news value based on RELEVANCE + RELIABILITY + UNIQUENESS
+# NOT entity impact
+
+# ===========================================
+# RELIABILITY TIERS (Source Trust Level)
+# ===========================================
+reliability:
+  tier_1:  # TRUSTED - Breaking confirmed here first
+    - fabrizio-romano
+    - david-ornstein
+    - the-athletic
+    - bbc-sport
+    - sky-sports
+    - espn
+    score: 30
+
+  tier_2:  # RELIABLE - Standard football media
+    - teamtalk
+    - caughtoffside
+    - football-insider
+    - marca
+    - goal
+    - gazzetta
+    - tuttosport
+    score: 20
+
+  tier_3:  # OK - Smaller aggregators
+    - yahoo-sports
+    - one-football
+    - sports-yahoo
+    score: 10
+
+  tier_4:  # UNVERIFIED - Unknown blogs
+    score: 5
+
+# ===========================================
+# NEWS VALUE GRADES
+# ===========================================
+value_grades:
+  A_plus:
+    min: 90
+    description: MUST READ - Breaking, confirmed, high impact
+    color: red
+
+  A:
+    min: 80
+    description: Important - Transfer active, big match result
+    color: orange
+
+  B_plus:
+    min: 70
+    description: Worth reading - Analysis, updates
+    color: yellow
+
+  B:
+    min: 60
+    description: Standard news - Regular updates
+    color: green
+
+  C:
+    min: 40
+    description: Skip unless interested - Minor gossip
+    color: blue
+
+  D:
+    min: 20
+    description: Skip - Low value, already known
+    color: gray
+
+  F:
+    min: 0
+    description: Skip - Noise, duplicate, unverified
+    color: gray
+
+# ===========================================
+# NEWS TYPE VALUES (What kind of news)
+# ===========================================
+news_types:
+  breaking: 25        # "Here we go", official
+  confirmed: 22        # Bid accepted, medical update
+  transfer: 20        # Active negotiation
+  result: 18          # Match final score
+  update: 15          # Contract, injury update
+  analysis: 12       # Tactical breakdown
+  opinion: 8          # Pundit takes
+  rumor: 3            # "could sign", "interested"
+  gossip: 2           # Unverified social media
+
+# ===========================================
+# SCORING FORMULA
+# ===========================================
+# total = reliability_score + news_type_score + recency_score + uniqueness_score
+
+# Max possible: 30 + 25 + 10 + 10 = 75
+
+# ===========================================
+# DUPLICATE TRACKING (What to check)
+# ===========================================
+duplicate_check:
+  by_url: true          # Same URL = dupe
+  by_title: true         # Similar title (>70%) = dupe
+  by_entities: true    # Same key entities + date = likely dupe
+
+# Key entities that define topic:
+# - For transfers: player name + destination club
+# - For matches: teams + date
+# - For results: winning team + score

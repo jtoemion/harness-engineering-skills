@@ -1,0 +1,15 @@
+name: Session Context Compressor
+description: Compresses and summarizes session context into a concise block for coding, research, writing, or planning tasks.
+triggers:
+  - compress context
+  - save session
+  - summarize progress
+  - compress
+  - compress coding
+  - compress research
+  - compress writing
+  - compress planning
+  - compress hard
+  - recompress
+mode_detection: auto or user-specified via `compress [coding|research|writing|planning]`
+quick_scan: true

@@ -1,0 +1,11 @@
+# Football Italia - Navigation Recipes
+
+## URL Patterns
+- Article: `https://www.football-italia.net/{slug}`
+- Section: `https://www.football-italia.net/`
+
+## football-news
+
+1. [goto] https://www.football-italia.net/
+2. [wait] 3 seconds
+3. [extract] article links

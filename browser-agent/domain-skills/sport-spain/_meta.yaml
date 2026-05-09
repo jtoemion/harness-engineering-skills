@@ -1,0 +1,14 @@
+# Sport (Spain) - Navigation Recipes
+
+## URL Patterns
+- Football: `https://www.sport.es/futbol/`
+- Article: `https://www.sport.es/futbol/{slug}`
+- La Liga: `https://www.sport.es/futbol/liga/`
+- Results: `https://www.sport.es/futbol/resultados/`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://www.sport.es/futbol/
+2. [wait] 3 seconds
+3. [extract] article links

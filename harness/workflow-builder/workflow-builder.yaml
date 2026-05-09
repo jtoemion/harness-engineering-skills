@@ -1,0 +1,47 @@
+name: workflow-builder
+description: Use when building, analyzing, or converting workflow skills — outcome-driven design through conversational discovery
+version: 1.0.0
+phase_files:
+  build: BUILD_PROCESS.md
+  analyze: QUALITY_ANALYSIS.md
+  convert: CONVERT_PROCESS.md
+modes:
+  build:
+    trigger: ["build a workflow", "create a skill", "design a workflow", "new skill"]
+    phases: 6
+    phases_list:
+      - "1 - Discover Intent"
+      - "2 - Classify Skill Type"
+      - "3 - Gather Requirements"
+      - "4 - Draft & Refine"
+      - "5 - Build"
+      - "6 - Summary"
+  analyze:
+    trigger: ["quality check workflow", "analyze skill", "lint skill", "review workflow"]
+    steps:
+      - "Lint checks (structural, naming, frontmatter)"
+      - "Judgment-based analysis (5 dimensions)"
+      - "Report synthesis"
+  convert:
+    trigger: ["convert a skill", "migrate skill format", "modernize skill"]
+    steps:
+      - "Capture original"
+      - "Rebuild from intent"
+      - "Categorize changes"
+      - "Generate comparison"
+principles:
+  - "Every instruction describes WHAT outcome, not HOW"
+  - "If LLM would do it correctly without being told — cut it"
+  - "Build through dialogue, not assumptions"
+  - "Front-load what matters, bury what doesn't"
+  - "Focus on decisions the LLM would get wrong"
+skill_types:
+  simple_utility:
+    signals: "Single clear action, no branching"
+    structure: "Flat SKILL.md, inline examples"
+  simple_workflow:
+    signals: "Sequential steps, light branching"
+    structure: "SKILL.md + optional reference"
+  complex_workflow:
+    signals: "Multi-phase, conditional logic, judgment calls"
+    structure: "SKILL.md + supporting phase docs"

@@ -1,0 +1,12 @@
+# The Athletic - Navigation Recipes
+
+## URL Patterns
+- Article: `https://theathletic.com/football/{slug}`
+- Section: `https://theathletic.com/football/{section}`
+
+## Available Recipes
+## football-news
+
+1. [goto] https://theathletic.com/football
+2. [wait] 3 seconds
+3. [extract] article links

@@ -31,3 +31,18 @@ npm-debug.log*
 *.tmp
 *.temp
 temp/
+
+# Transient subagent files
+SUBAGENT_BRIEF.md
+SUBAGENT_RESULT.md
+
+# Model cache (large, downloaded on first use)
+.huggingface/
+
+# Flow-watcher NLI model cache
+harness/runtime/flow-watcher/.cache/
+
+# Transient build artifacts
+__pycache__/
+*.pyc
+*.pyo

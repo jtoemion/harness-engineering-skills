@@ -1,15 +1,13 @@
 import subprocess
 import json
 import time
-import threading
-import yaml
 
 
-class QwenBridge:
+class WatchBridge:
     _process: subprocess.Popen | None = None
 
     @classmethod
-    def get(cls) -> "QwenBridge":
+    def get(cls) -> "WatchBridge":
         if cls._process is None or cls._process.poll() is not None:
             cls._process = subprocess.Popen(
                 ["node", "skills/harness/runtime/flow-watcher/flow-watcher.js"],
@@ -20,21 +18,20 @@ class QwenBridge:
             )
         return cls()
 
-    def ask(self, mode: str, payload: dict) -> dict:
-        request = json.dumps({"mode": mode, **payload}) + "\n"
+    def watch(self, input_text: str) -> dict:
+        request = json.dumps({"input": input_text}) + "\n"
         self._process.stdin.write(request)
         self._process.stdin.flush()
 
         result = self._read_response()
         if result is None:
             self._restart()
-            return get_fallback_skill(payload.get("input", ""), payload.get("state", {}))
+            return watch_fallback(input_text)
         return result
 
     def _read_response(self) -> dict | None:
-        result = []
         start = time.time()
-        while time.time() - start < 5:
+        while time.time() - start < 10:
             line = self._process.stdout.readline()
             if line:
                 try:
@@ -47,7 +44,7 @@ class QwenBridge:
     def _restart(self):
         if self._process and self._process.poll() is None:
             self._process.kill()
-        self._process = subprocess.Popen(
+        type(self)._process = subprocess.Popen(
             ["node", "skills/harness/runtime/flow-watcher/flow-watcher.js"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -60,32 +57,36 @@ class QwenBridge:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self._process:
-            self._process.stdin.close()
-            self._process.stdout.close()
-            self._process.kill()
-            self._process.wait()
+            try:
+                self._process.stdin.close()
+                self._process.stdout.close()
+                self._process.kill()
+                self._process.wait()
+            except Exception:
+                pass
+        type(self)._process = None
 
 
-def get_fallback_skill(input: str, state) -> dict:
-    input_lower = input.lower()
+def watch_fallback(input_text: str) -> dict:
+    input_lower = input_text.lower()
+    alerts = []
 
-    if "refactor" in input_lower or "restructure" in input_lower:
-        return {"skill": "architectural-impact", "confidence": 0.7, "source": "yaml-fallback"}
-    if "frontend" in input_lower or "ui" in input_lower or "css" in input_lower:
-        return {"skill": "frontend-avant-garde", "confidence": 0.7, "source": "yaml-fallback"}
-    if "test" in input_lower:
-        return {"skill": "test-driven-development", "confidence": 0.7, "source": "yaml-fallback"}
-    if "debug" in input_lower or "fix" in input_lower or "bug" in input_lower:
-        return {"skill": "systematic-debugging", "confidence": 0.7, "source": "yaml-fallback"}
-    if "plan" in input_lower or "design" in input_lower:
-        return {"skill": "writing-plans", "confidence": 0.7, "source": "yaml-fallback"}
-    if "memory" in input_lower or "vault" in input_lower:
-        return {"skill": "memorybank", "confidence": 0.7, "source": "yaml-fallback"}
-    if "git" in input_lower or "branch" in input_lower:
-        return {"skill": "using-git-worktrees", "confidence": 0.7, "source": "yaml-fallback"}
-    if "session" in input_lower or "close" in input_lower:
-        return {"skill": "session-graph", "confidence": 0.7, "source": "yaml-fallback"}
-    if "review" in input_lower:
-        return {"skill": "requesting-code-review", "confidence": 0.7, "source": "yaml-fallback"}
+    if any(w in input_lower for w in ["complete", "done", "fixed", "working", "all set", "finished"]):
+        alerts.append({"pattern_id": "claim-without-verification", "confidence": 0.7})
 
-    return {"skill": "karpathy-guidelines", "confidence": 0.3, "source": "yaml-fallback"}
+    if any(w in input_lower for w in ["skip", "skipping", "skip the", "skip step", "skip verification", "skip review", "skip planning"]):
+        alerts.append({"pattern_id": "skip-skill-steps", "confidence": 0.7})
+
+    if any(w in input_lower for w in ["close session", "end session", "wrapping up", "wrap up"]):
+        alerts.append({"pattern_id": "skip-session-close", "confidence": 0.7})
+
+    if any(w in input_lower for w in ["should work", "probably works", "assume it", "assume this", "this should"]):
+        alerts.append({"pattern_id": "no-evidence-claim", "confidence": 0.7})
+
+    if any(w in input_lower for w in ["--force", "force push", "hard reset", "--hard"]):
+        alerts.append({"pattern_id": "force-push-risk", "confidence": 0.7})
+
+    if not alerts:
+        return {"alerts": [], "gate": "PASS", "reason": "keyword-fallback"}
+
+    return {"alerts": alerts, "gate": "WARN", "reason": "keyword-fallback"}

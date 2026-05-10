@@ -7,88 +7,48 @@ let classifier = null;
 
 async function initPipeline() {
   if (!classifier) {
-    console.error('[INIT] Loading model...');
-    classifier = await pipeline('text-generation', 'onnx-community/Qwen2.5-0.5B-Instruct', { quantized: false });
+    console.error('[INIT] Loading watch model...');
+    classifier = await pipeline('zero-shot-classification', 'Xenova/nli-deberta-v3-base');
     console.error('[INIT] Model loaded');
   }
   return classifier;
 }
 
-const SKILLS = [
-  { id: 'brainstorming', keywords: ['create', 'feature', 'add', 'functionality', 'modify'] },
-  { id: 'systematic-debugging', keywords: ['bug', 'fix', 'error', 'unexpected', 'issue', 'problem'] },
-  { id: 'test-driven-development', keywords: ['test', 'tdd', 'write test', 'red green'] },
-  { id: 'requesting-code-review', keywords: ['review', 'pr', 'pull request', 'complete'] },
-  { id: 'architectural-impact', keywords: ['data', 'database', 'api', 'endpoint', 'architecture'] },
-  { id: 'frontend-avant-garde', keywords: ['ui', 'ux', 'css', 'style', 'design', 'visual'] },
-  { id: 'verification-before-completion', keywords: ['verify', 'complete', 'done', 'working'] },
+const WATCH_PATTERNS = [
+  { id: 'claim-without-verification', hypothesis: 'Agent is claiming work is complete, fixed, or passing without running verification commands' },
+  { id: 'skip-session-close', hypothesis: 'Agent is about to end the session without running the mandatory session close pipeline' },
+  { id: 'skip-skill-steps', hypothesis: 'Agent is skipping steps or phases in a skill workflow (e.g., jumping to implementation without planning, jumping to completion without review)' },
+  { id: 'scope-creep', hypothesis: 'Agent is about to touch files or modify areas outside the declared task scope' },
+  { id: 'stale-memory', hypothesis: 'Agent is not updating project memory (.memory/) — stale memory leads to wrong decisions' },
+  { id: 'hidden-assumptions', hypothesis: 'Agent is making hidden assumptions instead of surfacing them first (e.g., assuming library is installed, assuming correct config, assuming API format)' },
+  { id: 'skip-mistakes-check', hypothesis: 'Agent is about to write code without checking for known mistakes that could cause the same failure' },
+  { id: 'subagent-bypass', hypothesis: 'Agent is not using proper subagent protocol (skipping SUBAGENT_BRIEF.md or reading raw results instead of SUBAGENT_RESULT.md)' },
+  { id: 'force-push-risk', hypothesis: 'Agent is about to run a destructive git command like force push, hard reset, or rebase that could lose work' },
+  { id: 'no-evidence-claim', hypothesis: 'Agent is asserting something as fact without showing evidence (e.g., says "this works" without running the actual command)' },
+  { id: 'mode-violation', hypothesis: 'Agent is running FULL-mode-only operations (like session close, cold start, mistakes logging) in QUICK mode' },
+  { id: 'skip-checkpoint', hypothesis: 'Agent is about to wrap up without creating a checkpoint for the current task' },
 ];
 
-function keywordMatch(input) {
-  const lower = input.toLowerCase();
-  for (const skill of SKILLS) {
-    for (const kw of skill.keywords) {
-      if (lower.includes(kw)) {
-        return { skill_id: skill.id, confidence: 0.75, gate: 'PASS', reason: `keyword match: ${kw}` };
-      }
-    }
-  }
-  return null;
-}
+async function watch(input) {
+  const classifier = await initPipeline();
+  const labels = WATCH_PATTERNS.map(p => p.hypothesis);
 
-function parseResponse(text) {
-  // Check for skill name ONLY after "assistant" (the model's response)
-  const assistantIndex = text.indexOf('<|im_start|>assistant');
-  if (assistantIndex === -1) {
-    // Try "assistant" without the tags
-    const altIndex = text.indexOf('assistant');
-    if (altIndex !== -1) {
-      const responsePart = text.substring(altIndex);
-      for (const skill of SKILLS) {
-        if (responsePart.includes(skill.id)) {
-          return { skill_id: skill.id, confidence: 0.7, gate: 'PASS', reason: 'model matched' };
-        }
-      }
-    }
-    return null;
-  }
+  const result = await classifier(input, labels, { multi_label: true });
 
-  const responsePart = text.substring(assistantIndex);
-  for (const skill of SKILLS) {
-    if (responsePart.includes(skill.id)) {
-      return { skill_id: skill.id, confidence: 0.7, gate: 'PASS', reason: 'model matched' };
+  const alerts = [];
+  for (let i = 0; i < result.labels.length; i++) {
+    const score = result.scores[i];
+    if (score >= 0.5) {
+      const pattern = WATCH_PATTERNS.find(p => p.hypothesis === result.labels[i]);
+      alerts.push({ pattern_id: pattern.id, confidence: Math.round(score * 100) / 100 });
     }
   }
 
-  return null;
-}
-
-async function classifyRoute(input, state) {
-  const generate = await initPipeline();
-
-  const prompt = `<|im_start|>user
-Classify: "${input}"
-Reply with skill_id only from: ${SKILLS.map(s => s.id).join(', ')}<|im_end|>
-<|im_start|>assistant
-`;
-
-  const result = await generate(prompt, { max_new_tokens: 60, temperature: 0.1 });
-  const text = result[0].generated_text;
-  console.error('[RAW]', text.substring(0, 300));
-
-  const parsed = parseResponse(text);
-  if (parsed) {
-    return parsed;
-  }
-
-  // Fall back to keyword
-  const kwResult = keywordMatch(input);
-  if (kwResult) {
-    console.error('[FALLBACK] Keyword match:', kwResult);
-    return kwResult;
-  }
-
-  return { skill_id: 'karpathy-guidelines', confidence: 0.3, gate: 'PASS', reason: 'default' };
+  return {
+    alerts,
+    gate: alerts.length === 0 ? 'PASS' : 'WARN',
+    reason: 'nli-watch',
+  };
 }
 
 async function main() {
@@ -106,14 +66,14 @@ async function main() {
       buffer = buffer.slice(newlineIdx + 1);
       if (!line) continue;
       try {
-        const { input, state } = JSON.parse(line);
-        const result = await classifyRoute(input, state);
+        const { input } = JSON.parse(line);
+        const result = await watch(input);
         console.log(JSON.stringify(result));
       } catch (e) {
-        console.error('[ERROR]', e.message);
+        console.error(JSON.stringify({ error: e.message }));
       }
     }
   }
 }
 
-main().catch(e => { console.error('[FATAL]', e.message); process.exit(1); });
+main().catch(e => { console.error(JSON.stringify({ fatal: e.message })); process.exit(1); });

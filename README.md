@@ -19,7 +19,7 @@
 │  │  2. Load skill-router.yaml → parse routes               │    │
 │  │  3. Check .memory/ staleness (memory_watch.py)          │    │
 │  │  4. Check relevant mistakes (mistakes.py)                │    │
-│  │  5. Start Qwen bridge (flow-watcher.js)                 │    │
+│  │  5. Start flow-watcher (nli-deberta via Transformers.js)  │    │
 │  │  6. Boot Status Report printed                           │    │
 │  └─────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
@@ -33,7 +33,7 @@
 │  2. Check .memory/ staleness (memory_watch.py)                  │
 │  3. Check MISTAKES.md for relevant entries (mistakes.py)        │
 │  4. Mode guard check (conductor.py)                             │
-│  5. Qwen route classification (flow-watcher.js via bridge.py)    │
+│  5. Flow-watcher watch classification (flow-watcher.js via bridge.py)  │    │
 │  6. YAML keyword fallback if confidence < 0.65                 │
 │  7. Disambiguation if skills within 10 weight points           │
 │  8. Print: skill path to load, any warnings                    │
@@ -134,12 +134,8 @@ harness/
 │   ├── harness.py                    # Master CLI entry point
 │   ├── checkpoint.py                 # 12-step checkpoint pipeline
 │   ├── session_close.py             # 12-step session close (resumable)
-│   ├── flow-watcher/                # Qwen2.5-0.5B overseer
-│   │   ├── flow-watcher.js          # stdin/stdout JSON, two modes
-│   │   ├── package.json
-│   │   └── prompts/
-│   │       ├── router.txt            # Routing classification prompt
-│   │       └── validator.txt         # Flow sequence validation prompt
+│   ├── flow-watcher/                # nli-deberta-v3-base overseer
+│   │   ├── flow-watcher.js          # stdin/stdout JSON, watch patterns
 │   └── hooks/
 │       ├── pre-commit                # Git hook: block if session open
 │       └── install_hooks.py          # Hook installer
@@ -170,27 +166,45 @@ harness/
 
 ---
 
-## Flow-Watcher (Qwen2.5-0.5B)
+## Flow-Watcher (nli-deberta-v3-base)
 
-The only component that calls the LLM. Answers exactly two questions:
+The only component that calls the LLM. It's a **secondary watcher** — the primary router is `skill-router.yaml`. The watcher's job is to surface harness violations the keyword router might miss.
 
-### `--route` Mode
+### Watch Patterns (12 anti-patterns)
+
+The watcher classifies agent output against 12 harness patterns:
+
+| Pattern | Hypothesis |
+|---------|------------|
+| `claim-without-verification` | Agent claims work is done without running verification |
+| `skip-session-close` | Agent ends session without running close pipeline |
+| `skip-skill-steps` | Agent skips steps in a skill workflow |
+| `scope-creep` | Agent touches files outside declared scope |
+| `stale-memory` | Agent not updating .memory/ |
+| `hidden-assumptions` | Agent assumes without surfacing first |
+| `skip-mistakes-check` | Agent writing code without checking for known mistakes |
+| `subagent-bypass` | Agent not following subagent protocol |
+| `force-push-risk` | Agent about to run destructive git command |
+| `no-evidence-claim` | Agent asserts without showing evidence |
+| `mode-violation` | FULL-mode-only operation in QUICK mode |
+| `skip-checkpoint` | Agent wrapping up without checkpoint |
+
+### Input/Output
+
 ```bash
-node flow-watcher.js --route "there's a bug in the auth flow"
+echo '{"input": "The fix is complete. Moving on."}' | node flow-watcher.js
 ```
 ```json
-{"skill_id": "systematic-debugging", "confidence": 0.72, "gate": "PASS", "reason": "bug encountered"}
+{"alerts":[
+  {"pattern_id":"no-evidence-claim","confidence":0.99},
+  {"pattern_id":"claim-without-verification","confidence":0.96},
+  {"pattern_id":"skip-skill-steps","confidence":0.65}
+],"gate":"WARN","reason":"nli-watch"}
 ```
 
-### `--validate` Mode
-```bash
-node flow-watcher.js --validate '{"state":"ACTIVE","skills_loaded":["systematic-debugging"]}'
-```
-```json
-{"valid": true, "sequence": "pre-task → skill → checkpoint → ...", "gate": "PASS"}
-```
+**Alert threshold:** `confidence >= 0.5` per pattern. `multi_label: true` — multiple patterns can fire simultaneously.
 
-**Confidence threshold:** If `confidence < 0.65` → fall back to YAML keyword match (Python, no LLM).
+**Keyword fallback:** If NLI times out, bridge.py falls back to keyword matching for the most common patterns.
 
 ---
 
@@ -229,7 +243,7 @@ node flow-watcher.js --validate '{"state":"ACTIVE","skills_loaded":["systematic-
 |-------|------------|
 | State contract | Python + Pydantic v2 |
 | Gate CLI | Python (`harness.py`) |
-| Intent + flow classifier | Qwen2.5-0.5B via Transformers.js |
+| Pattern watcher | nli-deberta-v3-base via Transformers.js |
 | Python ↔ JS bridge | subprocess (stdin/stdout JSON) |
 | Session close pipeline | Python state machine |
 | Memory validation | Python file watcher |
@@ -240,7 +254,7 @@ node flow-watcher.js --validate '{"state":"ACTIVE","skills_loaded":["systematic-
 ## Setup
 
 ```bash
-# Install flow-watcher dependencies (downloads Qwen on first run)
+# Install flow-watcher dependencies (downloads nli-deberta-v3-base on first run)
 cd harness/runtime/flow-watcher
 npm install
 

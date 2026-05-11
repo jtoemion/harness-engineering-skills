@@ -526,9 +526,9 @@ def validate_anchors(context_path: Path) -> list[tuple[str, bool, str]]:
         content = read_utf8(target)
         # Convert GitHub-style anchor (hyphens→spaces) and search for heading
         anchor_words = anchor.replace("-", " ").replace("_", " ")
-        pattern_a = rf"^#{1,6}\s+.*{re.escape(anchor_words)}.*$"
+        pattern_a = rf"^#{{1,6}}\s+.*{re.escape(anchor_words)}.*$"
         # Also try direct hyphen match as-is
-        pattern_b = rf"^#{1,6}\s+.*{re.escape(anchor)}.*$"
+        pattern_b = rf"^#{{1,6}}\s+.*{re.escape(anchor)}.*$"
         found = bool(
             re.search(pattern_a, content, re.IGNORECASE | re.MULTILINE) or
             re.search(pattern_b, content, re.IGNORECASE | re.MULTILINE)

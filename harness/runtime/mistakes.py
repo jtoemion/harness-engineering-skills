@@ -6,7 +6,9 @@ from pathlib import Path
 from typing import Literal
 
 MISTAKES_PATH = Path(__file__).parent.parent / "MISTAKES.md"
-GLOBAL_VAULT = Path("C:/Users/jtoem/Obsidian/AntigravityV")
+MISTAKES_FILE = MISTAKES_PATH
+GLOBAL_VAULT = Path(".global")
+INSERT_MARKER = "<!-- INSERT NEW MISTAKE BELOW -->"
 CANONICAL_FILES = [".memory/activeContext.md", ".memory/progress.md"]
 MAX_STALENESS_MINUTES = 60
 
@@ -23,15 +25,16 @@ class MistakeEntry:
 
 
 def load_all() -> list[MistakeEntry]:
+    return _parse_entries(MISTAKES_PATH.read_text(encoding="utf-8"))
+
+
+def _parse_entries(content: str) -> list[MistakeEntry]:
     entries = []
-    content = MISTAKES_PATH.read_text(encoding="utf-8")
     pattern = re.compile(
         r"## \[(\d{4}-\d{2}-\d{2})\] \| \[([^\]]+)\]\s+"
         r"\*\*Error\*\*\s*:\s*(.+?)\s*\n"
         r"\*\*Cause\*\*\s*:\s*(.+?)\s*\n"
-        r"\*\*Lesson\*\*\s*:\s*(.+?)\s*\n"
-        r"(?:\*\*References\*\*\s*:\s*(.+?)\s*\n)?"
-        r"\*\*Status\*\*\s*:\s*(\w+)",
+        r"\*\*Lesson\*\*\s*:\s*(.+?)(?:\n|$)",
         re.DOTALL,
     )
     for match in pattern.finditer(content):

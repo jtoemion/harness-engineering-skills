@@ -9,7 +9,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 _RUNTIME_DIR = Path(__file__).parent
-WORKSPACE_ROOT = _RUNTIME_DIR.parent.parent.parent
+
+# WORKSPACE_ROOT: project root (contains .memory/ or .git/)
+# Default to cwd if run from project, else fall back to parent of skills/
+def _find_workspace_root() -> Path:
+    """Find the workspace root by looking for .memory/ or .git/ markers."""
+    # Start from cwd or from runtime dir parent chain
+    candidates = [Path.cwd()]
+    # Also check if opencode config dir is the parent of skills/harness
+    if (_RUNTIME_DIR.parent.parent.parent / ".memory").exists():
+        candidates.append(_RUNTIME_DIR.parent.parent.parent)
+    for candidate in candidates:
+        if (candidate / ".memory").exists() or (candidate / ".git").exists():
+            return candidate
+    # Fallback to first candidate (cwd)
+    return candidates[0]
+
+WORKSPACE_ROOT = _find_workspace_root()
 STATE_FILE = WORKSPACE_ROOT / ".harness-state.json"
 
 import importlib.util
@@ -25,6 +41,8 @@ state_mod = _import_module("runtime.state", _RUNTIME_DIR / "state.py")
 HarnessState = state_mod.HarnessState
 state_load = state_mod.load
 state_save = state_mod.save
+load_state = state_load
+save_state = state_save
 detect_mode = state_mod.detect_mode
 init_state = state_mod.init_state
 read_state_dict = state_mod.read_state
@@ -74,8 +92,16 @@ def _check_session_close_staging() -> bool:
 def _run_script(script_name: str, *args) -> int:
     """Run a Python script as subprocess and return exit code."""
     script_path = _RUNTIME_DIR / script_name
-    cmd = [sys.executable, str(script_path)] + list(args)
-    result = subprocess.run(cmd, cwd=str(WORKSPACE_ROOT))
+    # Use PYTHONPATH to allow runtime.* imports (must use forward slashes for Python)
+    env = os.environ.copy()
+    runtime_parent = str(_RUNTIME_DIR.parent).replace("\\", "/")  # skills/harness/
+    env["PYTHONPATH"] = runtime_parent
+    # Ensure UTF-8 output for Unicode characters (Windows fix)
+    env["PYTHONIOENCODING"] = "utf-8"
+    # Run as module via -m so relative imports (.state) work within the runtime package
+    script_module = f"runtime.{script_path.stem}"
+    cmd = [sys.executable, "-m", script_module] + list(args)
+    result = subprocess.run(cmd, cwd=str(_RUNTIME_DIR), env=env)
     return result.returncode
 
 
@@ -137,6 +163,7 @@ def cmd_boot() -> int:
         return 0
 
     state = _create_fresh_state()
+    state.state = "ACTIVE"  # Transition from BOOTING to ACTIVE
     write_state(state)
 
     check_staleness()
@@ -154,7 +181,7 @@ def cmd_boot() -> int:
 
 def _gate_pre_task(task_input: str) -> tuple[int, RouteResult | None]:
     """Run pre-task gate checks. Returns (exit_code, RouteResult)."""
-    state = read_state()
+    state = load_state()
     mode = detect_mode()
 
     print("=" * 60)
@@ -208,7 +235,7 @@ def cmd_gate(args: argparse.Namespace) -> int:
         exit_code, _ = _gate_pre_task(args.input or "")
         return exit_code
     elif args.phase == "pre-complete":
-        state = read_state()
+        state = load_state()
         print("=" * 60)
         print("GATE: PRE-COMPLETE")
         print("=" * 60)
@@ -232,7 +259,7 @@ def cmd_gate(args: argparse.Namespace) -> int:
 
 def cmd_verify_done() -> int:
     """Sets state.verification_logged = True."""
-    state = read_state()
+    state = load_state()
     state.verification_logged = True
     write_state(state)
     print("verification_logged = True")
@@ -241,13 +268,13 @@ def cmd_verify_done() -> int:
 
 def cmd_checkpoint(args: argparse.Namespace) -> int:
     """Run checkpoint 12-step pipeline via subprocess."""
-    state = read_state()
+    state = load_state()
     state.checkpoint_complete = False
     write_state(state)
 
     ret = _run_script("checkpoint.py", "--task", args.task or "Untitled task")
 
-    state = read_state()
+    state = load_state()
     state.checkpoint_complete = True
     write_state(state)
     return ret
@@ -260,7 +287,7 @@ def cmd_close(args: argparse.Namespace) -> int:
         cmd.append("--resume")
     ret = _run_script("session_close.py", *cmd)
     if ret == 0:
-        state = read_state()
+        state = load_state()
         state.state = "CLOSED"
         write_state(state)
     return ret
@@ -297,7 +324,10 @@ def cmd_mistakes(args: argparse.Namespace) -> int:
 def cmd_status() -> int:
     """Print Boot Status Report."""
     mode = detect_mode()
-    state = read_state()
+    if STATE_FILE.exists():
+        state = state_load(str(STATE_FILE))
+    else:
+        state = _create_fresh_state()
     _print_boot_status_report(mode, state)
     return 0
 
@@ -306,7 +336,7 @@ def cmd_hook_check_session() -> int:
     """Internal git hook check. Exit 1 if state != CLOSED."""
     if not STATE_FILE.exists():
         return 0
-    state = read_state()
+    state = state_load(str(STATE_FILE))
     if state.state != "CLOSED":
         print("Session not closed")
         return 1

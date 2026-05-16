@@ -1,6 +1,10 @@
 ---
 name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
+compliance_rules:
+  - "Plan is written before any implementation code is written"
+  - "User approves the plan before implementation begins"
+  - "Plan includes all steps, test strategy, and acceptance criteria"
 ---
 
 # Writing Plans

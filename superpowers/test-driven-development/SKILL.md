@@ -1,6 +1,11 @@
 ---
 name: test-driven-development
 description: Use when implementing any feature or bugfix, before writing implementation code.
+compliance_rules:
+  - "Tests are written BEFORE implementation code"
+  - "No implementation file is modified without a corresponding test file change"
+  - "All tests pass before claiming completion"
+  - "Test failure is verified before writing implementation code"
 quick_ref:
   iron_law: "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST"
   cycle: "RED → GREEN → REFACTOR → repeat"

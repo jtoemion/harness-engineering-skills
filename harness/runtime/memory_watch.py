@@ -2,9 +2,11 @@
 
 import argparse
 import sys
+import time
 from pathlib import Path
 from typing import Tuple, List
 
+WORKSPACE_ROOT = Path(__file__).parent.parent.parent
 HARNESS_ROOT = Path(r"C:\Users\jtoem\.config\opencode\skills\harness")
 MEMORY_DIR = Path(".memory")
 CANONICAL_FILES = [".memory/activeContext.md", ".memory/progress.md"]
@@ -128,5 +130,7 @@ def main():
 
 
 if __name__ == "__main__":
-    import time
     main()
+
+
+validate_schemas = check_all

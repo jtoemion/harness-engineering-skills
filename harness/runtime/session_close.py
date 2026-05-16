@@ -9,7 +9,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from state import HarnessState, load_state, save_state
+WORKSPACE_ROOT = Path(__file__).parent.parent.parent
+
+from .state import HarnessState, load_state, save_state
 
 SESSION_CLOSE_STEPS = [
     ("ill_check", "ILL check"),
@@ -26,6 +28,22 @@ SESSION_CLOSE_STEPS = [
     ("git_commit", "git commit"),
     ("output_summary", "output summary"),
 ]
+
+STEPS = SESSION_CLOSE_STEPS
+
+def get_step_index() -> dict:
+    return {name: i for i, (name, _) in enumerate(SESSION_CLOSE_STEPS)}
+
+step_index = get_step_index()
+_step_index = step_index
+
+
+def _ill_captures_count() -> int:
+    captures_path = Path(".memory/ill/captures.md")
+    if not captures_path.exists():
+        return 0
+    content = captures_path.read_text()
+    return content.count("\n- ")
 
 
 def _ill_check(state: HarnessState) -> tuple[bool, str, HarnessState]:
@@ -95,7 +113,7 @@ def _update_memory(state: HarnessState) -> tuple[bool, str, HarnessState]:
 
 
 def _write_mistakes(state: HarnessState) -> tuple[bool, str, HarnessState]:
-    from mistakes import load_all, sync_global
+    from .mistakes import load_all, sync_global
     entries = load_all()
     active = [e for e in entries if e.status == "ACTIVE"]
     sync_global()
@@ -158,7 +176,10 @@ def _atomic_move(state: HarnessState) -> tuple[bool, str, HarnessState]:
 
 
 def _sync_global(state: HarnessState) -> tuple[bool, str, HarnessState]:
-    return True, "synced to global vault", state
+    # Sync to .global/ folder instead of Obsidian vault
+    global_dir = Path(".global")
+    global_dir.mkdir(exist_ok=True)
+    return True, "synced to global folder", state
 
 
 def _update_dashboard(state: HarnessState) -> tuple[bool, str, HarnessState]:

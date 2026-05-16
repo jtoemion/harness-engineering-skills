@@ -1,6 +1,10 @@
 ---
 name: receiving-code-review
 description: Use when receiving code review feedback, before implementing suggestions.
+compliance_rules:
+  - "All feedback comments are addressed, not dismissed"
+  - "No silent dismissals - each comment gets explicit response"
+  - "Clarification is asked before implementing if anything is unclear"
 quick_ref:
   verify_first: "Check against codebase reality before implementing"
   no_performative: "No 'great point' or 'thanks' - state fix or pushback"

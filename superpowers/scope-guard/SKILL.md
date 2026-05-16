@@ -1,6 +1,10 @@
 ---
 name: scope-guard
 description: Detects and flags scope creep during implementation — fires automatically when a task is about to touch files outside its declared scope
+compliance_rules:
+  - "Task stays within its declared file scope"
+  - "Any scope deviation is flagged before implementation continues"
+  - "User approves scope changes before work continues on new files"
 ---
 
 # Scope Guard

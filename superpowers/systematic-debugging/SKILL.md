@@ -1,6 +1,11 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes.
+compliance_rules:
+  - "Root cause is investigated before any fix is proposed"
+  - "Bug is reproduced before fixing"
+  - "One change is made at a time to isolate the fix"
+  - "Fix is verified by running tests before claiming resolution"
 quick_ref:
   iron_law: "NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST"
   phase1: "Root cause - read errors, reproduce, check changes"

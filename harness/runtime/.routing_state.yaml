@@ -1,0 +1,6 @@
+confidence: 0.5
+gate: YAML
+needs_disambiguation: false
+reason: YAML keyword fallback
+skill_id: e2e-scaffold
+skill_path: harness/e2e-scaffold/SKILL.md

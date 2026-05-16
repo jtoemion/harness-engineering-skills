@@ -1,6 +1,11 @@
 ---
 name: executing-plans
 description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+compliance_rules:
+  - "Implementation follows the plan exactly"
+  - "No deviations from plan without user approval"
+  - "Checkpoints are run between task batches"
+  - "All tests pass before claiming plan completion"
 ---
 
 # Executing Plans

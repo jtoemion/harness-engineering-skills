@@ -1,6 +1,10 @@
 ---
 name: finishing-a-development-branch
 description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+compliance_rules:
+  - "All tests pass before claiming implementation is complete"
+  - "No uncommitted changes exist before finishing branch"
+  - "User approves the integration method (merge, PR, cleanup)"
 ---
 
 # Finishing a Development Branch

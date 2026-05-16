@@ -6,7 +6,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from state import HarnessState, load_state, save_state
+WORKSPACE_ROOT = Path(__file__).parent.parent.parent
+
+from .state import HarnessState, load_state, save_state
 
 CHECKPOINT_STEPS = [
     ("update_active_context", "step_update_active_context"),
@@ -22,6 +24,10 @@ CHECKPOINT_STEPS = [
     ("sync_global", "step_sync_global"),
     ("output_confirmation", "step_output_confirmation"),
 ]
+
+
+
+STEPS = CHECKPOINT_STEPS
 
 CONDITIONAL_STEPS = {"update_tech_context", "update_system_patterns"}
 
@@ -115,7 +121,8 @@ def _append_sessions_log(state: HarnessState, task: str) -> tuple[bool, str, Har
     entry = f"{timestamp} | {state.session_id} | {task}\n"
 
     if log_path.exists():
-        log_path.append_text(entry)
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(entry)
     else:
         log_path.write_text(f"# Sessions Log\n{entry}")
 
@@ -123,7 +130,7 @@ def _append_sessions_log(state: HarnessState, task: str) -> tuple[bool, str, Har
 
 
 def _process_mistakes(state: HarnessState, task: str) -> tuple[bool, str, HarnessState]:
-    from mistakes import load_all, sync_global
+    from .mistakes import load_all, sync_global
     entries = load_all()
     active = [e for e in entries if e.status == "ACTIVE"]
     sync_global()
@@ -165,10 +172,25 @@ STEP_FUNCTIONS = {
     "output_confirmation": _output_confirmation,
 }
 
+STEP_HANDLERS = STEP_FUNCTIONS
 
-def run_checkpoint(task_description: str) -> bool:
-    state = load_state()
-    state = state.transition("CHECKPOINTING")
+
+def run_checkpoint(task_description: str, state: HarnessState | dict | None = None) -> bool:
+    from datetime import datetime
+    if state is None:
+        state = load_state()
+    elif isinstance(state, dict):
+        defaults = {
+            "session_id": "unknown",
+            "mode": "quick",
+            "state": "ACTIVE",
+            "boot_time": datetime.now().isoformat(),
+            "skills_loaded": [],
+            "routing_log": [],
+        }
+        defaults.update(state)
+        state = HarnessState.model_validate(defaults)
+    state.transition("CHECKPOINTING")
     save_state(state)
 
     print("\n⚡ CHECKPOINT")

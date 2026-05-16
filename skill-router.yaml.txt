@@ -66,13 +66,6 @@ routing:
     mode_required: "any"
     weight: 75
 
-  - id: "writing-skills"
-    condition: "create a new skill or write a skill definition or build a new skill"
-    skill_path: "superpowers/writing-skills/SKILL.md"
-    mode_required: "any"
-    weight: 72
-    note: "TDD process for creating skills — test with subagent, write, verify"
-
   - id: "ultrathink"
     condition: "user explicitly types 'ULTRATHINK' in their prompt"
     skill_path: "superpowers/ultrathink-mode/SKILL.md"
@@ -126,13 +119,6 @@ routing:
     skill_path: "superpowers/writing-plans/SKILL.md"
     mode_required: "any"
     weight: 35
-
-  - id: "conductor"
-    condition: "design the workflow and drive it through to completion or orchestrate multi-layer feature or build complete feature spanning API database frontend"
-    skill_path: "superpowers/conductor/SKILL.md"
-    mode_required: "any"
-    weight: 33
-    note: "Orchestrates multi-skill workflows — uses intent matrix to build skill sequences"
 
   - id: "browser-agent"
     condition: "browser automation, automate browser, map site, browser agent, autorepair"

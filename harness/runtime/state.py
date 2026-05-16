@@ -37,15 +37,17 @@ class HarnessState(pydantic.BaseModel):
     routing_log: list[dict] = pydantic.Field(default_factory=list)
     close_step: int | None = None
     ill_captures_since_synthesis: int = 0
+    boot_count: int = 0
     _pending_route: str | None = None
     _llm_verdict: dict | None = None
 
-    def transition(self, new_state: SessionState) -> None:
+    def transition(self, new_state: SessionState) -> "HarnessState":
         if new_state not in VALID_TRANSITIONS.get(self.state, []):
             raise InvalidTransitionError(
                 f"Cannot transition from {self.state} to {new_state}"
             )
         self.state = new_state
+        return self
 
 
 def detect_mode() -> str:
@@ -53,12 +55,13 @@ def detect_mode() -> str:
     return "full" if (WORKSPACE_ROOT / ".memory").exists() else "quick"
 
 
-def init_state() -> HarnessState:
+def init_state(mode: str | None = None) -> HarnessState:
     """Create and save a fresh HarnessState."""
+    effective_mode = mode if mode else detect_mode()
     state = HarnessState(
         session_id=datetime.now().strftime("%Y-%m-%d-%H%M"),
-        mode=detect_mode(),
-        state="BOOTING",
+        mode=effective_mode,
+        state="ACTIVE",
         boot_time=datetime.now(),
     )
     save(state, str(STATE_FILE))
@@ -107,3 +110,12 @@ def save(state: HarnessState, path: str) -> None:
         json.dump(state.model_dump(mode="json"), tmp, indent=2, default=str)
         tmp_path = tmp.name
     os.replace(tmp_path, path)
+
+
+# Wrapper functions that use default path when none provided
+def load_state(path: str = None) -> HarnessState:
+    return load(path or str(STATE_FILE))
+
+
+def save_state(state: HarnessState, path: str = None) -> None:
+    save(state, path or str(STATE_FILE))

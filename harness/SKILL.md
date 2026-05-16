@@ -30,8 +30,8 @@ quick_ref:
 | `MEMORY_LIFECYCLE.md` | Memory file schemas |
 | `ATOMIC_CLOSE.md` | Atomic staging pattern for session close |
 | `ITERATIVE_LEARNING.md` | Self-learning capture-and-synthesize protocol |
-| `VAULT_SCHEMA.md` | Obsidian vault directory schema |
-| `OBSIDIAN_GITIGNORE` | Gitignore template for Obsidian vaults |
+| `MEMORY_LIFECYCLE.md` | Memory file schemas and lifecycle |
+| `COLD_START.md` | Cold start procedure for new projects |
 | `project-context/SKILL.md` | Generate project-context.md (persistent AI rules) |
 
 ## RUNTIME (Live Enforcement)
@@ -141,21 +141,6 @@ PRESENT TO USER
 **"close session"** or equivalent → MANDATORY.
 
 See `SESSION_CLOSE.md` for full procedure.
-
----
-
-## VAULT PATHS
-
-```
-VAULT_ROOT      = project root directory (where .obsidian/ lives)
-VAULT_MEMORY    = {VAULT_ROOT}/00_Memory/
-VAULT_SESSIONS  = {VAULT_ROOT}/01_Sessions/
-VAULT_MISTAKES  = {VAULT_ROOT}/02_Mistakes/
-VAULT_PATTERNS  = {VAULT_ROOT}/03_Patterns/
-VAULT_INDEX     = {VAULT_ROOT}/04_Index/
-VAULT_TEMPLATES = {VAULT_ROOT}/05_Templates/
-GLOBAL_VAULT    = $ANTIGRAVITY_GLOBAL_VAULT or C:\Users\jtoem\Obsidian\AntigravityV
-```
 
 ---
 

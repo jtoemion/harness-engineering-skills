@@ -1,6 +1,10 @@
 ---
 name: verification-before-completion
 description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+compliance_rules:
+  - "Verification commands are run and evidence is captured before claiming completion"
+  - "No completion claims are made without fresh verification evidence"
+  - "All test commands pass before claiming work is done"
 ---
 
 # Verification Before Completion

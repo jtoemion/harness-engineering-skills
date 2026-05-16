@@ -1,6 +1,10 @@
 ---
 name: requesting-code-review
 description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+compliance_rules:
+  - "Diff is clean (all changes documented and intentional)"
+  - "All tests pass before requesting review"
+  - "All relevant reviewers are tagged in the review request"
 ---
 
 # Requesting Code Review

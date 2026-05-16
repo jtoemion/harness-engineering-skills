@@ -2,6 +2,11 @@
 name: karpathy-guidelines
 description: Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.
 license: MIT
+compliance_rules:
+  - "Simplicity: prefer the simpler solution over the complex one"
+  - "Surgical changes: make minimal, targeted changes rather than broad rewrites"
+  - "Surface assumptions: declare assumptions before implementation"
+  - "Verifiable success criteria: define what 'done' looks like before starting"
 ---
 
 # Karpathy Guidelines

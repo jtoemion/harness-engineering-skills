@@ -47,10 +47,10 @@ STEP 8: MOVE staging to vault (atomic)
   mv 00_Memory/.session-close-staging/* → final locations
   Remove staging directory
 
-STEP 9: SYNC to global vault
-  a. Copy mistake notes → {GLOBAL_VAULT}/00_Global/Mistakes/
-  b. Copy pattern notes → {GLOBAL_VAULT}/00_Global/Patterns/
-  c. Append session entry → {GLOBAL_VAULT}/00_Global/Sessions/
+STEP 9: SYNC to global context
+  a. Copy mistake notes → `.global/mistakes/` (global cross-project store)
+  b. Copy pattern notes → `.global/patterns/` (global cross-project store)
+  c. Append session entry → `.global/sessions/` (global session history)
 
 STEP 10: UPDATE 04_Index/Dashboard.md (refresh links)
 
@@ -117,5 +117,5 @@ Agent  : [tool]
 Time   : [start] → [end]
 Files  : [N] modified
 Mistakes: [N] made | [N] avoided
-Stored : SESSIONS.md ✓ | progress.md ✓ | activeContext.md ✓ | Obsidian ✓ | Git ✓
+Stored : SESSIONS.md ✓ | progress.md ✓ | activeContext.md ✓ | .global/ ✓ | Git ✓
 ```

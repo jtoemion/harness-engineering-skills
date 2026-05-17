@@ -9,7 +9,21 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-WORKSPACE_ROOT = Path(__file__).parent.parent.parent
+_RUNTIME_DIR = Path(__file__).parent
+
+# WORKSPACE_ROOT: project root (contains .memory/ or .git/)
+# Default to cwd if run from project, else fall back to parent of skills/
+def _find_workspace_root() -> Path:
+    """Find the workspace root by looking for .memory/ or .git/ markers."""
+    candidates = [Path.cwd()]
+    if (_RUNTIME_DIR.parent.parent.parent / ".memory").exists():
+        candidates.append(_RUNTIME_DIR.parent.parent.parent)
+    for candidate in candidates:
+        if (candidate / ".memory").exists() or (candidate / ".git").exists():
+            return candidate
+    return candidates[0]
+
+WORKSPACE_ROOT = _find_workspace_root()
 
 from .state import HarnessState, load_state, save_state
 
@@ -279,5 +293,9 @@ def run_close(resume: bool = False) -> bool:
 
 if __name__ == "__main__":
     resume = "--resume" in sys.argv
-    success = run_close(resume=resume)
+    try:
+        success = run_close(resume=resume)
+    except Exception as e:
+        print(f"Session close error: {e}")
+        success = False
     sys.exit(0 if success else 1)

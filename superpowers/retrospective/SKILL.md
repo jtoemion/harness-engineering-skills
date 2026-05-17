@@ -1,28 +1,36 @@
 ---
 name: retrospective
-description: Post-pipeline learning extraction — runs after Complex/Ultrathink pipelines to capture what went wrong, what was unexpected, and what patterns emerged
+description: "Mandatory closing protocol that extracts pipeline lessons AND synthesizes ILL captures. Fires at every session close. Two-section output: Pipeline Lessons + Moment Captures."
+quick_ref:
+  trigger: "EVERY session close (mandatory) OR user asks for lessons learned"
+  sections: "Pipeline Lessons (always) + Moment Captures (if captures >= 1)"
+  outputs: ".memory/mistakes.json, .memory/patterns.json, .memory/ill/synthesis.md"
 ---
 
-# Retrospective
+# Retrospective & ILL Synthesis
 
 ## Overview
 
-The retrospective skill is a closing protocol that extracts lessons from completed pipelines. It runs after Complex and Ultrathink tier pipelines and writes findings to `.memory/systemPatterns.md` so future sessions inherit the learning.
+The retrospective skill is a **mandatory closing protocol** that combines two functions:
+
+1. **Pipeline Lessons**: Extract what went right/wrong across the whole session
+2. **Moment Captures**: Synthesize ILL (Iterative Learning Layer) captures into actionable patterns
 
 **Without this skill, the system makes the same mistakes in session 50 that it made in session 1.**
 
-**Announce at start:** "Running retrospective to capture lessons from this pipeline."
+**Announce at start:** "Running retrospective and ILL synthesis to capture lessons."
 
 ## When It Fires
 
-- **Always** after Complex or Ultrathink tier pipelines
-- **Optionally** after Moderate tier if something unexpected happened
-- **Never** after Simple tier (not enough signal to extract)
+- **MANDATORY** at every session close (not just Complex/Ultrathink)
+- **Optionally** when user asks for lessons learned
 - Runs **after** verification-before-completion, **before** dev-journey-log and memorybank Phase 2
 
-## The Process
+---
 
-### Step 1: Pipeline Review (2 minutes)
+## Section 1: Pipeline Lessons (ALWAYS runs)
+
+### Step 1: Pipeline Review
 
 Answer these questions about the pipeline that just completed:
 
@@ -30,7 +38,7 @@ Answer these questions about the pipeline that just completed:
 2. **What actually happened?** (stages completed, scope changes, actual effort)
 3. **Where did plan ≠ reality?** (list every deviation)
 
-### Step 2: Extract Lessons (3 minutes)
+### Step 2: Extract Lessons
 
 For each deviation, classify:
 
@@ -43,50 +51,86 @@ For each deviation, classify:
 | **Anti-pattern** | Did we do something we should never repeat? | "Edited shared config without checking consumers" |
 | **Blocker** | What blocked progress? | "Waited on user for 2 hours for DB credentials" |
 
-### Step 3: Write to systemPatterns.md
+### Step 3: Write to JSON Knowledge Graph
 
-Append findings to `.memory/systemPatterns.md` in this format:
-
-```markdown
-## [DATE] — [Pipeline Summary]
-
-**Tier:** [Complex/Ultrathink]
-**Stages planned:** [N] | **Stages actual:** [N]
-**Scope expansions:** [N]
-
-### Lessons
-- [ESTIMATION] [lesson]
-- [PATTERN] [lesson]
-- [ANTI-PATTERN] [lesson]
-
-### Rules Discovered
-- [New rule or constraint that should apply to future work]
-```
+- **Mistakes / Anti-patterns:** Append to `.memory/mistakes.json` (include error, cause, lesson, status="ACTIVE", category).
+- **Patterns / Reusable Rules:** Append to `.memory/patterns.json` (include pattern, applies_to, prevention).
 
 ### Step 4: Check for Recurring Issues
 
-Before finishing, scan previous entries in `systemPatterns.md`:
+Before finishing, scan previous entries in `mistakes.json`:
 
-- **Same lesson appearing 2+ times?** → Escalate: "This issue has occurred [N] times. Consider creating a new rule or skill to prevent it."
-- **Same file causing problems repeatedly?** → Flag: "[file] has been involved in [N] incidents. May need refactoring."
-- **Same estimation error repeating?** → Adjust: "Tasks involving [type] are consistently underestimated. Default to Large."
+- **Same lesson appearing 2+ times?** → Escalate
+- **Same file causing problems repeatedly?** → Flag
+- **Same estimation error repeating?** → Adjust defaults
 
-## Output Format
+---
+
+## Section 2: Moment Captures (if captures >= 1)
+
+This section replaces the standalone `ill-synthesis` skill. It only runs if ILL captures exist.
+
+### Check Prerequisites
 
 ```
-⚡ RETROSPECTIVE COMPLETE
+Read .memory/ill/captures.md and .memory/ill/wins.md
+Count entries. If 0 → skip this section, note in output.
+If >= 1 → run the synthesis phases below.
+```
+
+**Threshold: captures >= 1** (NOT 3 — the old threshold of 3 was too high and meant most sessions skipped synthesis entirely).
+
+### Synthesis Phases
+
+1. **Gather**: Read all capture files. Extract entries with timestamps, tags, severity, descriptions.
+2. **Group**: Group captures by ILL tag: [delegation], [prompt-quality], [scope-creep], [cache], [memory], [subagent], [protocol]
+3. **Quantify**: For each group: sum time (minutes) and tokens (estimated). Calculate occurrence count.
+4. **Generate**: Produce markdown synthesis with pattern → cost → fix structure per group.
+5. **Promote**: For each pattern: evaluate if 3+ sessions across 2+ projects. If yes → flag for human approval.
+6. **Archive**: Move processed captures to `.memory/ill/history/`. Retain wins permanently.
+
+### Synthesis Output
+
+Write to `.memory/ill/synthesis.md`:
+
+```markdown
+# ILL Synthesis — YYYY-MM-DD
+
+## Summary
+- **Total captures**: N
+- **Patterns identified**: N
+- **Time cost**: N min
+- **Promotion candidates**: N
+
+## Patterns
+
+### [PATTERN] Pattern Name
+**Occurrences**: N sessions across M projects
+**Root cause**: [derived from captures]
+**Fix**: [specific, actionable — agent can execute directly]
+```
+
+---
+
+## Combined Output Format
+
+```
+⚡ RETROSPECTIVE & ILL SYNTHESIS COMPLETE
   Pipeline    : [summary]
   Deviations  : [N] found
-  Lessons     : [N] captured
+  Lessons     : [N] captured (mistakes + patterns)
+  ILL Captures: [N] found, [N] patterns synthesized
   Recurring   : [N] patterns flagged
-  Written to  : .memory/systemPatterns.md
+  Written to  : .memory/mistakes.json, .memory/patterns.json, .memory/ill/synthesis.md
 ```
+
+---
 
 ## Integration
 
 - **Conductor** includes retrospective in canonical order for Complex/Ultrathink
 - **memorybank** Phase 2 runs after retrospective (retrospective feeds into memory)
-- **systemPatterns.md** is read by memorybank Phase 1 on boot, so lessons persist
+- **JSON Knowledge Graph** is enforced via `harness.py gate --phase pre-task` on the next boot
 
 ## Anti-Rationalization
 
@@ -95,4 +139,6 @@ Before finishing, scan previous entries in `systemPatterns.md`:
 | "The pipeline went smoothly, nothing to capture" | Smooth pipelines have patterns worth replicating. Capture what went right. |
 | "I'll remember this for next time" | You won't. You're stateless. Write it down. |
 | "This lesson is obvious" | If it's obvious, writing it takes 10 seconds. If it's not, you just proved why it needs writing. |
-| "systemPatterns.md is getting long" | Long = lots of lessons = system improving. Trim only if entries are truly obsolete. |
+| "JSON files are getting long" | Long = lots of lessons = system improving. Trim only if entries are truly obsolete. |
+| "Not enough captures to synthesize" | Even 1 capture has signal. The old threshold of 3 was too high. |
+| "ILL synthesis is separate from retrospective" | Merged. One close ritual, two sections. Less friction = more compliance. |

@@ -92,7 +92,13 @@ def save_all(entries: list[MistakeEntry]) -> None:
 
 
 def check_relevant(task_input: str) -> list[MistakeEntry]:
+    """Check both markdown MISTAKES.md and project JSON mistakes.json for relevant entries."""
     active = [e for e in load_all() if e.status == "ACTIVE"]
+    
+    # Also check JSON knowledge graph
+    json_active = _load_json_mistakes()
+    active.extend(json_active)
+    
     if not active:
         return []
     words = set(task_input.lower().split())
@@ -107,6 +113,36 @@ def check_relevant(task_input: str) -> list[MistakeEntry]:
     for score, entry in sorted(scored, key=lambda x: -x[0]):
         print(f"[{entry.date}] {entry.category}: {entry.lesson}")
     return [e for _, e in scored]
+
+
+def _load_json_mistakes() -> list[MistakeEntry]:
+    """Load mistakes from project JSON knowledge graph."""
+    try:
+        # Find workspace root (project with .memory/)
+        current = Path(__file__).parent.parent.parent
+        while current.parent != current:
+            if (current / ".memory").exists():
+                break
+            current = current.parent
+        json_file = current / ".memory" / "mistakes.json"
+        if not json_file.exists():
+            return []
+        import json as _json
+        data = _json.loads(json_file.read_text(encoding="utf-8"))
+        entries = []
+        for m in data.get("mistakes", []):
+            entries.append(MistakeEntry(
+                date=m.get("created", "unknown"),
+                category=m.get("category", "general"),
+                error=m.get("error", ""),
+                cause=m.get("cause", ""),
+                lesson=m.get("lesson", ""),
+                references=m.get("references", []),
+                status=m.get("status", "ACTIVE"),
+            ))
+        return [e for e in entries if e.status == "ACTIVE"]
+    except Exception:
+        return []
 
 
 def log_mistake(entry: MistakeEntry) -> None:

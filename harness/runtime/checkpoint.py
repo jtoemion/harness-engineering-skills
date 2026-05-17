@@ -6,7 +6,19 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-WORKSPACE_ROOT = Path(__file__).parent.parent.parent
+_RUNTIME_DIR = Path(__file__).parent
+
+def _find_workspace_root() -> Path:
+    """Find the workspace root by looking for .memory/ or .git/ markers."""
+    candidates = [Path.cwd()]
+    if (_RUNTIME_DIR.parent.parent.parent / ".memory").exists():
+        candidates.append(_RUNTIME_DIR.parent.parent.parent)
+    for candidate in candidates:
+        if (candidate / ".memory").exists() or (candidate / ".git").exists():
+            return candidate
+    return candidates[0]
+
+WORKSPACE_ROOT = _find_workspace_root()
 
 from .state import HarnessState, load_state, save_state
 

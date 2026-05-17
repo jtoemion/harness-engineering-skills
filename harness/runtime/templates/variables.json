@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "updated": "2026-05-17",
+  "variables": [
+    {
+      "id": "var-currentUser",
+      "variable": "currentUser",
+      "type": "state",
+      "location": "src/contexts/AuthContext.tsx",
+      "behavior": "Set on login, cleared on logout, persisted to localStorage",
+      "depends_on": ["authToken", "userProfile"],
+      "affects": ["userRole", "permissions", "dashboardData", "navigation"],
+      "weight": "high",
+      "session": "2026-05-17"
+    },
+    {
+      "id": "var-authToken",
+      "variable": "authToken",
+      "type": "state",
+      "location": "src/contexts/AuthContext.tsx",
+      "behavior": "Set on login, cleared on logout. For PIN login, uses anonymous Firebase UID resolved via getRealUserId()",
+      "depends_on": ["currentUser"],
+      "affects": ["API calls", "Firestore writes", "session creation"],
+      "weight": "high",
+      "session": "2026-05-17"
+    },
+    {
+      "id": "var-leagueData",
+      "variable": "leagueData",
+      "type": "derived",
+      "location": "src/hooks/useLeague.ts",
+      "behavior": "Computed from studentsByLeague + promotions + relegations",
+      "depends_on": ["students", "computePromotionsAndRelegations()"],
+      "affects": ["Leaderboard", "LeagueCard", "resetJob"],
+      "weight": "high",
+      "session": "2026-05-17"
+    },
+    {
+      "id": "var-STUDENT_PACKAGES",
+      "variable": "STUDENT_PACKAGES",
+      "type": "const",
+      "location": "src/constants/packages.ts",
+      "behavior": "Static configuration mapping package tiers to features",
+      "depends_on": [],
+      "affects": ["package selection", "feature gating", "pricing display"],
+      "weight": "medium",
+      "session": "2026-05-17"
+    }
+  ]
+}

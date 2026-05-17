@@ -1,89 +1,77 @@
-# Vault Schema
+# Vault Schema — DEPRECATED
+
+> **⚠️ DEPRECATED:** This document describes the Obsidian vault approach. The system now uses a **file-based JSON knowledge graph** stored in `.memory/`. This file is kept for historical reference only.
+>
+> **Active system:** See `.memory/mistakes.json`, `.memory/patterns.json`, `.memory/variables.json`, `.memory/knowledge.json`
+> **ID Format:** Still used by session-graph redirects (now absorbed into memorybank Phase 4)
+
+---
 
 ## Project Codes
 
-| Project | Code | Vault Path |
-|---------|------|------------|
-| forgeWhisper | FW | C:\Users\jtoem\Repo\forgeWhisper\ |
-| LP-bmw | BMW | C:\Users\jtoem\Repo\LP-bmw\ |
-| LPPastpapr | PP | C:\Users\jtoem\Repo\LPPastpapr\ |
-| student-portal | SP | C:\Users\jtoem\Repo\pastpapr\student-portal\ |
-| question-extractor | QE | C:\Users\jtoem\Repo\question-extractor\ |
-| n8n-ytdlp-setup | N8 | C:\Users\jtoem\Repo\n8n-ytdlp-setup\ |
+| Project | Code | Project Root |
+|---------|------|-------------|
+| forgeWhisper | FW | `C:\Users\jtoem\Repo\forgeWhisper\` |
+| LP-bmw | BMW | `C:\Users\jtoem\Repo\LP-bmw\` |
+| LPPastpapr | PP | `C:\Users\jtoem\Repo\LPPastpapr\` |
+| student-portal | SP | `C:\Users\jtoem\Repo\pastpapr\student-portal\` |
+| question-extractor | QE | `C:\Users\jtoem\Repo\question-extractor\` |
+| n8n-ytdlp-setup | N8 | `C:\Users\jtoem\Repo\n8n-ytdlp-setup\` |
 
-## ID Format
+## ID Format (Still Used)
 
 - Mistakes: `{CODE}-M###` (e.g. BMW-M001, FW-M003)
 - Patterns: `{CODE}-P###` (e.g. BMW-P001)
 - Decisions: `{CODE}-D###` (e.g. BMW-D012)
-- Sessions: `YYYY-MM-DD-slug` (no project code needed, sessions are project-scoped by folder)
+- Sessions: `YYYY-MM-DD-slug` (no project code needed, sessions are project-scoped)
 
-## Global Vault
+## JSON Knowledge Graph (Active System)
 
-- Path: Defined by `ANTIGRAVITY_GLOBAL_VAULT` env variable
-- Default: `C:\Users\jtoem\Obsidian\AntigravityV\`
-- Global notes use unscoped IDs with `project:` prefix in frontmatter
-
-## Vault Structure (Per Project)
+The active system uses flat JSON files in `.memory/`:
 
 ```
-{PROJECT_ROOT}/
-├── 00_Memory/          # Replaces .memory/ — core 5 files + SESSIONS.md
-├── 01_Sessions/        # Individual session notes
-├── 02_Mistakes/        # Individual mistake notes ({CODE}-M###-slug.md)
-├── 03_Patterns/        # Individual pattern notes ({CODE}-P###-slug.md)
-├── 04_Index/           # Dashboard.md + MOCs
-├── 05_Templates/       # Note templates (T-*.md)
-└── .obsidian/          # Obsidian config (committed, gitignore workspace.json + cache/)
+.memory/
+├── mistakes.json      # Active mistakes with error/cause/lesson/status/category
+├── patterns.json      # Reusable patterns with pattern/applies_to/prevention
+├── variables.json     # Variable-level insights with type/behavior/depends_on/affects
+├── knowledge.json     # Main index with version and summary counts
+├── sessions.json      # Session history (JSONL format)
+└── decisions.json     # Architectural decisions
 ```
 
-## Global Vault Structure
+## Environment Variables (Obsolete)
 
+| Variable | Status | Notes |
+|----------|--------|-------|
+| `ANTIGRAVITY_GLOBAL_VAULT` | ❌ Removed | No global vault — project-local `.memory/` only |
+| `OBSIDIAN_REST_KEY` | ❌ Removed | No Obsidian MCP dependency |
+
+## Frontmatter Schema (Obsolete)
+
+The Obsidian frontmatter schema is deprecated. JSON knowledge files use flat JSON schema:
+
+```json
+{
+  "id": "BMW-M001",
+  "error": "...",
+  "cause": "...",
+  "lesson": "...",
+  "status": "ACTIVE",
+  "category": "backend"
+}
 ```
-{ANTIGRAVITY_GLOBAL_VAULT}/
-├── 00_Global/
-│   ├── Mistakes/       # Cross-project mistake notes
-│   ├── Patterns/       # Cross-project pattern notes
-│   └── Decisions/      # Cross-project decision notes
-├── 01_Templates/       # Shared templates
-├── 02_Index/
-│   ├── Projects.md     # Links to all project vaults
-│   ├── Mistakes.md     # Dataview: all ACTIVE mistakes
-│   └── Patterns.md     # Dataview: all patterns by frequency
-└── 03_Daily/           # Daily notes (cross-project view)
-```
-
-## Environment Variables
-
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `ANTIGRAVITY_GLOBAL_VAULT` | Path to global vault | `C:\Users\jtoem\Obsidian\AntigravityV\` |
-| `OBSIDIAN_REST_KEY` | Local REST API key | (gitignored, never hardcoded) |
-
-## Frontmatter Schema
-
-Every note has YAML frontmatter with a `type` field:
-
-| Type | Folder | Required Fields |
-|------|--------|----------------|
-| projectbrief | 00_Memory/ | type, project, project_code, status, created, updated, stack, priority |
-| activeContext | 00_Memory/ | type, project, task, blockers, last_agent, updated |
-| progress | 00_Memory/ | type, project, updated, total, completed |
-| techContext | 00_Memory/ | type, project, frontend, backend, database, infra, key_decisions |
-| systemPatterns | 00_Memory/ | type, project, architectural_style, conventions, known_gotchas, updated |
-| sessions-index | 00_Memory/ | type, project, total, last |
-| session | 01_Sessions/ | type, project, date, duration, outcome, task, mistakes, decisions, patterns |
-| mistake | 02_Mistakes/ | type, id, project, category, status, created, resolved, lessons, related |
-| pattern | 03_Patterns/ | type, id, project, category, applies_to, created |
-| decision | 03_Patterns/ | type, id, project, domain, status, created, context |
-| dashboard | 04_Index/ | type, project, updated |
 
 ## Tombstone Pattern
 
-Resolved mistakes remain in `02_Mistakes/` with `status: RESOLVED` and `resolved: YYYY-MM-DD`.
-`vault_query` defaults to filtering out resolved mistakes (`status != RESOLVED`).
-This preserves historical context without cluttering active queries.
+Resolved mistakes remain in `mistakes.json` with `status: RESOLVED`. Query filters by default to `status != RESOLVED`.
 
-## Atomic Close
+## See Also
 
-See `harness/ATOMIC_CLOSE.md` for the write-to-temp-then-move pattern.
+- `harness/NEWSPAPER_LOGIC.md` — Document format standard
+- `harness/SYSTEMPATTERNS_TEMPLATE.md` — Template for retrospective entries
+- `harness/QUICK_MODE_BUFFER.md` — Quick mode learning buffer mechanism
+- `runtime/templates/` — JSON schema templates
+
+---
+
+*This file was kept to preserve the ID format naming convention. All Obsidian-specific content is deprecated.*

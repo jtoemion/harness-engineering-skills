@@ -88,6 +88,35 @@ project-root/
 
 ---
 
+## Newspaper Logic (MANDATORY for all output)
+
+All output files MUST follow the Newspaper Logic format from `harness/NEWSPAPER_LOGIC.md`:
+
+- **At scan time**: Read `.memory/insights.md` and `.memory/variables.json` to enrich context
+- **At output time**: Enforce headline-first structure in every section
+- **Maximum 3 key facts** per collapsed section
+- **Cross-reference** instead of duplicate — use `See [Section Name]` links
+- **No preamble** — start with the headline, not "In this section..."
+
+Example output section:
+```
+## HEADLINE: Authentication uses anonymous proxy with UID resolution
+
+> SUMMARY: PIN login creates anonymous Firebase sessions; getRealUserId() resolves to real UID in security rules.
+
+<details>
+<summary>Details</summary>
+
+- Anonymous auth: `authService.ts:88-107`
+- UID resolution: `firestore.rules` uses `getRealUserId()`
+- Gotcha: All writes must pass `actualUserId || uid` — NOT bare `uid`
+- Cross-reference: See [Security Rules section]
+
+</details>
+```
+
+---
+
 ## Scan Levels
 
 | Level | Scope | Use when |

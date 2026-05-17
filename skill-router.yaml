@@ -54,12 +54,6 @@ routing:
     weight: 80
     note: "Scrape football news from web sources"
 
-  - id: "project-context"
-    condition: "user says 'project context' or 'generate context' or '.context' or 'AI rules for this project'"
-    skill_path: "harness/project-context/SKILL.md"
-    mode_required: "any"
-    weight: 80
-
   - id: "workflow-builder"
     condition: "user says 'build a workflow' or 'create a skill' or 'convert a skill' or 'quality check workflow' or 'analyze skill'"
     skill_path: "harness/workflow-builder/SKILL.md"
@@ -97,6 +91,13 @@ routing:
     mode_required: "any"
     weight: 60
 
+  - id: "subagent-driven-development"
+    condition: "multiple tasks requiring independent implementation with spec and code review stages"
+    skill_path: "superpowers/subagent-driven-development/SKILL.md"
+    mode_required: "any"
+    weight: 58
+    note: "Fresh subagent per task + two-stage review (spec then quality)"
+
   - id: "verification-before-completion"
     condition: "about to claim work is complete, fixed, or passing — before committing or creating PRs"
     skill_path: "superpowers/verification-before-completion/SKILL.md"
@@ -116,7 +117,7 @@ routing:
     weight: 45
 
   - id: "brainstorming"
-    condition: "creative work — creating features, building components, adding functionality, or modifying behavior"
+    condition: "exploring requirements or approaches for an unspecced feature before any design exists — NOT for features with clear requirements"
     skill_path: "superpowers/brainstorming/SKILL.md"
     mode_required: "any"
     weight: 40
@@ -131,7 +132,7 @@ routing:
     condition: "design the workflow and drive it through to completion or orchestrate multi-layer feature or build complete feature spanning API database frontend"
     skill_path: "superpowers/conductor/SKILL.md"
     mode_required: "any"
-    weight: 33
+    weight: 41
     note: "Orchestrates multi-skill workflows — uses intent matrix to build skill sequences"
 
   - id: "browser-agent"
@@ -189,11 +190,19 @@ routing:
     weight: 5
 
   - id: "ill-synthesis"
-    condition: "synthesize command, OR session close with 3+ captures"
-    skill_path: "superpowers/ill-synthesis/SKILL.md"
+    condition: "user says 'synthesize' explicitly (standalone trigger)"
+    skill_path: "superpowers/retrospective/SKILL.md"
     mode_required: "full"
     weight: 85
-    note: "Transforms raw ILL captures into structured pattern analysis"
+    note: "Now part of retrospective skill. ILL synthesis runs at every close when captures >= 1."
+
+  - id: "retrospective"
+    condition: "session close, OR agent drift detected, OR user asks for lessons learned, OR user says 'synthesize'"
+    skill_path: "superpowers/retrospective/SKILL.md"
+    mode_required: "full"
+    weight: 90
+    note: "MANDATORY at every session close. Includes ILL synthesis (Section 2) when captures >= 1."
+
 
 # DISAMBIGUATION — handle commonly confused skills
 disambiguation:
@@ -205,13 +214,6 @@ disambiguation:
       test-review = "Are my EXISTING tests good quality?" (review/audit)
       test-driven-development = "Am I WRITING new code? Write tests first!" (process)
       e2e-scaffold = "Do I need E2E test INFRASTRUCTURE setup?" (scaffolding)
-
-  - confused:
-      - document-project
-      - project-context
-    rule: |
-      document-project = Full documentation generator (3 scan modes, produces architecture docs, dev guides, etc.)
-      project-context = Lightweight persistent rules file (~100 lines, gotchas + patterns for AI)
 
   - confused:
       - workflow-builder
@@ -243,6 +245,34 @@ disambiguation:
       writing-plans = Have requirements, need a plan BEFORE coding
       executing-plans = Have a written plan, need to IMPLEMENT it
 
+  - confused:
+      - brainstorming
+      - writing-plans
+    rule: |
+      brainstorming = Exploring ideas and approaches for a feature WITHOUT clear requirements
+      writing-plans = Have clear requirements/spec, need a step-by-step implementation plan BEFORE coding
+
+  - confused:
+      - brainstorming
+      - architectural-impact
+    rule: |
+      brainstorming = Explore requirements, approaches, UX — PRE-design phase (vague idea)
+      architectural-impact = Analyze ripple effects of CHANGES — POST-design (know what to build)
+
+  - confused:
+      - verification-before-completion
+      - systematic-debugging
+    rule: |
+      verification-before-completion = Claiming work is DONE — verify before deployment
+      systematic-debugging = Something is BROKEN — find root cause
+
+  - confused:
+      - frontend-avant-garde
+      - architectural-impact
+    rule: |
+      frontend-avant-garde = UI/UX only — styling, components, layout, animations
+      architectural-impact = UI + data/API/backend layers — cross-layer changes
+
 # MODE GUARDS — skills that require specific modes
 mode_guards:
   - skill_id: "session-close"
@@ -261,3 +291,292 @@ routing_rules:
   - rule: "If no routing condition matches, proceed without loading any skill. Do NOT guess."
   - rule: "karpathy-guidelines loads on boot in both modes. Do not load it again via routing."
   - rule: "dev-journey-log and scope-guard fire AUTOMATICALLY on their trigger conditions. No user request needed."
+
+# MANDATORY SESSION LIFECYCLE — EVERY SESSION (FULL MODE)
+lifecycle_rules:
+  ## BOOT PHASE — ALWAYS RUN (QUICK & FULL)
+  - phase: "boot"
+    action: "INITIALIZE quick-temp-log"
+    mode: "quick"
+    location: "TEMP_PATH/quick-temp-log.md"
+    format: |
+      # Quick Session Log — [TIMESTAMP]
+      ## Tasks
+      -
+      ## Decisions
+      -
+      ## Findings
+      -
+    mandatory: true
+    note: "Lightweight log for QUICK mode. Deleted on close. No persistence."
+
+  - phase: "boot"
+    action: "LOAD .memory/ files"
+    mode: "full"
+    files:
+      - "projectbrief.md" # Project identity
+      - "progress.md" # Current state
+      - "activeContext.md" # What was being worked on
+      - "systemPatterns.md" # DEPRECATED: Lessons now go to mistakes.json/patterns.json
+      - "mistakes.json" # Active mistakes (JSON knowledge graph)
+      - "patterns.json" # Active patterns (JSON knowledge graph)
+      - "MISTAKES.md" # Active mistakes to avoid
+      - "SESSIONS.md" # Recent session history
+    notification: "IF any file shows UNRESOLVED status → ANNOUNCE to user immediately: 'Attention: [N] unresolved issues from previous session'"
+    mandatory: true
+
+  - phase: "boot"
+    action: "RETROSPECTIVE READ"
+    skill: "retrospective"
+    mode: "read" # Read mistakes.json + patterns.json, announce active lessons
+    mandatory: true
+    output: "Announce: 'From previous sessions: [N] mistakes, [N] patterns active. Key lessons: [list top 3 from mistakes.json]'"
+
+  - phase: "boot"
+    action: "CHECK for stale .memory/"
+    rule: "If any .memory/ file not updated in current session → flag as STALE → notify user"
+    mandatory: true
+
+  ## WORK PHASE — DRIFT DETECTION
+  - phase: "work"
+    action: "DRIFT DETECTION"
+    trigger: "BEFORE any implementation decision"
+    check:
+      - "Does this contradict a rule in mistakes.json or patterns.json?"
+      - "Does this repeat a known mistake from mistakes.json?"
+      - "Am I about to violate a known constraint?"
+    response: "IF drift detected → PAUSE → read relevant mistakes.json entry → acknowledge in response → proceed with awareness"
+    mandatory: true
+
+  - phase: "work"
+    action: "MISTAKE CATCHING"
+    trigger: "ANY verification failure, test failure, build error, or unexpected behavior"
+    response: "Automatically log to .memory/mistakes.json with: error, cause, lesson, status: ACTIVE, category"
+    mandatory: true
+
+  ## CLOSE PHASE — MANDATORY SEQUENCE
+  - phase: "close"
+    action: "VERIFICATION"
+    skill: "verification-before-completion"
+    mandatory: true
+
+  - phase: "close"
+    action: "RETROSPECTIVE WRITE"
+    skill: "retrospective"
+    mode: "write" # Write to mistakes.json + patterns.json
+    trigger: "EVERY session close (not just Complex/Ultrathink)"
+    mandatory: true
+    output: "Write to mistakes.json + patterns.json → Announce: 'Retrospective complete. [N] lessons captured.'"
+
+  - phase: "close"
+    action: "ILL SYNTHESIS (Section 2 of retrospective)"
+    skill: "retrospective"
+    trigger: "EVERY session close (if captures >= 1)"
+    mandatory: true
+    output: "Generate synthesis.md → Flag any patterns for promotion"
+
+  - phase: "close"
+    action: "SESSION GRAPH (Phase 4 of memorybank)"
+    skill: "memorybank"
+    mandatory: true # Full mode only
+
+  - phase: "close"
+    action: "MEMORY UPDATE"
+    skill: "memorybank"
+    phase: "Phase 2 checkpoint"
+    mandatory: true
+
+  ## QUICK MODE CLOSE (MINIMAL)
+  - phase: "close"
+    mode: "quick"
+    action: "APPEND quick-temp-log to session summary"
+    output: "Display to user: What was done, decisions made, any findings"
+    mandatory: true
+
+  - phase: "close"
+    mode: "quick"
+    action: "DELETE quick-temp-log"
+    location: "TEMP_PATH/quick-temp-log.md"
+    behavior: "DO NOT persist. Delete from temp directory."
+    mandatory: true
+    note: "Quick mode has no memory persistence. Temp log is for session visibility only."
+
+# KNOWLEDGEBASE FRESHNESS RULES
+knowledgebase_rules:
+  - rule: ".memory/ is the source of truth. Agent MUST depend on it."
+  - rule: "At boot: LOAD all .memory/ files → DECLARE what was learned → Surface unresolved"
+  - rule: "During work: If uncertain, check .memory/ before proceeding"
+  - rule: "At close: UPDATE all modified .memory/ files → Mark status → Notify user of unresolved"
+  - rule: "IF .memory/ says ACTIVE issue exists → Agent must reference it → Cannot proceed without acknowledging"
+  - rule: "Stale data detection: If file timestamp > 24 hours AND has ACTIVE items → Notify user"
+
+# INSIGHTS & DEPENDENCY TRACKING
+insights_rules:
+  - trigger: "ANY file read that reveals dependency, pattern, or key structure"
+    action: "LOG to .memory/insights.md"
+    format: |
+      ## [TIMESTAMP] — [Type]
+      **Discovery**: [What was found]
+      **Location**: [file:line or module]
+      **Impact**: [What depends on this / what this affects]
+      **Linked**: [[other relevant files or insights]]
+    types:
+      - "dependency" # File A imports/depends on File B
+      - "pattern" # Reusable pattern discovered
+      - "architecture" # Structural insight about the system
+      - "gotcha" # Unexpected behavior, caveat
+      - "config" # Key configuration or environment variable
+      - "variable" # Variable-level insight (see variable_rules below)
+
+  - trigger: "document-project skill runs"
+    action: "CONSUME .memory/insights.md as input"
+    output: "Use insights to enrich documentation — show what was discovered, not just static structure"
+
+  - rule: "insights.md accumulates across sessions → document-project reads at scan time"
+  - rule: "Each insight should have: discovery, location, impact, linked files"
+
+# VARIABLE-LEVEL DEPENDENCY TRACKING
+variable_rules:
+  - trigger: "ANY code read that shows variable/function/component relationship"
+    action: "LOG to .memory/insights.md with type: variable"
+    format: |
+      ## [TIMESTAMP] — variable
+      **Variable**: [name]
+      **Type**: [state / prop / const / function / class]
+      **Location**: [file:line]
+      **Behavior**: [how it changes / what triggers it]
+      **Depends On**: [what variables/functions/config it needs]
+      **Affects**: [what variables/components it changes]
+      **Weight**: [high/medium/low] — how central to system
+      **Session**: [when discovered]
+
+  - weight_definitions:
+      high: "Used in 3+ places, or controls core flow, or changes propagate widely"
+      medium: "Used in 2 places, or local but important"
+      low: "Single use, local scope, unlikely to affect other code"
+
+  - behavior_tracking:
+      - '"How does this variable change?" (event-driven, computed, derived)'
+      - '"What triggers its change?" (user action, API response, computed)'
+      - '"What breaks when this breaks?" (propagation)'
+      - '"What must be set before this can work?" (dependencies)'
+
+  - cross_session_persistence:
+      - "Variable insights persist across sessions — no re-learning"
+      - "At boot: LOAD insights.md — agent knows variable landscape"
+      - "When encountering variable: CHECK insights.md first — use known behavior"
+
+  - example: |
+      ## 2026-05-17T10:30:00Z — variable
+      **Variable**: currentUser
+      **Type**: state
+      **Location**: src/contexts/AuthContext.tsx:45
+      **Behavior**: Set on login, cleared on logout, persisted to localStorage
+      **Depends On**: [authToken, userProfile]
+      **Affects**: [userRole, permissions, dashboardData, navigation]
+      **Weight**: high
+      **Session**: 2026-05-17
+
+      ## 2026-05-17T11:00:00Z — variable
+      **Variable**: leagueData
+      **Type**: derived
+      **Location**: src/hooks/useLeague.ts:78
+      **Behavior**: Computed from studentsByLeague + promotions + relegations
+      **Depends On**: [students, computePromotionsAndRelegations()]
+      **Affects**: [Leaderboard, LeagueCard, resetJob]
+      **Weight**: high
+
+# KNOWLEDGE-GRAPH ALTERNATIVE (No Obsidian)
+knowledgebase_alternative:
+  name: "File-Based Knowledge Graph"
+  reason: "Obsidian MCP unreliable — use simple files instead"
+  storage: ".memory/"
+
+  ## Structure (No Obsidian Required)
+  files:
+    - "knowledge.json" # Main index — structured, queryable
+    - "mistakes.json" # Mistakes log — JSON for easy lookup
+    - "patterns.json" # Patterns log
+    - "decisions.json" # Decisions log
+    - "variables.json" # Variable insights
+    - "sessions.json" # Session history
+
+  ## Missing File Behavior
+  missing_file_behavior:
+    knowledge.json: "WARN: No knowledge graph. Creating empty skeleton."
+    mistakes.json: "WARN: No mistakes file. Creating empty skeleton."
+    variables.json: "WARN: No variables file. Creating empty skeleton."
+
+  ## knowledge.json Schema
+  schema: |
+    {
+      "version": "1.0",
+      "updated": "ISO-TIMESTAMP",
+      "mistakes": [
+        {
+          "id": "BMW-M001",
+          "error": "...",
+          "cause": "...",
+          "lesson": "...",
+          "status": "ACTIVE",
+          "category": "backend"
+        }
+      ],
+      "patterns": [
+        {
+          "id": "BMW-P001",
+          "pattern": "...",
+          "applies_to": ["React", "TypeScript"],
+          "prevention": "..."
+        }
+      ],
+      "insights": [
+        {
+          "id": "var-currentUser",
+          "variable": "currentUser",
+          "type": "state",
+          "weight": "high",
+          "depends_on": ["authToken"],
+          "affects": ["dashboard", "navigation"]
+        }
+      ]
+    }
+
+  ## Operations (No MCP Required)
+  operations:
+    - '"query_mistakes(category)" - Filter mistakes.json by category'
+    - '"query_patterns(stack)" - Filter patterns.json by applies_to'
+    - '"query_insights(variable)" - Find variable in variables.json'
+    - '"add_mistake(entry)" - Append to mistakes.json'
+    - '"add_pattern(entry)" - Append to patterns.json'
+    - '"add_variable(entry)" - Append to variables.json'
+
+  ## Boot Behavior
+  boot:
+    - "READ knowledge.json - Load into context"
+    - "QUERY mistakes:status=ACTIVE - surface at boot"
+    - "QUERY patterns - surface relevant to project stack"
+
+  ## Advantages Over Obsidian
+  advantages:
+    - key: "No MCP dependency — plain file I/O"
+    - key: "JSON = easy to query, filter, validate"
+    - key: "Markdown still works for human readability"
+    - key: "versioned — can add migration later"
+
+  ## Future Migration Path
+  migration:
+    - key: "Keep schema stable"
+    - key: "If Obsidian MCP becomes reliable - add layer on top"
+    - key: "Current: file-only is DEFAULT"
+
+# DRIFT DETECTION RULES
+drift_rules:
+  - trigger: "Agent makes decision that contradicts a rule in mistakes.json or patterns.json"
+    response: "Alert: 'This contradicts a known pattern from mistakes.json/patterns.json. Acknowledge before proceeding.'"
+  - trigger: "Agent repeats a known mistake"
+    response: "Alert: 'This matches mistake [ID] from mistakes.json. Reference the lesson.'"
+  - trigger: "Agent suggests solution already tried and failed"
+    response: "Alert: 'This approach was tried in a previous session and failed. Check mistakes.json for the failed attempt.'"
+  - trigger: "Agent is confused (asks same question twice, contradicts itself)"
+    response: "Trigger: Offer to run mini-retrospective: 'You seem to be drifting. Want me to review mistakes.json?'"

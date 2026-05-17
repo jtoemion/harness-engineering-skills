@@ -8,7 +8,23 @@ SessionState = Literal["BOOTING", "ACTIVE", "CHECKPOINTING", "CLOSING", "CLOSED"
 Mode = Literal["quick", "full"]
 GateDecision = Literal["PASS", "WARN", "BLOCK"]
 
-WORKSPACE_ROOT = Path(__file__).parent.parent.parent.parent
+# WORKSPACE_ROOT is computed lazily to handle different project directories
+# Use a function to allow runtime override
+def _get_worktree_root() -> Path:
+    """Get workspace root by walking up from state.py location."""
+    return Path(__file__).parent.parent.parent
+
+_WORKSPACE_ROOT = _get_worktree_root()
+
+def _find_workspace_root() -> Path:
+    """Find the workspace root by looking for .memory/ or .git/ markers."""
+    candidates = [Path.cwd(), _WORKSPACE_ROOT]
+    for candidate in candidates:
+        if (candidate / ".memory").exists() or (candidate / ".git").exists():
+            return candidate
+    return candidates[0]
+
+WORKSPACE_ROOT = _find_workspace_root()
 STATE_FILE = WORKSPACE_ROOT / ".harness-state.json"
 
 VALID_TRANSITIONS: dict[SessionState, list[SessionState]] = {
@@ -38,6 +54,7 @@ class HarnessState(pydantic.BaseModel):
     close_step: int | None = None
     ill_captures_since_synthesis: int = 0
     boot_count: int = 0
+    boot_receipt: dict | None = None
     _pending_route: str | None = None
     _llm_verdict: dict | None = None
 

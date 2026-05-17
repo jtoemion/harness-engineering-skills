@@ -41,8 +41,8 @@ state_mod = _import_module("runtime.state", _RUNTIME_DIR / "state.py")
 HarnessState = state_mod.HarnessState
 state_load = state_mod.load
 state_save = state_mod.save
-load_state = state_load
-save_state = state_save
+load_state = state_mod.load_state  # Use wrapper that has default path
+save_state = state_mod.save_state  # Use wrapper that has default path
 detect_mode = state_mod.detect_mode
 init_state = state_mod.init_state
 read_state_dict = state_mod.read_state
@@ -101,7 +101,8 @@ def _run_script(script_name: str, *args) -> int:
     # Run as module via -m so relative imports (.state) work within the runtime package
     script_module = f"runtime.{script_path.stem}"
     cmd = [sys.executable, "-m", script_module] + list(args)
-    result = subprocess.run(cmd, cwd=str(_RUNTIME_DIR), env=env)
+    # Use WORKSPACE_ROOT as cwd so Path.cwd() returns the project dir
+    result = subprocess.run(cmd, cwd=str(WORKSPACE_ROOT), env=env)
     return result.returncode
 
 
@@ -140,11 +141,96 @@ def _print_boot_status_report(mode: str, state: HarnessState) -> None:
     print(f"  Time    : {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}")
     print(f"  Mode    : {mode.upper()}")
     print(f"  Memory  : {memory_status}")
+    if mode == "full" and state.boot_receipt:
+        print(f"  Boot Receipt : {state.boot_receipt.get('mistakes_loaded', 0)} mistakes, {state.boot_receipt.get('patterns_loaded', 0)} patterns, {state.boot_receipt.get('variables_loaded', 0)} variables")
     print(f"  Harness : LOADED +")
     print(f"  Project : {state.session_id}")
     print(f"  Task    : N/A")
     print(f"  Next    : N/A")
     print()
+
+
+def _generate_boot_receipt() -> dict:
+    """Generate boot receipt with counts of loaded knowledge files."""
+    receipt = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "mistakes_loaded": 0,
+        "patterns_loaded": 0,
+        "variables_loaded": 0,
+        "files_read": []
+    }
+    
+    mem_dir = WORKSPACE_ROOT / ".memory"
+    
+    mistakes_file = mem_dir / "mistakes.json"
+    if mistakes_file.exists():
+        try:
+            data = json.loads(mistakes_file.read_text(encoding="utf-8"))
+            receipt["mistakes_loaded"] = len(data.get("mistakes", []))
+            receipt["files_read"].append("mistakes.json")
+        except Exception:
+            pass
+    
+    patterns_file = mem_dir / "patterns.json"
+    if patterns_file.exists():
+        try:
+            data = json.loads(patterns_file.read_text(encoding="utf-8"))
+            receipt["patterns_loaded"] = len(data.get("patterns", []))
+            receipt["files_read"].append("patterns.json")
+        except Exception:
+            pass
+    
+    variables_file = mem_dir / "variables.json"
+    if variables_file.exists():
+        try:
+            data = json.loads(variables_file.read_text(encoding="utf-8"))
+            receipt["variables_loaded"] = len(data.get("variables", []))
+            receipt["files_read"].append("variables.json")
+        except Exception:
+            pass
+    
+    system_patterns = mem_dir / "systemPatterns.md"
+    if system_patterns.exists():
+        receipt["files_read"].append("systemPatterns.md")
+    
+    return receipt
+
+
+def _flush_quick_buffer() -> None:
+    """Flush Quick mode buffer into sessions.json at Full mode boot."""
+    home = Path.home()
+    buffer_file = home / ".memory" / "quick-buffer.jsonl"
+    if not buffer_file.exists():
+        return
+    
+    try:
+        lines = buffer_file.read_text(encoding="utf-8").strip().split("\n")
+        entries = []
+        for line in lines:
+            line = line.strip()
+            if line:
+                try:
+                    entries.append(json.loads(line))
+                except Exception:
+                    pass
+        
+        if entries:
+            sessions_file = WORKSPACE_ROOT / ".memory" / "sessions.json"
+            if sessions_file.exists():
+                try:
+                    data = json.loads(sessions_file.read_text(encoding="utf-8"))
+                    existing = data.get("sessions", [])
+                    existing.extend(entries)
+                    data["sessions"] = existing
+                    data["updated"] = datetime.now(timezone.utc).isoformat()
+                    sessions_file.write_text(json.dumps(data, indent=2, default=str), encoding="utf-8")
+                except Exception:
+                    pass
+            print(f"  Flushed {len(entries)} Quick mode session(s) into sessions.json")
+        
+        buffer_file.unlink()
+    except Exception:
+        pass
 
 
 def cmd_boot() -> int:
@@ -166,6 +252,21 @@ def cmd_boot() -> int:
     state.state = "ACTIVE"  # Transition from BOOTING to ACTIVE
     write_state(state)
 
+    _bootstrap_json_knowledge()
+
+    _flush_quick_buffer()
+
+    # Generate and store boot receipt
+    receipt = _generate_boot_receipt()
+    state.boot_receipt = receipt
+    write_state(state)
+    
+    # Write receipt file
+    receipt_file = WORKSPACE_ROOT / ".memory" / "boot-receipt.json"
+    if (WORKSPACE_ROOT / ".memory").exists():
+        receipt_file.write_text(json.dumps(receipt, indent=2, default=str), encoding="utf-8")
+        print(f"  Boot receipt written: {receipt['mistakes_loaded']} mistakes, {receipt['patterns_loaded']} patterns, {receipt['variables_loaded']} variables")
+
     check_staleness()
 
     try:
@@ -177,6 +278,73 @@ def cmd_boot() -> int:
 
     _print_boot_status_report(mode, state)
     return 0
+
+
+def _bootstrap_json_knowledge():
+    """Create JSON schema if missing in FULL mode."""
+    mem_dir = WORKSPACE_ROOT / ".memory"
+    if not mem_dir.exists():
+        return
+        
+    knowledge_file = mem_dir / "knowledge.json"
+    if not knowledge_file.exists():
+        knowledge_file.write_text('{"version":"1.0","project":{},"indexes":{}}', encoding="utf-8")
+        print("  WARN: No knowledge graph. Creating empty skeleton.")
+        
+    mistakes_file = mem_dir / "mistakes.json"
+    if not mistakes_file.exists():
+        mistakes_file.write_text('{"version":"1.0","mistakes":[]}', encoding="utf-8")
+        print("  WARN: No mistakes file. Creating empty skeleton.")
+        
+    patterns_file = mem_dir / "patterns.json"
+    if not patterns_file.exists():
+        patterns_file.write_text('{"version":"1.0","patterns":[]}', encoding="utf-8")
+        print("  WARN: No patterns file. Creating empty skeleton.")
+        
+    variables_file = mem_dir / "variables.json"
+    if not variables_file.exists():
+        variables_file.write_text('{"version":"1.0","variables":[]}', encoding="utf-8")
+        print("  WARN: No variables file. Creating empty skeleton.")
+
+
+def _check_project_knowledge(task_input: str) -> tuple[list[dict], list[dict]]:
+    """Check project JSON knowledge graph for relevant mistakes and patterns."""
+    mistakes = []
+    patterns = []
+    if not task_input:
+        return mistakes, patterns
+        
+    words = set(task_input.lower().split())
+    
+    mistakes_file = WORKSPACE_ROOT / ".memory" / "mistakes.json"
+    if mistakes_file.exists():
+        try:
+            data = json.loads(mistakes_file.read_text(encoding="utf-8"))
+            for m in data.get("mistakes", []):
+                text = f"{m.get('error', '')} {m.get('lesson', '')}".lower()
+                entry_words = set(text.split())
+                overlap = len(words & entry_words)
+                score = overlap / len(entry_words) if entry_words else 0
+                if score > 0.15:
+                    mistakes.append(m)
+        except Exception:
+            pass
+
+    patterns_file = WORKSPACE_ROOT / ".memory" / "patterns.json"
+    if patterns_file.exists():
+        try:
+            data = json.loads(patterns_file.read_text(encoding="utf-8"))
+            for p in data.get("patterns", []):
+                text = f"{p.get('pattern', '')} {p.get('prevention', '')}".lower()
+                entry_words = set(text.split())
+                overlap = len(words & entry_words)
+                score = overlap / len(entry_words) if entry_words else 0
+                if score > 0.15:
+                    patterns.append(p)
+        except Exception:
+            pass
+
+    return mistakes, patterns
 
 
 def _gate_pre_task(task_input: str) -> tuple[int, RouteResult | None]:
@@ -199,10 +367,40 @@ def _gate_pre_task(task_input: str) -> tuple[int, RouteResult | None]:
             for r in stale_files:
                 print(f"    {r['file']}: {r['status']} (age={r['age_minutes']})")
 
+    proj_mistakes, proj_patterns = _check_project_knowledge(task_input)
+    if proj_mistakes or proj_patterns:
+        print()
+        print("  PROJECT KNOWLEDGE MATCHES:")
+        for m in proj_mistakes[:3]:
+            print(f"    [MISTAKE] {m.get('error', '')[:80]}")
+            print(f"      Lesson: {m.get('lesson', '')[:100]}")
+        for p in proj_patterns[:3]:
+            print(f"    [PATTERN] {p.get('pattern', '')[:80]}")
+            print(f"      Prevention: {p.get('prevention', '')[:100]}")
+        print()
+        print("  >>> ACTION REQUIRED: You MUST explicitly acknowledge and incorporate")
+        print("  >>> these lessons into your plan BEFORE execution. Do not ignore them.")
+        print()
+
+    # Permission error diagnosis protocol
+    permission_keywords = {"permission", "firebase", "firestore", "auth", "uid", "security rules", "access denied", "insufficient permissions", "getrealuserid", "anonymous"}
+    task_words = set(task_input.lower().split()) if task_input else set()
+    if task_words & permission_keywords:
+        print()
+        print("  PERMISSION ERROR DIAGNOSIS PROTOCOL (mandatory):")
+        print("    1. Identify WHICH collection is being accessed")
+        print("    2. Identify WHICH operation (read/write/create/delete)")
+        print("    3. Check WHICH user ID is being used (uid vs actualUserId vs getRealUserId())")
+        print("    4. Verify security rules match the operation and user ID")
+        print("    5. For anonymous proxy auth: ensure getRealUserId() resolution is consistent")
+        print()
+        print("  >>> This checklist is MANDATORY for any task touching auth/permissions/Firestore.")
+        print()
+        
     relevant = check_relevant(task_input)
     if relevant:
         print()
-        print(f"  RELEVANT MISTAKES ({len(relevant)}):")
+        print(f"  GLOBAL RELEVANT MISTAKES ({len(relevant)}):")
         for entry in relevant[:3]:
             print(f"    - [{entry.date}] {entry.error[:50]}")
             print(f"      Lesson: {entry.lesson[:50]}")
@@ -216,7 +414,9 @@ def _gate_pre_task(task_input: str) -> tuple[int, RouteResult | None]:
     if result.gate == "BLOCKED":
         warnings.append("FULL mode required but QUICK mode active")
     if relevant:
-        warnings.append(f"{len(relevant)} relevant mistake(s) found")
+        warnings.append(f"{len(relevant)} global mistake(s) found")
+    if proj_mistakes or proj_patterns:
+        warnings.append(f"{len(proj_mistakes)} project mistake(s) and {len(proj_patterns)} pattern(s) found")
 
     print()
     print(f"  Skill: {skill_path}")
@@ -239,6 +439,29 @@ def cmd_gate(args: argparse.Namespace) -> int:
         print("=" * 60)
         print("GATE: PRE-COMPLETE")
         print("=" * 60)
+        # Check boot receipt
+        if not state.boot_receipt:
+            print("  BLOCK: No boot receipt found for this session")
+            print("  Run: harness boot")
+            print("=" * 60)
+            return 1
+        
+        # Check knowledge was consulted
+        if not state.mistakes_checked:
+            print("  BLOCK: mistakes_checked = False")
+            print("  Run: harness gate --phase pre-task --input 'your task'")
+            print("=" * 60)
+            return 1
+        
+        # Check systemPatterns.md was modified since boot (if it exists)
+        system_patterns = WORKSPACE_ROOT / ".memory" / "systemPatterns.md"
+        if system_patterns.exists() and state.boot_time:
+            import os
+            mod_time = datetime.fromtimestamp(os.path.getmtime(system_patterns), tz=timezone.utc)
+            if mod_time <= state.boot_time:
+                print("  WARN: No mistakes or patterns logged since boot")
+                print("  Consider running retrospective before closing (writes to mistakes.json/patterns.json)")
+        
         if not state.verification_logged:
             print("  BLOCK: verification_logged = False")
             print("  Run: harness verify-done")

@@ -26,7 +26,7 @@ quick_ref:
 ├── 03_Patterns/        # Individual pattern notes ({CODE}-P###-slug.md)
 ├── 04_Index/           # Dashboard.md + MOCs
 ├── 05_Templates/       # Note templates (T-*.md)
-└── .obsidian/          # Obsidian config
+└── (no .obsidian/)    # Obsidian is OPTIONAL. Core system works with plain files only.
 ```
 
 ## FILES
@@ -58,15 +58,28 @@ See `PHASE3_SUBCOMMAND.md`
 ### Session Close
 See `harness/ATOMIC_CLOSE.md` for the write-to-temp-then-move pattern.
 
+### Graph Close (Phase 4)
+
+At session close, memorybank creates linked knowledge notes:
+
+1. **Session note**: Create a linked session note in `01_Sessions/`
+2. **Mistake notes**: Create individual mistake notes in `02_Mistakes/` with `[[links]]`
+3. **Pattern notes**: Create or update pattern notes in `03_Patterns/` with `[[links]]`
+4. **Decision notes**: Create decision notes in `03_Patterns/` with `[[links]]`
+5. **Dashboard update**: Update `04_Index/Dashboard.md` with new counts
+6. **Validation**: Verify frontmatter, link integrity, ID uniqueness before committing
+
+Use the atomic staging pattern from `harness/ATOMIC_CLOSE.md`:
+- Write to `.session-close-staging/` first
+- Validate all staged files
+- Move to vault locations
+- Cleanup staging directory
+
+Note format: `{CODE}-M###-slug.md` for mistakes, `{CODE}-P###-slug.md` for patterns, `{CODE}-D###-slug.md` for decisions.
+
 ---
 
-## OBSIDIAN MIRROR
 
-- Project vault: `{PROJECT_ROOT}/00_Memory/` ↔ `00_HUMAN/02_Projects/[NAME]/Memory/` (legacy projects only)
-- Global vault sync: project `02_Mistakes/` and `03_Patterns/` → `{ANTIGRAVITY_GLOBAL_VAULT}/00_Global/`
-- Scratchpad: `00_Memory/` → `01_AI/04_Logs/Scratchpad/Memory/`
-
----
 
 ## ILL (Iterative Learning Layer)
 

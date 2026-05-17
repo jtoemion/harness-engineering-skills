@@ -17,6 +17,7 @@ Every output file must follow these principles:
 |-----------|---------|
 | **Lede first** | First 3 lines tell an AI what it MUST know. No preamble. |
 | **Inverse pyramid** | Most critical info first. Details deeper. |
+| **Collapse by default** | Wrap deep-dive sections in `<details><summary>Topic</summary>...</details>` to save vertical space. |
 | **Scannable** | Dense tables, short anchors, bold leads. No prose paragraphs. |
 | **Non-linear** | Each section independently actionable. AI can drop in at any anchor. |
 | **Inline the hard stuff** | The most violated rule should appear verbatim in the file — not behind a link. |

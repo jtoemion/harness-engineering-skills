@@ -2,13 +2,10 @@
 Session close 12-step state machine.
 Enforces SESSION_CLOSE.md's 12 steps. Resumable after crash.
 """
-import hashlib
-import json
 import os
 import shutil
 import subprocess
 import sys
-import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -26,9 +23,11 @@ def _find_workspace_root() -> Path:
             return candidate
     return candidates[0]
 
+
 WORKSPACE_ROOT = _find_workspace_root()
 
 from .state import HarnessState, load_state, save_state
+from .incident import _write_incident, _assess_data_loss
 
 SESSION_CLOSE_STEPS = [
     ("ill_check", "ILL check"),
@@ -55,61 +54,17 @@ step_index = get_step_index()
 _step_index = step_index
 
 
-def _assess_data_loss(step_name: str) -> str:
-    """Estimate data loss risk for a given step failure."""
-    high_risk = {"atomic_move", "git_commit", "write_session"}
-    medium_risk = {"update_memory", "write_mistakes", "write_patterns"}
-    if step_name in high_risk:
-        return "HIGH — staged files may be orphaned or uncommitted work lost"
-    elif step_name in medium_risk:
-        return "MEDIUM — memory files may be stale"
-    return "LOW — informational step, no data at risk"
-
-
-def _write_incident(state: HarnessState, step_name: str, error: Exception) -> Path | None:
-    """Write incident record to .memory/incidents/. Returns path or None."""
-    incidents_dir = WORKSPACE_ROOT / ".memory" / "incidents"
-    try:
-        incidents_dir.mkdir(parents=True, exist_ok=True)
-    except Exception:
-        return None
-
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")
-    error_type = type(error).__name__
-    hash4 = hashlib.md5(f"{error_type}{step_name}".encode()).hexdigest()[:4]
-    filename = f"{timestamp}-{step_name}-{hash4}.json"
-
-    incident = {
-        "timestamp": datetime.now().isoformat(),
-        "pipeline": "session_close",
-        "step_name": step_name,
-        "step_index": _step_index.get(step_name, -1),
-        "error_type": error_type,
-        "error_message": str(error),
-        "traceback": traceback.format_exc(),
-        "state_snapshot": {
-            "session_id": state.session_id,
-            "mode": state.mode,
-            "state": state.state,
-            "skills_loaded": state.skills_loaded,
-            "close_step": state.close_step,
-            "mistakes_checked": state.mistakes_checked,
-            "boot_receipt": state.boot_receipt is not None,
-        },
-        "recovery": {
-            "attempted": False,
-            "method": None,
-            "succeeded": None,
-        },
-        "data_loss_risk": _assess_data_loss(step_name),
-    }
-
-    filepath = incidents_dir / filename
-    try:
-        filepath.write_text(json.dumps(incident, indent=2, default=str), encoding="utf-8")
-        return filepath
-    except Exception:
-        return None
+def _session_close_write_incident(state: HarnessState, step_name: str, error: Exception) -> Path | None:
+    """Thin wrapper: calls shared incident._write_incident with session_close-specific step_index + risk."""
+    risk = _assess_data_loss(step_name)
+    return _write_incident(
+        state=state,
+        step_name=step_name,
+        error=error,
+        pipeline="session_close",
+        step_index=_step_index.get(step_name, -1),
+        data_loss_risk=risk,
+    )
 
 
 def _ill_captures_count() -> int:
@@ -327,7 +282,7 @@ def run_close(resume: bool = False) -> bool:
         try:
             success, message, state = step_fn(state)
         except Exception as e:
-            filepath = _write_incident(state, step_name, e)
+            filepath = _session_close_write_incident(state, step_name, e)
             print(f"  [{i+1}/12] {step_display}... ✗ (EXCEPTION: {e})")
             if filepath:
                 print(f"  Incident logged: {filepath}")
@@ -369,7 +324,7 @@ if __name__ == "__main__":
             # Use absolute import path to work when run as __main__ via `python session_close.py`
             import runtime.state as _rs
             _state = _rs.load_state()
-            _write_incident(_state, "run_close_toplevel", e)
+            _session_close_write_incident(_state, "run_close_toplevel", e)
         except Exception:
             pass  # If even incident writing fails, don't mask original error
         print(f"Session close error: {e}")

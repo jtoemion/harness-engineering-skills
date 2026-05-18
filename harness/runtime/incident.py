@@ -1,5 +1,6 @@
 """
 Shared incident logging for harness pipelines.
+Used by session_close.py and checkpoint.py.
 """
 import hashlib
 import json
@@ -26,12 +27,24 @@ def _find_workspace_root() -> Path:
 WORKSPACE_ROOT = _find_workspace_root()
 
 
+def _assess_data_loss(step_name: str) -> str:
+    """Estimate data loss risk for a given step failure."""
+    high_risk = {"atomic_move", "git_commit", "write_session"}
+    medium_risk = {"update_memory", "write_mistakes", "write_patterns"}
+    if step_name in high_risk:
+        return "HIGH — staged files may be orphaned or uncommitted work lost"
+    elif step_name in medium_risk:
+        return "MEDIUM — memory files may be stale"
+    return "LOW — informational step, no data at risk"
+
+
 def _write_incident(
     state: HarnessState,
     step_name: str,
     error: Exception,
-    pipeline: str = "unknown",
+    pipeline: str = "session_close",
     step_index: int = -1,
+    data_loss_risk: str | None = None,
 ) -> Path | None:
     """Write incident record to .memory/incidents/. Returns path or None."""
     incidents_dir = WORKSPACE_ROOT / ".memory" / "incidents"
@@ -44,6 +57,9 @@ def _write_incident(
     error_type = type(error).__name__
     hash4 = hashlib.md5(f"{error_type}{step_name}".encode()).hexdigest()[:4]
     filename = f"{timestamp}-{step_name}-{hash4}.json"
+
+    # Compute risk from step_name if not provided
+    risk = data_loss_risk if data_loss_risk is not None else _assess_data_loss(step_name)
 
     incident = {
         "timestamp": datetime.now().isoformat(),
@@ -58,6 +74,7 @@ def _write_incident(
             "mode": state.mode,
             "state": state.state,
             "skills_loaded": state.skills_loaded,
+            "close_step": getattr(state, "close_step", None),
             "checkpoint_complete": getattr(state, "checkpoint_complete", None),
             "mistakes_checked": getattr(state, "mistakes_checked", None),
             "boot_receipt": state.boot_receipt is not None if hasattr(state, "boot_receipt") else None,
@@ -67,6 +84,7 @@ def _write_incident(
             "method": None,
             "succeeded": None,
         },
+        "data_loss_risk": risk,
     }
 
     try:

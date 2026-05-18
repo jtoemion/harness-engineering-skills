@@ -1,0 +1,130 @@
+skill:
+  name: test-driven-development
+  display_name: "Test-Driven Development (TDD)"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\test-driven-development\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: development
+  tags:
+    - tdd
+    - testing
+    - red-green-refactor
+    - quality
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "implement feature"
+      type: keyword
+      required: true
+    - condition: "add feature"
+      type: keyword
+      required: false
+    - condition: "bugfix"
+      type: keyword
+      required: false
+    - condition: "write code"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 95
+
+behavior:
+  summary: "Write failing test first, then minimal code to pass, then refactor. The RED→GREEN→REFACTOR cycle ensures every line of code is verified."
+  detailed_description: "Core principle: If you didn't watch the test fail, you don't know if it tests the right thing. The Iron Law: NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST. Write code before test? Delete it and start over. No exceptions. The cycle: RED (write failing test, verify it fails for expected reason), GREEN (write minimal code to pass), REFACTOR (clean up while keeping tests green), then repeat for next failing test."
+  process:
+    - step: 1
+      action: "RED: Write failing test for the behavior you want"
+      mandatory: true
+      output: "New test that fails with expected error"
+      verification: "Test fails for the expected reason, not due to test bug"
+      failure_mode: "Test passing immediately means test doesn't verify the feature"
+    - step: 2
+      action: "GREEN: Write minimal code to make test pass"
+      mandatory: true
+      output: "Implementation that passes the test"
+      verification: "Test passes, all tests pass"
+      failure_mode: "Over-engineering creates unnecessary complexity"
+    - step: 3
+      action: "REFACTOR: Clean up code while keeping tests green"
+      mandatory: true
+      output: "Cleaner code, still passing tests"
+      verification: "All tests still pass after refactoring"
+      failure_mode: "Breaking tests during refactor undoes verification"
+    - step: 4
+      action: "Repeat: Write next failing test"
+      mandatory: true
+      output: "Next test in the cycle"
+      verification: "New test fails, ready for GREEN phase"
+      failure_mode: "Stopping after one test misses edge cases"
+  entry_conditions:
+    - condition: "Feature or bugfix to implement"
+      check: "Clear understanding of what behavior to add/fix"
+  exit_conditions:
+    - condition: "All tests pass with pristine output"
+      check: "Run full test suite, verify 0 failures, no errors/warnings"
+    - condition: "Every new function/method has a test"
+      check: "Test coverage for all new code"
+    - condition: "Watched each test fail before implementing"
+      check: "Verified RED phase for each test"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: no_production_code_without_failing_test
+    gate_type: hard_block
+    trigger: "Writing production code before writing a test that fails"
+    message: "IRON LAW: NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST. Write code before test? Delete it. Start over. No exceptions."
+    blocking_command: null
+  - gate_id: verify_red_phase
+    gate_type: warning
+    trigger: "About to claim tests pass without having seen them fail for expected reason"
+    message: "You must watch each test fail before implementing to verify it tests the right thing."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Too simple to test"
+    description: "Simple code breaks, test takes 30 seconds"
+    severity: BLOCKER
+    prevention: "Write test anyway, it's fast"
+  - pattern: "I'll test after"
+    description: "Tests passing immediately prove nothing"
+    severity: BLOCKER
+    prevention: "Write test first, watch it fail"
+  - pattern: "Deleting X hours is wasteful (sunk cost)"
+    description: "Unverified code is technical debt"
+    severity: BLOCKER
+    prevention: "Delete and start over with TDD"
+  - pattern: "TDD will slow me down"
+    description: "TDD faster than debugging later"
+    severity: MAJOR
+    prevention: "Trust the process, debugging costs more"
+  - pattern: "Existing code has no tests"
+    description: "You're improving it, add tests for existing code"
+    severity: MAJOR
+    prevention: "Add tests when touching existing code"
+
+quick_ref:
+  trigger_line: "implement feature, add feature, bugfix"
+  key_constraint: "NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST"
+  command_sequence: "RED (write failing test) → GREEN (minimal code to pass) → REFACTOR (clean up) → repeat"
+  output_indicator: "All tests pass, every new function has test, watched each test fail first"
+  do_not:
+    - "Write production code before writing test"
+    - "Skip watching test fail (assume it works)"
+    - "Write more than minimal code in GREEN phase"
+    - "Skip REFACTOR phase"
+  common_mistakes:
+    - mistake: "Writing code first, test after"
+      fix: "Delete code, write test first, then code"
+    - mistake: "Not watching test fail"
+      fix: "Run test, see it fail for expected reason"
+    - mistake: "Over-engineering in GREEN phase"
+      fix: "Write minimal code to pass only"
+    - mistake: "Not testing edge cases"
+      fix: "Add more tests for error conditions"

@@ -1,0 +1,123 @@
+skill:
+  name: context-handoff
+  display_name: Context Handoff — Forensic Diagnostic Payload Generator
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\context-handoff\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: handoff
+  tags: [handoff, context, transfer, diagnostic, payload, subagent, forensic]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "handoff, context transfer, brief another model, prepare for, diagnostic payload, another model to look at, make a handoff document"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 9
+
+behavior:
+  summary: "Generates ultra-dense forensic handoff document for transferring project context to another AI agent"
+  detailed_description: >
+    Generates Context Handoff and Diagnostic Payload — single ultra-dense document for 1M+ token reasoning model.
+    Receiving model should act on document alone, with zero follow-up questions.
+    Announce at start: "Generating context handoff payload. Ingesting project state..."
+    Phase 0: Mandatory context ingestion. Path A (memory exists): read .memory/, .docs/, cross-reference.
+    Path B (no memory): deploy 4 explore subagents in parallel.
+    Phase 1: Generate handoff with 6 exact sections: Architectural Blueprint, Forensic State, What Was Tried,
+    Chaos Delta, Isolated Code Sandboxes, Diagnostic Prompts.
+    Phase 2: Quality gate — all 6 sections complete, specificity, no summarization.
+    This skill does NOT modify any files — read-only, produces document.
+  process:
+    - step: 1
+      action: "Check for .memory/ or .docs/ — Path A or B"
+      mandatory: true
+      output: "Memory exists or not"
+      verification: "Files exist or not"
+    - step: 2
+      action: "Path A: Read all .memory/ and .docs/ files"
+      mandatory: false
+      output: "Project context loaded"
+      verification: "activeContext.md, progress.md, mistakes.json, patterns.json read"
+    - step: 3
+      action: "Path B: Deploy 4 explore subagents if no memory"
+      mandatory: false
+      output: "Context gathered via subagents"
+      verification: "Project structure, architecture, recent changes, error state explored"
+    - step: 4
+      action: "Phase 1: Generate 6 sections"
+      mandatory: true
+      output: "Complete handoff document"
+      verification: "All 6 sections filled, no TBD/TODO"
+    - step: 5
+      action: "Phase 2: Quality gate self-check"
+      mandatory: true
+      output: "Quality checks passed"
+      verification: "Completeness, specificity, no summarization, already tried, diagnostic prompts, versions"
+    - step: 6
+      action: "Output: Format header + present document"
+      mandatory: true
+      output: "Handoff document"
+      verification: "Header shows sections complete, code blocks embedded"
+
+  entry_conditions:
+    - condition: "User requests handoff, context transfer, or diagnostic payload for another model"
+      check: "Trigger phrase detected"
+  exit_conditions:
+    - condition: "All 6 sections complete with quality gate passed"
+      check: "Specificity verified, code blocks verbatim"
+
+output_destination:
+  path: null
+  format: markdown
+  overwrite: false
+
+gates:
+  - gate_id: ch_001
+    gate_type: hard_block
+    trigger: "No memory and no subagent deployment"
+    message: "Must either read memory or deploy subagents to gather context"
+    blocking_command: null
+  - gate_id: ch_002
+    gate_type: hard_block
+    trigger: "Quality gate fails"
+    message: "Fix failing checks before presenting"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Summarizing code to save tokens"
+    description: "Verbatim code costs nothing, summarized code loses the bug"
+    severity: BLOCKER
+    prevention: "Paste complete code blocks"
+  - pattern: "Omitting Section 3 (What Was Tried)"
+    description: "This is #1 reason handoffs waste tokens"
+    severity: BLOCKER
+    prevention: "Include at least N/A if greenfield"
+  - pattern: "Generic diagnostic prompts"
+    description: "Prompts must be specific to THIS problem"
+    severity: BLOCKER
+    prevention: "4 questions tailored to specific problem"
+  - pattern: "Using 'latest' or 'recent' for versions"
+    description: "Version differences cause 80% of wrong suggestions"
+    severity: BLOCKER
+    prevention: "Exact version numbers only"
+
+quick_ref:
+  trigger_line: "handoff, context transfer, brief another model, prepare for, diagnostic payload"
+  key_constraint: "6 sections, verbatim code, exact versions, specific diagnostic prompts"
+  command_sequence: "Check memory → Load/context gather → 6 sections → Quality gate → Output"
+  output_indicator: "⚡ CONTEXT HANDOFF GENERATED | Sections: 6/6"
+  do_not:
+    - "Summarize code (paste verbatim)"
+    - "Omit What Was Tried section"
+    - "Use generic diagnostic prompts"
+    - "Say 'latest' for versions"
+    - "Write partial handoff"
+  common_mistakes:
+    - mistake: "Receiving model can figure out stack"
+      fix: "Version differences cause 80% of wrong suggestions — be explicit"
+    - mistake: "Not enough context for full handoff"
+      fix: "Deploy subagents or ask user — never write partial"

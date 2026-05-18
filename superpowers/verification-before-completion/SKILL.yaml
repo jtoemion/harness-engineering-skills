@@ -1,0 +1,142 @@
+skill:
+  name: verification-before-completion
+  display_name: "Verification Before Completion"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\verification-before-completion\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: quality
+  subcategory: verification
+  tags:
+    - verification
+    - completion
+    - evidence
+    - honesty
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "complete"
+      type: keyword
+      required: false
+    - condition: "done"
+      type: keyword
+      required: false
+    - condition: "fixed"
+      type: keyword
+      required: false
+    - condition: "pass"
+      type: keyword
+      required: false
+    - condition: "success"
+      type: keyword
+      required: false
+    - condition: "commit"
+      type: keyword
+      required: false
+    - condition: "pr"
+      type: keyword
+      required: false
+    - condition: "approve"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 100
+
+behavior:
+  summary: "Run verification commands and capture evidence before making any completion claims. Evidence before assertions, always."
+  detailed_description: "Claiming work is complete without verification is dishonesty, not efficiency. The Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. If you haven't run the verification command in this message, you cannot claim it passes. Before claiming any status: (1) IDENTIFY what command proves the claim; (2) RUN the FULL command fresh; (3) READ full output, check exit code; (4) VERIFY output confirms claim; (5) ONLY THEN make the claim. Skip any step = lying, not verifying."
+  process:
+    - step: 1
+      action: "IDENTIFY: What command proves this claim?"
+      mandatory: true
+      output: "Specific command to run"
+      verification: "Command directly tests the claim"
+      failure_mode: "Running wrong command gives false confidence"
+    - step: 2
+      action: "RUN: Execute the FULL command (fresh, complete)"
+      mandatory: true
+      output: "Command output with exit code"
+      verification: "Command completes, output available"
+      failure_mode: "Not running full command misses issues"
+    - step: 3
+      action: "READ: Full output, check exit code, count failures"
+      mandatory: true
+      output: "Complete output analyzed"
+      verification: "Exit code checked, failures counted"
+      failure_mode: "Partial reading misses failures"
+    - step: 4
+      action: "VERIFY: Does output confirm the claim?"
+      mandatory: true
+      output: "Confirmed or actual status"
+      verification: "Evidence from output supports claim"
+      failure_mode: "Claiming without evidence is lying"
+    - step: 5
+      action: "ONLY THEN: Make the claim WITH evidence"
+      mandatory: true
+      output: "Claim with verification evidence"
+      verification: "Claim matches output"
+      failure_mode: "Claiming without evidence"
+  entry_conditions:
+    - condition: "About to make any completion claim"
+      check: "Using words like complete, done, fixed, pass, success, great, perfect"
+  exit_conditions:
+    - condition: "Verification command run and evidence captured"
+      check: "Command output shows actual result"
+    - condition: "Claim matches evidence"
+      check: "Stated result matches output"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: no_claims_without_verification
+    gate_type: hard_block
+    trigger: "Making completion claims without running verification command"
+    message: "IRON LAW: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. Run the command, read the output, THEN claim the result."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Using should, probably, seems to"
+    description: "Hedging indicates lack of verification"
+    severity: BLOCKER
+    prevention: "Run verification, state actual result"
+  - pattern: "Expressing satisfaction before verification"
+    description: "Great!, Perfect!, Done! without evidence"
+    severity: BLOCKER
+    prevention: "Verify first, then state result with evidence"
+  - pattern: "Committing/pushing without verification"
+    description: "Trusting code is correct without checking"
+    severity: BLOCKER
+    prevention: "Run tests, verify build before VCS operations"
+  - pattern: "Trusting agent success reports"
+    description: "Agent says success, you claim success"
+    severity: BLOCKER
+    prevention: "Verify independently, check VCS diff"
+  - pattern: "Partial verification is enough"
+    description: "Checking some tests but not all"
+    severity: BLOCKER
+    prevention: "Run FULL test suite"
+
+quick_ref:
+  trigger_line: "complete, done, fixed, pass, success, commit, PR, great, perfect"
+  key_constraint: "NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE"
+  command_sequence: "Identify command → Run full command → Read output → Verify claim matches → THEN claim"
+  output_indicator: "Claim with evidence from verification output"
+  do_not:
+    - "Say should, probably, seems to"
+    - "Express satisfaction before verification"
+    - "Trust agent reports"
+    - "Partial verification"
+    - "Skip verification when tired"
+  common_mistakes:
+    - mistake: "Running test once and claiming pass"
+      fix: "Run full suite, verify exit code"
+    - mistake: "Linter passing = build passing"
+      fix: "Run actual build command, linter doesn't check compilation"
+    - mistake: "Tests pass = requirements met"
+      fix: "Re-read plan, verify each requirement"
+    - mistake: "Agent said success"
+      fix: "Verify independently, check VCS diff"

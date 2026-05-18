@@ -1,0 +1,93 @@
+skill:
+  name: workflow-builder
+  display_name: Workflow & Skill Builder
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\harness\workflow-builder\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: skill-development
+  tags: [workflow, skill, building, conversion, design]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "build a workflow | create a skill | quality check workflow | analyze skill | convert a skill"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 75
+
+behavior:
+  summary: Build, analyze, or convert workflow/skill structures through outcome-driven design.
+  detailed_description: |
+    Outcome-driven design through conversational discovery. 3 modes: Build, Analyze, Convert.
+    Core principle: Describe WHAT outcome to achieve, not HOW to achieve it. Pruning rule:
+    if an LLM would do it correctly without being told — cut it. Use workflow-builder FIRST to design,
+    then writing-skills to validate with TDD.
+
+  process:
+    - step: 1
+      action: Identify intent — Build, Analyze, or Convert
+      mandatory: true
+      output: Mode selection
+      verification: Mode confirmed with user
+      failure_mode: Wrong mode = wrong process
+
+    - step: 2
+      action: Load reference document for selected mode (BUILD_PROCESS.md / QUALITY_ANALYSIS.md / CONVERT_PROCESS.md)
+      mandatory: true
+      output: Mode-specific process loaded
+      verification: Document accessible
+      failure_mode: Missing mode-specific process
+
+    - step: 3
+      action: Execute phase-by-phase per mode document
+      mandatory: true
+      output: Skill/workflow output
+      verification: Output matches outcome criteria
+      failure_mode: Skipping phases = incomplete skill
+
+  entry_conditions:
+    - condition: "User intent identified (build/analyze/convert)"
+      check: "Mode selected"
+
+  exit_conditions:
+    - condition: "Skill/workflow produced and validated"
+      check: "Output meets outcome criteria"
+
+gates:
+  - gate_id: outcome-over-instruction
+    gate_type: warning
+    trigger: Agent writes HOW instructions when WHAT outcome suffices
+    message: "Outcome over instruction. Cut instructions an LLM would do correctly without being told."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: Writing HOW instructions when WHAT outcomes suffice
+    description: If an LLM would do it correctly without being told, cut it
+    severity: MAJOR
+    prevention: Prune aggressively — describe destination not every turn
+  - pattern: Skipping conversational discovery
+    description: Guessing requirements without dialogue
+    severity: MAJOR
+    prevention: Build through dialogue, not assumptions
+
+components:
+  files_read:
+    - path: harness/workflow-builder/BUILD_PROCESS.md
+      purpose: Build mode process
+      min_lines: null
+    - path: harness/workflow-builder/QUALITY_ANALYSIS.md
+      purpose: Analyze mode process
+      min_lines: null
+    - path: harness/workflow-builder/CONVERT_PROCESS.md
+      purpose: Convert mode process
+      min_lines: null
+
+quick_ref:
+  trigger_line: "Fires on 'build a workflow', 'create a skill', 'quality check workflow', 'analyze skill', 'convert a skill'"
+  key_constraint: "Outcome over instruction — describe WHAT not HOW"
+  command_sequence: "Identify mode → Load reference → Execute phase-by-phase"
+  output_indicator: "After: Skill/workflow created, analyzed, or converted per mode"

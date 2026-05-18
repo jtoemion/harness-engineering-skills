@@ -1,0 +1,151 @@
+skill:
+  name: architectural-impact
+  display_name: Architectural Impact & Dependency Mapping
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\architectural-impact\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: dependency-analysis
+  tags: [dependency-analysis, ripple-effect, layers, multi-tier, schema, database, business-logic]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "add a feature"
+      type: keyword
+      required: true
+    - condition: "change a schema"
+      type: keyword
+      required: true
+    - condition: "create a service"
+      type: keyword
+      required: true
+    - condition: "build an API"
+      type: keyword
+      required: true
+    - condition: "refactor logic"
+      type: keyword
+      required: true
+    - condition: "database"
+      type: keyword
+      required: false
+    - condition: "new feature"
+      type: keyword
+      required: false
+    - condition: "business logic"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 100
+
+behavior:
+  summary: Mandatory ripple effect analysis before any multi-layer code change to prevent cascading breakage using a strict bottom-up layer execution order.
+  detailed_description: >
+    This skill enforces a three-phase protocol: (1) Ripple Effect Analysis - identify all affected layers and output an Impact Table before writing code, (2) Strict Execution - implement changes bottom-up from Database/DAL through Service Layer to Controller/ViewModel to View, always leaving each layer compilable and tested before moving up, (3) Documentation - log changes to techContext.md and trigger memorybank checkpoint.
+  process:
+    - step: 1
+      action: "Perform Ripple Effect Analysis - Identify request type and determine affected layers"
+      mandatory: true
+      output: "Impact Table showing affected layers and required changes"
+      verification: "All 5 layers explicitly marked YES/NO with specific change descriptions"
+      failure_mode: "Skipping analysis causes cascading breakage in downstream layers"
+    - step: 2
+      action: "Assess risk level - LOW/MEDIUM/HIGH with rationale"
+      mandatory: true
+      output: "Risk assessment with one-sentence rationale"
+      verification: "HIGH risk requires explicit user confirmation before proceeding"
+      failure_mode: "Proceeding on HIGH risk without confirmation violates protocol"
+    - step: 3
+      action: "Execute changes in strict bottom-up order: Database/DAL first"
+      mandatory: true
+      output: "Schema migrations, DAL functions with dependency injection"
+      verification: "DAL compiles and passes tests in isolation"
+      failure_mode: "Leaving DAL broken blocks all dependent layers"
+    - step: 4
+      action: "Execute Service Layer changes (second)"
+      mandatory: true
+      output: "Business logic consuming updated DAL with injected dependencies"
+      verification: "Service functions are correct and pass tests"
+      failure_mode: "Service with hardcoded dependencies violates DI rules"
+    - step: 5
+      action: "Execute Controller/ViewModel changes (third)"
+      mandatory: true
+      output: "Routing and state management updates"
+      verification: "Controller handles all new states/actions"
+      failure_mode: "Controller not updated breaks the orchestration chain"
+    - step: 6
+      action: "Execute View/UI changes (last)"
+      mandatory: true
+      output: "UI components exposing what layers below support"
+      verification: "UI only renders data that exists in lower layers"
+      failure_mode: "UI depending on non-existent data causes runtime errors"
+    - step: 7
+      action: "Document in techContext.md and trigger memorybank checkpoint"
+      mandatory: true
+      output: "Log entry with layers modified, schema changes, data flow, dependencies"
+      verification: "Entry follows markdown format, activeContext.md updated"
+      failure_mode: "Missing documentation loses architectural context for future sessions"
+  entry_conditions:
+    - condition: "User requests a change involving data, database, API, or multi-layer modification"
+      check: "Trigger keyword detected or multi-layer change implied"
+    - condition: "No prior Ripple Effect Analysis done for this request"
+      check: "No Impact Table exists for current request"
+  exit_conditions:
+    - condition: "All layers in Impact Table executed in bottom-up order"
+      check: "Each layer verified compilable and tested before next layer"
+    - condition: "Documentation entry written to techContext.md"
+      check: "Entry exists with all required fields"
+    - condition: "Memorybank checkpoint triggered"
+      check: "Checkpoint command executed"
+  output_destination:
+    path: ".memory/techContext.md"
+    format: markdown
+    overwrite: false
+
+gates:
+  - gate_id: high-risk-pause
+    gate_type: hard_block
+    trigger: "Risk assessed as HIGH"
+    message: "Risk is HIGH. Please confirm you want to proceed before continuing."
+    blocking_command: null
+  - gate_id: skip-analysis
+    gate_type: hard_block
+    trigger: "Attempt to write code before Ripple Effect Analysis"
+    message: "You must complete Ripple Effect Analysis and output Impact Table before writing code."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Skipping Ripple Effect Analysis for small UI changes"
+    description: "UI changes often need new data from lower layers. Analysis must be done first."
+    severity: BLOCKER
+    prevention: "Always run Phase 1 analysis regardless of perceived change size"
+  - pattern: "Working top-down (View first)"
+    description: "View gets built last. Always work bottom-up from Database to View."
+    severity: BLOCKER
+    prevention: "Follow strict execution order: DB/DAL → Service → Controller → View"
+  - pattern: "Hardcoding dependencies inside modules"
+    description: "Database connections and API clients must be injected, never instantiated inside"
+    severity: BLOCKER
+    prevention: "Pass all dependencies as constructor/function arguments"
+  - pattern: "Leaving layers in broken state"
+    description: "Each layer must compile and pass tests before moving to next layer"
+    severity: BLOCKER
+    prevention: "Verify each layer self-consistent before proceeding"
+
+quick_ref:
+  trigger_line: "Any multi-layer change: add feature, change schema, create service, build API, refactor logic"
+  key_constraint: "ALWAYS run Ripple Effect Analysis before writing ANY code"
+  command_sequence: "Phase 1: Analysis → Impact Table → Risk Assessment → Phase 2: DB/DAL → Service → Controller → View → Phase 3: Document + Checkpoint"
+  output_indicator: "Impact Table with all 5 layers marked YES/NO and specific changes described"
+  do_not:
+    - "Skip analysis for small-looking changes"
+    - "Work top-down (View before data layer)"
+    - "Hardcode database connections inside modules"
+    - "Leave layers in broken state"
+  common_mistakes:
+    - mistake: "Thinking UI-only change needs no analysis"
+      fix: "UI changes often expose new data. Always analyze."
+    - mistake: "Adding field to database and updating UI, skipping Service and Controller"
+      fix: "Never skip layers. Execute all four in order."

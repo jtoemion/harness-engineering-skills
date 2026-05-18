@@ -1,0 +1,113 @@
+skill:
+  name: knowledge-graph
+  display_name: KNOWLEDGE-GRAPH — Graph Intelligence
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\knowledge-graph\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: graph-intelligence
+  tags: [graph, wiki-links, yaml, mistakes, patterns, decisions, cross-project]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "graph, surface knowledge, find mistakes, find patterns, find decisions, related notes, cluster, cross-project"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 8
+
+behavior:
+  summary: "Navigate Obsidian knowledge graph for cross-project intelligence using [[wiki-links]] and YAML frontmatter"
+  detailed_description: >
+    Navigate the Obsidian knowledge graph for cross-project intelligence. Uses vault-ops for file operations.
+    graph_surface: boot-time knowledge surfacing (load local active mistakes, global matching mistakes/patterns, latest session).
+    Ranking: category match (+3), stack match (+2), recency bonus (+1). Limit: top 5 mistakes, top 5 patterns, latest session.
+    graph_mistakes: find relevant mistakes (category matching table, slug similarity for deduplication).
+    graph_patterns: find patterns (applies_to matching: any stack item match counts, case-insensitive).
+    graph_decisions: find past decisions for similar domain. graph_related: follow all [[links]] 2 levels deep.
+    graph_cluster: show knowledge clusters for Obsidian visualization.
+  process:
+    - step: 1
+      action: "graph_surface(project, context) — at boot"
+      mandatory: false
+      output: "Prioritized knowledge: mistakes, patterns, recent session"
+      verification: "Load all sources, rank, limit output"
+    - step: 2
+      action: "graph_mistakes(project, category)"
+      mandatory: false
+      output: "Array of { id, error, cause, lesson, related_notes }"
+      verification: "Category matching, slug deduplication"
+    - step: 3
+      action: "graph_patterns(stack)"
+      mandatory: false
+      output: "Array of { id, pattern, observed_in, prevention, related_notes }"
+      verification: "applies_to matching, sort by length"
+    - step: 4
+      action: "graph_decisions(domain)"
+      mandatory: false
+      output: "Array of { id, context, decision, rationale, alternatives }"
+      verification: "Query by domain, sort by recency"
+    - step: 5
+      action: "graph_related(note_id)"
+      mandatory: false
+      output: "{ center, level1: [], level2: [] }"
+      verification: "Follow links 2 levels, prevent infinite loops"
+    - step: 6
+      action: "graph_cluster(project)"
+      mandatory: false
+      output: "{ mistakes_by_category, patterns_by_category, decisions_by_domain }"
+      verification: "Group by type, then category"
+
+  entry_conditions:
+    - condition: "Need to surface cross-project knowledge, find past mistakes/patterns/decisions, or traverse graph"
+      check: "Operation type identified"
+  exit_conditions:
+    - condition: "Relevant knowledge surfaced or queried"
+      check: "Results presented in structured format"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: kg_001
+    gate_type: log_only
+    trigger: "Skipping graph_surface at boot"
+    message: "Surfaces critical context — mistakes, patterns, recent sessions"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Just grep for it"
+    description: "Knowledge-graph follows [[links]] to build neighborhoods, not just text search"
+    severity: MAJOR
+    prevention: "Use wiki-link traversal, not grep"
+  - pattern: "Only check local mistakes"
+    description: "Cross-project patterns are the whole point of the global vault"
+    severity: MAJOR
+    prevention: "Query global vault for patterns"
+  - pattern: "Skip graph_surface at boot"
+    description: "Surfaces critical context — mistakes, patterns, recent sessions"
+    severity: MINOR
+    prevention: "Call graph_surface at every boot"
+  - pattern: "Resolved mistakes don't matter"
+    description: "They prevent repeating the same mistake (tombstone pattern)"
+    severity: MINOR
+    prevention: "Keep resolved mistakes, filter with status != RESOLVED"
+
+quick_ref:
+  trigger_line: "graph, surface, find mistakes, patterns, decisions, related"
+  key_constraint: "Follow wiki-links, query global vault, rank by category/stack/recency"
+  command_sequence: "graph_surface → graph_mistakes/graph_patterns/graph_decisions → graph_related → graph_cluster"
+  output_indicator: "📊 SURFACED KNOWLEDGE"
+  do_not:
+    - "Just grep instead of following wiki-links"
+    - "Only check local mistakes"
+    - "Skip graph_surface at boot"
+    - "Delete resolved mistakes"
+  common_mistakes:
+    - mistake: "Only checking local"
+      fix: "Cross-project patterns are the whole point of global vault"

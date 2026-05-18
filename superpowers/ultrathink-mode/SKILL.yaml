@@ -1,0 +1,126 @@
+skill:
+  name: ultrathink-mode
+  display_name: ULTRATHINK — Deep Reasoning Mode
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\ultrathink-mode\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: persona
+  subcategory: deep-reasoning
+  tags: [reasoning, analysis, thinking, multi-dimensional, exhaustive]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "ULTRATHINK"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 20
+
+behavior:
+  summary: "Override mode that suspends all brevity rules and enforces exhaustive multi-dimensional reasoning"
+  detailed_description: >
+    Invoke ONLY when user explicitly types ULTRATHINK anywhere in prompt. This is a deliberate override trigger.
+    Suspends all brevity rules across all active protocols. Enforces exhaustive multi-dimensional reasoning before 
+    any code or recommendation. Phase 1: Declare override. Phase 2: Multi-dimensional analysis (Psychological,
+    Technical, Accessibility AAA, Scalability). Phase 3: Devil's Advocate — identify exactly 3 failure vectors.
+    Phase 4: Output (Deep reasoning chain + Edge cases + Production code).
+  process:
+    - step: 1
+      action: "Output ULTRATHINK ENGAGED declaration"
+      mandatory: true
+      output: "🧠 ULTRATHINK ENGAGED message"
+      verification: "Message displayed immediately on detection"
+    - step: 2
+      action: "Dimension 1 — Psychological analysis"
+      mandatory: true
+      output: "Mental model, cognitive load, friction points, emotional response"
+      verification: "All 5 questions answered"
+    - step: 3
+      action: "Dimension 2 — Technical analysis"
+      mandatory: true
+      output: "Performance, state complexity, bundle impact, thread, memory, network"
+      verification: "All 6 areas analyzed"
+    - step: 4
+      action: "Dimension 3 — Accessibility analysis (WCAG AAA)"
+      mandatory: true
+      output: "7:1 contrast, focus management, screen reader, keyboard nav, reduced motion, 44px targets"
+      verification: "AAA compliance verified"
+    - step: 5
+      action: "Dimension 4 — Scalability analysis"
+      mandatory: true
+      output: "API at scale, team growth, hardcoded values, separation of concerns, maintenance burden"
+      verification: "All 5 aspects covered"
+    - step: 6
+      action: "Identify exactly 3 failure vectors with precise technical details"
+      mandatory: true
+      output: "3 specific failure vectors with mitigations"
+      verification: "3 vectors found, none generic"
+    - step: 7
+      action: "Output: Deep reasoning chain + Edge case analysis + Production code"
+      mandatory: true
+      output: "Full analysis, 3 vectors with mitigations, optimized code"
+      verification: "Output follows exact sequence"
+
+  entry_conditions:
+    - condition: "User explicitly types ULTRATHINK in prompt"
+      check: "Keyword present anywhere in user message"
+  exit_conditions:
+    - condition: "All 4 dimensions analyzed + 3 failure vectors with mitigations + code output"
+      check: "Complete multi-dimensional analysis delivered"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: ut_001
+    gate_type: hard_block
+    trigger: "ULTRATHINK without all 4 dimensions"
+    message: "All 4 dimensions are mandatory — Psychological, Technical, Accessibility AAA, Scalability"
+    blocking_command: null
+  - gate_id: ut_002
+    gate_type: hard_block
+    trigger: "ULTRATHINK without exactly 3 failure vectors"
+    message: "Must find exactly 3 failure vectors. There is always a third."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Declaring request is straightforward"
+    description: "Straightforward means you didn't go deep enough — dig further"
+    severity: BLOCKER
+    prevention: "If it feels easy, go deeper"
+  - pattern: "WCAG AA instead of AAA"
+    description: "ULTRATHINK requires AAA — AA is baseline, not target"
+    severity: BLOCKER
+    prevention: "Use 7:1 contrast ratio for normal text, 4.5:1 for large text"
+  - pattern: "Doing Devil's Advocate mentally without showing it"
+    description: "Must be written out — if not in output, it didn't happen"
+    severity: BLOCKER
+    prevention: "Show all 3 vectors with exact mitigations in output"
+  - pattern: "Finding only 2 failure vectors"
+    description: "There is always a third — find it"
+    severity: BLOCKER
+    prevention: "Keep digging until 3 vectors found"
+
+quick_ref:
+  trigger_line: "ULTRATHINK"
+  key_constraint: "All 4 dimensions + 3 failure vectors with mitigations"
+  command_sequence: "Declare → 4 Dimensions → 3 Vectors → Output"
+  output_indicator: "🧠 ULTRATHINK ENGAGED"
+  do_not:
+    - "Skip any of the 4 dimensions"
+    - "Stop at 2 failure vectors"
+    - "Do Devil's Advocate mentally without showing it"
+    - "Settle for WCAG AA (needs AAA)"
+    - "Give brief answers (brevity rules suspended)"
+  common_mistakes:
+    - mistake: "Analyzed and it's straightforward"
+      fix: "Straightforward means you didn't go deep enough. Dig further."
+    - mistake: "User just wants code not essay"
+      fix: "User typed ULTRATHINK — they want the depth."
+    - mistake: "Psychological dimension doesn't apply to backend"
+      fix: "Cognitive load of developer API, mental model of data structures — always applies."

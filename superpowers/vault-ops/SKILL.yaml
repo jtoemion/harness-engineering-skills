@@ -1,0 +1,128 @@
+skill:
+  name: vault-ops
+  display_name: VAULT-OPS — Obsidian Vault Operations
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\vault-ops\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: obsidian-vault
+  tags: [obsidian, vault, markdown, yaml, read, write, query, patch, link, sync]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "vault read, vault write, vault query, vault patch, vault link, vault search, vault sync, read note, write note, query vault"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 9
+
+behavior:
+  summary: "Core Obsidian vault read/write/query/patch/link/sync operations — FILE-ONLY mode by default, ENHANCED with REST API"
+  detailed_description: >
+    Operations for reading, writing, querying, and syncing Obsidian vault notes. FILE-ONLY mode works without Obsidian running.
+    ENHANCED mode available when Obsidian + Local REST API is running. vault_read: parse YAML frontmatter, extract body and links.
+    vault_write: create from template with ID generation, slug generation, placeholder replacement. vault_query: scan + filter across vault.
+    vault_patch: update specific frontmatter field. vault_link: add [[link]] to note body. vault_search: full-text search.
+    vault_sync: bidirectional sync between project and global vaults (mistakes: assumption/scope-creep/config to global, others local;
+    patterns: applies_to.length > 1 to global; sessions: never copy).
+  process:
+    - step: 1
+      action: "Boot: Probe REST API (curl to localhost:27124)"
+      mandatory: true
+      output: "rest_api=true (200) or rest_api=false (timeout)"
+      verification: "MODE: FILE-ONLY or ENHANCED"
+    - step: 2
+      action: "vault_read(path, type, filters)"
+      mandatory: false
+      output: "{ frontmatter, body, links }"
+      verification: "Parse YAML, extract body, extract [[links]]"
+    - step: 3
+      action: "vault_write(path, template, data)"
+      mandatory: false
+      output: "Created .md file with frontmatter"
+      verification: "Template replacement, ID generation, YAML validation"
+    - step: 4
+      action: "vault_query(vault, type, filters)"
+      mandatory: false
+      output: "Array of { path, frontmatter, body_summary }"
+      verification: "GLOB, parse, filter, sort by created DESC"
+    - step: 5
+      action: "vault_patch(path, field, value)"
+      mandatory: false
+      output: "Updated frontmatter field"
+      verification: "Read, parse, modify, serialize, write"
+    - step: 6
+      action: "vault_link(from, to)"
+      mandatory: false
+      output: "Added [[link]] in appropriate section"
+      verification: "Locate section, check duplicates, append link"
+    - step: 7
+      action: "vault_sync(project, global)"
+      mandatory: false
+      output: "Bidirectional sync complete"
+      verification: "Follow sync rules table exactly"
+
+  entry_conditions:
+    - condition: "Need to read, write, query, patch, link, search, or sync Obsidian vault notes"
+      check: "Operation type identified"
+  exit_conditions:
+    - condition: "Operation completed successfully or error handled gracefully"
+      check: "Warn and skip, never raise"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: vo_001
+    gate_type: warning
+    trigger: "REST API not available"
+    message: "Falling back to FILE-ONLY mode — all operations work without REST API"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Requiring REST API"
+    description: "FILE-ONLY mode always works — REST is bonus, not requirement"
+    severity: MINOR
+    prevention: "Design for FILE-ONLY, enhance for ENHANCED"
+  - pattern: "Skipping YAML validation"
+    description: "Malformed frontmatter corrupts graph and breaks queries"
+    severity: BLOCKER
+    prevention: "Parse with YAML parser before write"
+  - pattern: "Writing directly during close"
+    description: "Atomic close requires staging — never write directly"
+    severity: BLOCKER
+    prevention: "Always stage, validate, then move"
+  - pattern: "Skipping global sync"
+    description: "Cross-project knowledge is the whole point of the vault"
+    severity: MAJOR
+    prevention: "Follow sync rules for cross-project patterns"
+  - pattern: "Deleting resolved mistakes"
+    description: "Tombstone pattern — keep for history, filter from queries"
+    severity: MAJOR
+    prevention: "Keep resolved mistakes, filter with status != RESOLVED"
+  - pattern: "Not deduplicating links"
+    description: "Duplicate [[links]] cause visual clutter"
+    severity: MINOR
+    prevention: "Check if link exists before appending"
+
+quick_ref:
+  trigger_line: "vault read, write, query, patch, link, search, sync"
+  key_constraint: "FILE-ONLY by default, atomic close staging, sync rules table"
+  command_sequence: "Detect mode → Choose operation → Execute → Handle errors"
+  output_indicator: "vault_read/write/query/patch/link/search/sync"
+  do_not:
+    - "Require REST API (FILE-ONLY always works)"
+    - "Skip validation (parse YAML before write)"
+    - "Write directly during close (stage first)"
+    - "Delete resolved mistakes (tombstone pattern)"
+    - "Skip global sync (cross-project knowledge)"
+  common_mistakes:
+    - mistake: "REST API is required"
+      fix: "FILE-ONLY mode always works — REST is bonus"
+    - mistake: "Partial YAML updates safe"
+      fix: "Manual field edits without full serialization corrupts file"

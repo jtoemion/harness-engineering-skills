@@ -1,0 +1,137 @@
+skill:
+  name: receiving-code-review
+  display_name: Receiving Code Review
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\receiving-code-review\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: quality
+  subcategory: review-response
+  tags: [code-review, feedback, implementation, pushback, verification]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "code review feedback"
+      type: keyword
+      required: true
+    - condition: "receiving feedback"
+      type: keyword
+      required: false
+    - condition: "review comments"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 80
+
+behavior:
+  summary: Verify-before-implement protocol for processing code review feedback with technical correctness over social comfort.
+  detailed_description: >
+    This skill implements a response pattern: (1) Read - complete feedback without reacting, (2) Understand - restate requirement in own words or ask, (3) Verify - check against codebase reality, (4) Evaluate - technically sound for THIS codebase?, (5) Respond - technical acknowledgment or reasoned pushback, (6) Implement - one item at a time, test each. Forbidden responses: explicit agreement ("You're absolutely right!"), performative ("Great point!"), premature commitment ("Let me implement that now"). Implementation order: clarify unclear items first, then blocking issues, simple fixes, complex fixes.
+  process:
+    - step: 1
+      action: "Read complete feedback without reacting"
+      mandatory: true
+      output: "Complete feedback understood"
+      verification: "All feedback items identified"
+      failure_mode: "Reacting before reading causes misunderstanding"
+    - step: 2
+      action: "Understand - Restate requirement in own words"
+      mandatory: true
+      output: "Restated requirements"
+      verification: "Can paraphrase without losing meaning"
+      failure_mode: "Missing meaning causes wrong implementation"
+    - step: 3
+      action: "Ask clarifying questions if anything unclear"
+      mandatory: false
+      output: "Clarification questions"
+      verification: "Questions clear and specific"
+      failure_mode: "Implementing unclear feedback causes errors"
+    - step: 4
+      action: "Verify - Check against codebase reality"
+      mandatory: true
+      output: "Verification results"
+      verification: "Checked against actual codebase"
+      failure_mode: "Implementing without verification breaks functionality"
+    - step: 5
+      action: "Evaluate - Technically sound for THIS codebase?"
+      mandatory: true
+      output: "Evaluation decision"
+      verification: "Considers THIS codebase's patterns and architecture"
+      failure_mode: "Generic suggestions may not fit this codebase"
+    - step: 6
+      action: "Respond - Technical acknowledgment or reasoned pushback"
+      mandatory: true
+      output: "Response (NOT performative)"
+      verification: "No forbidden responses used"
+      failure_mode: "Using forbidden responses violates protocol"
+    - step: 7
+      action: "Implement items in order: blocking → simple → complex"
+      mandatory: true
+      output: "Implemented fixes"
+      verification: "Each fix tested individually"
+      failure_mode: "Implementing out of order causes regressions"
+    - step: 8
+      action: "Verify no regressions after all fixes"
+      mandatory: true
+      output: "Regression test results"
+      verification: "All tests pass"
+      failure_mode: "New bugs from fixes"
+  entry_conditions:
+    - condition: "Code review feedback received"
+      check: "Review comments available"
+    - condition: "Not yet responded to feedback"
+      check: "No response sent yet"
+  exit_conditions:
+    - condition: "All feedback addressed with explicit response"
+      check: "Every comment has response (fix or pushback)"
+    - condition: "No regressions introduced"
+      check: "All tests pass"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: verify-first
+    gate_type: warning
+    trigger: "About to implement without verification"
+    message: "Verify against codebase reality before implementing."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Saying 'You're absolutely right!'"
+    description: "Explicit violation - performative response not allowed"
+    severity: BLOCKER
+    prevention: "State technical requirement or pushback instead"
+  - pattern: "Using 'Great point!' or 'Excellent feedback!'"
+    description: "Performative responses are forbidden"
+    severity: BLOCKER
+    prevention: "Restate technical requirement or ask question"
+  - pattern: "Saying 'Let me implement that now' before verification"
+    description: "Must verify against codebase first"
+    severity: MAJOR
+    prevention: "Verify first, then implement"
+  - pattern: "Silent dismissal of feedback"
+    description: "All feedback comments must be addressed"
+    severity: BLOCKER
+    prevention: "Every comment gets explicit response"
+
+quick_ref:
+  trigger_line: "Receiving code review feedback"
+  key_constraint: "VERIFY before implementing - technical correctness over social comfort"
+  command_sequence: "Read → Understand (restate) → Verify (check codebase) → Evaluate → Respond (NOT performative) → Implement (blocking→simple→complex) → Verify no regressions"
+  output_indicator: "All comments addressed with fix or pushback, no forbidden responses used"
+  do_not:
+    - "Say 'You're absolutely right!'"
+    - "Use 'Great point!' or performative language"
+    - "Implement without verification"
+    - "Dismiss any comment silently"
+  common_mistakes:
+    - mistake: "Reviewer is right without verifying"
+      fix: "Verify against codebase first - could break things"
+    - mistake: "Implementing without verification"
+      fix: "Check against codebase reality first"
+    - mistake: "Saying 'Thanks for feedback'"
+      fix: "Delete. State fix or pushback instead."

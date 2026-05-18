@@ -1,0 +1,54 @@
+skill:
+  name: ill-synthesis
+  display_name: ILL Synthesis (Redirect)
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\ill-synthesis\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: redirect
+  tags: [redirect, merged]
+  compliance_level: advisory
+
+trigger:
+  conditions:
+    - condition: "close session"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 0
+
+behavior:
+  summary: This skill has been merged into retrospective.
+  detailed_description: |
+    This skill is a redirect stub. Functionality moved to retrospective/SKILL.md.
+    Original trigger preserved for backward compatibility.
+
+  process:
+    - step: 1
+      action: Redirect to retrospective
+      mandatory: true
+      output: Load target skill
+      verification: Target skill loaded
+      failure_mode: Target skill not found
+
+  entry_conditions: []
+  exit_conditions: []
+
+  output_destination:
+    path: null
+    format: null
+    overwrite: false
+
+gates: []
+
+anti_patterns: []
+
+quick_ref:
+  trigger_line: "REDIRECT — merged into retrospective"
+  key_constraint: "No behavior — redirect to retrospective"
+  command_sequence: "Redirect to retrospective"
+  output_indicator: "After: Target skill loaded"
+  do_not: []
+  common_mistakes: []

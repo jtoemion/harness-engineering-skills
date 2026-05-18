@@ -1,0 +1,118 @@
+skill:
+  name: using-superpowers
+  display_name: Using Skills (Superpowers)
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\using-superpowers\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: skill-management
+  tags: [skills, invoke, load, superpowers, process, persona]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "Any task request, question, or action — check for skills before responding"
+      type: always
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 15
+
+behavior:
+  summary: "Establishes how to find and use skills — invoke relevant skills BEFORE any response or action"
+  detailed_description: >
+    Invoke relevant or requested skills BEFORE any response or action. Even 1% chance a skill might apply
+    means invoke the skill to check. If invoked skill turns out to be wrong, don't use it.
+    Skill check happens BEFORE clarifying questions, BEFORE exploring codebase.
+    Use Skill tool to load skill content — never use Read tool on skill files.
+    Priority: Process skills first (brainstorming, debugging), then implementation skills (frontend-design).
+    Rigid skills (TDD, debugging): follow exactly. Flexible skills (patterns): adapt principles to context.
+  process:
+    - step: 1
+      action: "User message received — check if any skill might apply"
+      mandatory: true
+      output: "Skill applicable or not"
+      verification: "Even 1% chance → invoke"
+    - step: 2
+      action: "If skill might apply, invoke Skill tool"
+      mandatory: true
+      output: "Skill loaded"
+      verification: "Use Skill tool, not Read tool"
+    - step: 3
+      action: "Announce: 'Using [skill] to [purpose]'"
+      mandatory: true
+      output: "Announcement in response"
+      verification: "Format matches"
+    - step: 4
+      action: "Follow skill exactly (if rigid) or adapt (if flexible)"
+      mandatory: true
+      output: "Skill followed"
+      verification: "Check skill compliance_level"
+    - step: 5
+      action: "Respond (including clarifications)"
+      mandatory: true
+      output: "Final response"
+      verification: "Skill loaded before response"
+
+  entry_conditions:
+    - condition: "Any task request, question, or action received"
+      check: "Message from user"
+  exit_conditions:
+    - condition: "Skill check completed before any response"
+      check: "Skill invoked if applicable"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: us_001
+    gate_type: hard_block
+    trigger: "Responding before skill check"
+    message: "Must check for skills BEFORE any response or action"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "This is just a simple question"
+    description: "Questions are tasks — check for skills"
+    severity: BLOCKER
+    prevention: "Even simple questions may have relevant skills"
+  - pattern: "I need more context first"
+    description: "Skill check comes BEFORE clarifying questions"
+    severity: BLOCKER
+    prevention: "Skills tell you HOW to explore"
+  - pattern: "Let me explore the codebase first"
+    description: "Skills tell you HOW to explore — check first"
+    severity: BLOCKER
+    prevention: "Skill check happens first"
+  - pattern: "I can check git/files quickly"
+    description: "Files lack conversation context — check for skills"
+    severity: BLOCKER
+    prevention: "Skill check comes before file exploration"
+  - pattern: "I remember this skill"
+    description: "Skills evolve — read current version"
+    severity: MINOR
+    prevention: "Invoke skill to get current version"
+  - pattern: "This doesn't need a formal skill"
+    description: "If skill exists, use it"
+    severity: MINOR
+    prevention: "Even 1% chance → invoke to check"
+
+quick_ref:
+  trigger_line: "ANY task request — always check for skills first"
+  key_constraint: "Invoke Skill tool BEFORE any response or action"
+  command_sequence: "Receive message → Check if skill might apply → Invoke if yes → Follow → Respond"
+  output_indicator: "Using [skill-name] to [purpose]"
+  do_not:
+    - "Respond before skill check"
+    - "Explore codebase before skill check"
+    - "Ask clarifying questions before skill check"
+    - "Use Read tool on skill files (use Skill tool)"
+    - "Skip because seems simple"
+  common_mistakes:
+    - mistake: "I remember this skill"
+      fix: "Skills evolve — invoke to get current version"
+    - mistake: "Need more context first"
+      fix: "Skills tell you HOW to gather information"

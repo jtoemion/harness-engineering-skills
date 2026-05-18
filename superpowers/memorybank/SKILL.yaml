@@ -1,0 +1,145 @@
+skill:
+  name: memorybank
+  display_name: Memory Bank - Autonomous Session Memory Lifecycle
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\memorybank\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: session-memory
+  tags: [memory, session, checkpoint, vault, cold-start, full-mode, ill]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "session start"
+      type: keyword
+      required: true
+    - condition: "task complete"
+      type: keyword
+      required: false
+    - condition: "checkpoint"
+      type: keyword
+      required: false
+    - condition: "close session"
+      type: keyword
+      required: false
+  mode_required: full
+  min_task_complexity: any
+  weight: 100
+
+behavior:
+  summary: Manages project memory lifecycle in FULL mode with vault structure, mandatory checkpoints, session close with graph creation, and ITERATIVE_LEARNING integration.
+  detailed_description: >
+    Memorybank operates in FULL mode only (QUICK mode has no memory). It manages: (1) Boot Phase - check vault structure, read core files, output Status Report, (2) Checkpoint Phase - update memory files after task completion, (3) Subagent Result Phase - checkpoint subagent outputs, (4) Session Close - mandatory in FULL mode, creates linked session/mistake/pattern notes using atomic staging, (5) Graph Close - create knowledge notes with wiki-links, (6) ILL integration - capture inefficiencies and synthesize patterns.
+  process:
+    - step: 1
+      action: "Boot Phase - Check vault structure and read core files"
+      mandatory: true
+      output: "Status Report with mode, memory state, harness status"
+      verification: "All core 5 files exist and readable"
+      failure_mode: "Missing vault structure requires cold start"
+    - step: 2
+      action: "Read 00_Memory/ files (projectbrief, activeContext, techContext, progress, decisions)"
+      mandatory: true
+      output: "Loaded project context"
+      verification: "All 5 core files read without error"
+      failure_mode: "Missing files need creation or cold start"
+    - step: 3
+      action: "Read 02_Mistakes/ for relevant mistakes"
+      mandatory: false
+      output: "Loaded mistake patterns"
+      verification: "Mistakes loaded and surfaced in status"
+      failure_mode: "Missing mistakes directory - create if needed"
+    - step: 4
+      action: "Checkpoint Phase - Update memory files after task"
+      mandatory: true
+      output: "Updated activeContext.md, progress.md"
+      verification: "Files reflect current task state"
+      failure_mode: "Stale memory causes context loss"
+    - step: 5
+      action: "Session Close - Mandatory in FULL mode"
+      mandatory: true
+      output: "ATOMIC_CLOSE.md staging with session note creation"
+      verification: "Staging validated before move"
+      failure_mode: "Skipping session close violates FULL mode protocol"
+    - step: 6
+      action: "Graph Close - Create linked knowledge notes"
+      mandatory: true
+      output: "Session note, mistake notes (CODE-M###-slug.md), pattern notes (CODE-P###-slug.md)"
+      verification: "Notes have frontmatter, [[links]], unique IDs"
+      failure_mode: "Missing graph notes lose knowledge structure"
+    - step: 7
+      action: "ILL captures - Write to .memory/ill/captures.md"
+      mandatory: false
+      output: "Inefficiency captures with tags and severity"
+      verification: "Captures written during work"
+      failure_mode: "Lost capture signal"
+    - step: 8
+      action: "ILL synthesis - On command via retrospective"
+      mandatory: false
+      output: "Synthesis in .memory/ill/synthesis.md"
+      verification: "Patterns grouped by tag, promotion candidates flagged"
+      failure_mode: "Missed pattern identification"
+  entry_conditions:
+    - condition: "FULL mode active (QUICK mode has no memory)"
+      check: ".memory/ directory exists"
+    - condition: "Session starting with no prior context"
+      check: "Boot Phase initiated"
+  exit_conditions:
+    - condition: "Session close completed with graph notes created"
+      check: "All notes in vault, staging cleaned"
+    - condition: "ILL captures synthesized if >=1 exist"
+      check: "Synthesis written, history archived"
+  output_destination:
+    path: ".memory/"
+    format: markdown
+    overwrite: false
+
+gates:
+  - gate_id: full-mode-only
+    gate_type: hard_block
+    trigger: "Memorybank invoked in QUICK mode"
+    message: "Memorybank is FULL MODE ONLY. QUICK mode has no memory."
+    blocking_command: null
+  - gate_id: mandatory-close
+    gate_type: hard_block
+    trigger: "Session ending without session close in FULL mode"
+    message: "Session close is MANDATORY in FULL mode. No exceptions."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Memorybank invoked in QUICK mode"
+    description: "QUICK mode = no memory. Memorybank does not apply."
+    severity: BLOCKER
+    prevention: "Check .memory/ exists before invoking"
+  - pattern: "Skipping checkpoint in FULL mode"
+    description: "Every task needs checkpoint in FULL mode."
+    severity: BLOCKER
+    prevention: "Run checkpoint after every task"
+  - pattern: "Skipping session close"
+    description: "MANDATORY in FULL mode. No exceptions."
+    severity: BLOCKER
+    prevention: "Always run session close before ending"
+  - pattern: "Writing directly to vault during close"
+    description: "Use ATOMIC_CLOSE.md staging pattern."
+    severity: BLOCKER
+    prevention: "Write to staging, validate, move, cleanup"
+
+quick_ref:
+  trigger_line: "Session start, task complete, checkpoint, close session in FULL mode"
+  key_constraint: "FULL MODE ONLY - QUICK mode has no memory"
+  command_sequence: "Boot: Check vault → Read 00_Memory/ + 02_Mistakes/ → Status Report → Task work → Checkpoint: Update files → Close: Staging → Validate → Move → Graph notes"
+  output_indicator: "Status Report at boot, updated memory files at checkpoint, graph notes at close"
+  do_not:
+    - "Invoke in QUICK mode"
+    - "Skip checkpoint"
+    - "Skip session close"
+    - "Write directly to vault"
+  common_mistakes:
+    - mistake: "Memory applies in QUICK mode"
+      fix: "QUICK mode = no memory. Don't invoke."
+    - mistake: "Skipping checkpoint"
+      fix: "Every task needs checkpoint in FULL mode."
+    - mistake: "Writing directly to vault"
+      fix: "Use ATOMIC_CLOSE staging pattern."

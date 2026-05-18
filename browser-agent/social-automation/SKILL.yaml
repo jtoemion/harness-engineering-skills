@@ -1,0 +1,121 @@
+skill:
+  name: social-automation
+  display_name: Social Media Automation
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\browser-agent\social-automation\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: automation
+  subcategory: social-media
+  tags: [twitter, x.com, bluesky, social-media, posting, automation, opencode-browser]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "Twitter posting"
+      type: keyword
+      required: true
+    - condition: "social media automation"
+      type: keyword
+      required: true
+    - condition: "post to X"
+      type: keyword
+      required: false
+    - condition: "automate bluesky"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 85
+
+behavior:
+  summary: "Automates social media posting (Twitter/X, Bluesky) via browser automation. MANDATORY: MUST use opencode-browser, NEVER playwright/CDP/stagehand."
+  detailed_description: "Social media automation REQUIRES opencode-browser. This is not optional. Using playwright_browser_*, chrome-devtools_*, or stagehand_* is a DIRECT VIOLATION regardless of circumstances. Workflow: Launch browser → Navigate → Auth check → Login flow if needed → Post form → Handle failures with retry loop. Sites with login walls/bot detection (x.com, Bluesky) require opencode-browser via _backends/chrome_backend.py. Mandatory failure-retry: write to failures.md → read → extract fix → retry × 2 → escalate."
+  process:
+    - step: 1
+      action: "Verify opencode-browser broker is running"
+      mandatory: true
+      output: "Broker available for connections"
+      verification: "Check broker status or proceed and handle unavailable case"
+      failure_mode: "If unavailable, report as blocker - do NOT substitute forbidden tools"
+    - step: 2
+      action: "Navigate to site and check auth state"
+      mandatory: true
+      output: "Logged in or login required"
+      verification: "Page snapshot shows home feed or login form"
+      failure_mode: "Navigation fails → retry → escalate"
+    - step: 3
+      action: "If not logged in: Execute login flow"
+      mandatory: true
+      output: "Authenticated session"
+      verification: "URL shows /home or home feed visible"
+      failure_mode: "Login fails → failures.md → retry → escalate"
+    - step: 4
+      action: "Navigate to post form and compose"
+      mandatory: true
+      output: "Tweet composed in composer dialog"
+      verification: "Composer dialog open, textarea has content"
+      failure_mode: "Compose fails → failures.md → retry → escalate"
+    - step: 5
+      action: "Submit post"
+      mandatory: true
+      output: "Post published successfully"
+      verification: "Dialog closes, post appears in timeline"
+      failure_mode: "Post fails → failures.md → retry × 2 → escalate"
+  entry_conditions:
+    - condition: "opencode-browser broker running"
+      check: "Process active at configured socket"
+    - condition: "Credentials available OR login flow defined"
+      check: "User provides auth or uses defined login flow"
+  exit_conditions:
+    - condition: "Post published successfully"
+      check: "Tweet appears in timeline, dialog closed"
+    - condition: "Failure documented and retried"
+      check: "failures.md has entry, max 3 attempts"
+  output_destination:
+    path: "domain-skills/<site>/failures.md"
+    format: "markdown"
+    overwrite: false
+
+gates:
+  - gate_id: opencode_browser_required
+    gate_type: hard_block
+    trigger: "Using playwright_browser_*, chrome-devtools_*, or stagehand_* for social media"
+    message: "Social media automation MUST use opencode-browser. Using Playwright, CDP, or Stagehand is FORBIDDEN regardless of circumstances. If broker unavailable, report as blocker."
+    blocking_command: null
+  - gate_id: failure_retry_loop
+    gate_type: hard_block
+    trigger: "Failure without logging to failures.md"
+    message: "Every failure MUST trigger retry loop: log to failures.md → read last failure → apply fix → retry × 2 → escalate to user."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Using Playwright, CDP, or Stagehand for social media"
+    description: "Using any tool other than opencode-browser for social automation violates the core requirement."
+    severity: BLOCKER
+    prevention: "Use only _backends/chrome_backend.py. If broker unavailable, report blocker - do NOT substitute."
+  - pattern: "Skipping failure-retry loop"
+    description: "Not logging failures and retrying before escalating wastes potential fixes."
+    severity: BLOCKER
+    prevention: "Every failure: write to failures.md → read → extract fix → retry → escalate after 3 attempts."
+  - pattern: "Asking user for credentials without attempting login flow"
+    description: "Bypassing the defined login flow wastes user time."
+    severity: MAJOR
+    prevention: "Use the documented login flow first. Only ask if flow fails after retries."
+
+quick_ref:
+  trigger_line: "Automate Twitter/X or Bluesky posting"
+  key_constraint: "MUST use opencode-browser ONLY - Playwright, CDP, Stagehand are FORBIDDEN. Broker unavailable = report blocker."
+  command_sequence: "1. Verify broker running → 2. Navigate → 3. Check auth → 4. Login if needed → 5. Compose → 6. Post → 7. On failure: log→read→retry→escalate"
+  output_indicator: "Tweet posted OR failures.md updated with retry count"
+  do_not:
+    - "Use playwright_browser_* for social"
+    - "Use chrome-devtools_* for social"
+    - "Use stagehand_* for social"
+    - "Skip failure-retry loop"
+    - "Ask for credentials without trying login flow"
+  common_mistakes:
+    - mistake: "Trying Playwright as fallback when broker unavailable"
+      fix: "Report as blocker. Never substitute forbidden tools - violation regardless of circumstances."
+    - mistake: "Not documenting failures before retry"
+      fix: "Write to failures.md before every retry - log error, URL, action, proposed fix"

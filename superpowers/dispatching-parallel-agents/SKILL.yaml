@@ -1,0 +1,140 @@
+skill:
+  name: dispatching-parallel-agents
+  display_name: "Dispatching Parallel Agents"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\dispatching-parallel-agents\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: automation
+  subcategory: parallelization
+  tags:
+    - parallel
+    - agents
+    - dispatch
+    - efficiency
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "multiple failures"
+      type: keyword
+      required: true
+    - condition: "parallel"
+      type: keyword
+      required: false
+    - condition: "concurrent"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: complex
+  weight: 75
+
+behavior:
+  summary: "Dispatch one agent per independent problem domain when facing multiple unrelated failures. Let them work concurrently to solve independent problems in parallel."
+  detailed_description: "When you have multiple unrelated failures (different test files, different subsystems, different bugs), investigating them sequentially wastes time. Each investigation is independent and can happen in parallel. Core principle: Dispatch one agent per independent problem domain. Let them work concurrently. Use when: 3+ test files failing with different root causes, multiple subsystems broken independently, each problem can be understood without context from others, no shared state. Don't use when: failures are related, need to understand full system state, agents would interfere with each other."
+  process:
+    - step: 1
+      action: "Identify Independent Domains — Group failures by what's broken"
+      mandatory: true
+      output: "Grouped problem domains"
+      verification: "Each group is independent from others"
+      failure_mode: "Grouping related issues wastes parallelization"
+    - step: 2
+      action: "Verify independence — Can they work in parallel without sharing state?"
+      mandatory: true
+      output: "Confirmation of parallel capability"
+      verification: "No shared state, no interference"
+      failure_mode: "Parallel agents conflict"
+    - step: 3
+      action: "Create Focused Agent Tasks — Each agent gets specific scope, clear goal, constraints"
+      mandatory: true
+      output: "Individual task briefs for each agent"
+      verification: "Each brief is focused, self-contained, specific output"
+      failure_mode: "Too broad = agent gets lost"
+    - step: 4
+      action: "Dispatch in Parallel — All agents start concurrently"
+      mandatory: true
+      output: "Multiple agents working simultaneously"
+      verification: "All agents dispatched at once"
+      failure_mode: "Sequential dispatch loses parallel benefit"
+    - step: 5
+      action: "Review and Integrate — Read each summary, check for conflicts, run full test suite"
+      mandatory: true
+      output: "All fixes integrated, conflicts resolved"
+      verification: "Full test suite passes, no conflicts"
+      failure_mode: "Undetected conflicts break things"
+    - step: 6
+      action: "Spot Check — Verify agents didn't make systematic errors"
+      mandatory: true
+      output: "Quality verified"
+      verification: "Manual spot check of changes"
+      failure_mode: "Systematic errors in all agents"
+  entry_conditions:
+    - condition: "Multiple failures (3+)"
+      check: "More than 2 independent problems"
+    - condition: "Independence confirmed"
+      check: "No shared state, different root causes"
+  exit_conditions:
+    - condition: "All agents completed"
+      check: "Each agent returned with summary"
+    - condition: "Full test suite passes"
+      check: "All fixes work together"
+    - condition: "No conflicts detected"
+      check: "Agents didn't edit same code"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: verify_independence
+    gate_type: warning
+    trigger: "Dispatching parallel agents without verifying independence"
+    message: "Verify failures are independent before dispatching. Related failures should be investigated together."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Too broad: 'Fix all the tests'"
+    description: "Agent gets lost in scope"
+    severity: BLOCKER
+    prevention: "Specific scope: one test file or subsystem"
+  - pattern: "No context: 'Fix the race condition'"
+    description: "Agent doesn't know where to look"
+    severity: BLOCKER
+    prevention: "Paste error messages and test names"
+  - pattern: "No constraints"
+    description: "Agent might refactor everything"
+    severity: BLOCKER
+    prevention: "'Do NOT change production code' or 'Fix tests only'"
+  - pattern: "Vague output: 'Fix it'"
+    description: "You don't know what changed"
+    severity: MAJOR
+    prevention: "'Return summary of root cause and changes'"
+  - pattern: "Dispatching related failures in parallel"
+    description: "Fixing one might fix others, wasted work"
+    severity: BLOCKER
+    prevention: "Investigate together first"
+  - pattern: "Need full context but dispatching parallel"
+    description: "Understanding requires entire system"
+    severity: BLOCKER
+    prevention: "Single agent investigates all"
+
+quick_ref:
+  trigger_line: "multiple failures, parallel, concurrent"
+  key_constraint: "Only dispatch in parallel when problems are truly independent"
+  command_sequence: "Identify independent domains → Verify no shared state → Create focused briefs → Dispatch all at once → Review each summary → Check for conflicts → Run full suite → Spot check"
+  output_indicator: "All fixes integrated, full test suite passes, no conflicts"
+  do_not:
+    - "Dispatch related failures in parallel"
+    - "Give broad scope to agents"
+    - "Skip conflict check"
+    - "Trust agent output without verification"
+  common_mistakes:
+    - mistake: "Not verifying independence"
+      fix: "Check: fixing one might fix others?"
+    - mistake: "Too broad scope"
+      fix: "One test file or subsystem per agent"
+    - mistake: "No constraints"
+      fix: "Say what NOT to change"
+    - mistake: "Skipping conflict check"
+      fix: "Review all changes together"

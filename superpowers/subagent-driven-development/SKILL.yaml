@@ -1,0 +1,194 @@
+skill:
+  name: subagent-driven-development
+  display_name: "Subagent-Driven Development"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\subagent-driven-development\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: automation
+  subcategory: delegation
+  tags:
+    - subagent
+    - delegation
+    - development
+    - review
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "subagent"
+      type: keyword
+      required: true
+    - condition: "dispatch"
+      type: keyword
+      required: false
+    - condition: "delegate"
+      type: keyword
+      required: false
+  mode_required: full
+  min_task_complexity: complex
+  weight: 80
+
+behavior:
+  summary: "Execute implementation plans with fresh subagent per task and two-stage review (spec compliance then code quality). High quality, fast iteration."
+  detailed_description: "Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration. Process per task: Create TodoWrite, extract full task text (never let subagent read plan), CREATE SUBAGENT_BRIEF.md (compact), DISPATCH implementer, SUBAGENT writes SUBAGENT_RESULT.md, READ RESULT only, CHECK MISTAKES.md, DISPATCH spec reviewer, if issues → implementer fixes → re-review, DISPATCH code quality reviewer, if issues → implementer fixes → re-review, MARK task complete, LOG to SESSIONS.md, REPEAT. Uses harness boot sequence. Required: using-git-worktrees, writing-plans, requesting-code-review, finishing-a-development-branch."
+  process:
+    - step: 1
+      action: "Run harness boot sequence BEFORE any task"
+      mandatory: true
+      output: "Session initialized, mistakes loaded"
+      verification: "Boot complete, memory loaded"
+      failure_mode: "Missing context from previous sessions"
+    - step: 2
+      action: "Create TodoWrite for all tasks"
+      mandatory: true
+      output: "Task list tracking progress"
+      verification: "All tasks in TodoWrite"
+      failure_mode: "No tracking, tasks lost"
+    - step: 3
+      action: "Extract full task text + context (never let subagent read plan)"
+      mandatory: true
+      output: "Task context ready for brief"
+      verification: "Full text available, not plan reference"
+      failure_mode: "Subagent needs plan context, giving it access risks scope creep"
+    - step: 4
+      action: "CREATE SUBAGENT_BRIEF.md (compact, max 1 page)"
+      mandatory: true
+      output: "Brief file ready for dispatch"
+      verification: "Brief under 1 page, clear goal"
+      failure_mode: "Too long = subagent gets lost"
+    - step: 5
+      action: "DISPATCH implementer subagent"
+      mandatory: true
+      output: "Subagent working on task"
+      verification: "Subagent started"
+      failure_mode: "Not dispatching means not delegating"
+    - step: 6
+      action: "READ SUBAGENT_RESULT.md only after completion"
+      mandatory: true
+      output: "Result read, memory updated"
+      verification: "Result file read, summary noted"
+      failure_mode: "Not reading result loses implementation info"
+    - step: 7
+      action: "CHECK MISTAKES.md before each task"
+      mandatory: true
+      output: "Known mistakes surfaced"
+      verification: "Check performed, relevant mistakes noted"
+      failure_mode: "Repeating past mistakes"
+    - step: 8
+      action: "DISPATCH spec reviewer subagent"
+      mandatory: true
+      output: "Spec compliance review"
+      verification: "Review performed"
+      failure_mode: "Skipping spec review = wrong implementation"
+    - step: 9
+      action: "If issues → implementer fixes → re-review"
+      mandatory: true
+      output: "Issues resolved"
+      verification: "Re-review passes"
+      failure_mode: "Proceeding with unfixed issues"
+    - step: 10
+      action: "DISPATCH code quality reviewer"
+      mandatory: true
+      output: "Code quality review"
+      verification: "Review performed"
+      failure_mode: "Skipping quality review = poor code"
+    - step: 11
+      action: "If issues → implementer fixes → re-review"
+      mandatory: true
+      output: "Quality issues resolved"
+      verification: "Re-review passes"
+      failure_mode: "Poor quality code in codebase"
+    - step: 12
+      action: "MARK task complete, LOG to SESSIONS.md"
+      mandatory: true
+      output: "Task tracked as complete"
+      verification: "Logged to SESSIONS.md"
+      failure_mode: "No record of work done"
+    - step: 13
+      action: "REPEAT for next task"
+      mandatory: true
+      output: "Next task started"
+      verification: "Next brief created, dispatch"
+      failure_mode: "Stopping early, not completing plan"
+  entry_conditions:
+    - condition: "Implementation plan exists"
+      check: "Plan in docs/plans/"
+    - condition: "Harness booted"
+      check: "Boot sequence run, mistakes loaded"
+  exit_conditions:
+    - condition: "All tasks completed with both reviews passing"
+      check: "Spec and quality reviews pass for all tasks"
+    - condition: "SESSIONS.md logged"
+      check: "All work logged"
+  output_destination:
+    path: .memory/SESSIONS.md
+    format: markdown
+    overwrite: false
+
+gates:
+  - gate_id: harness_boot_before_tasks
+    gate_type: hard_block
+    trigger: "Starting tasks without running harness boot"
+    message: "Run harness boot sequence BEFORE any task."
+    blocking_command: null
+  - gate_id: spec_before_quality
+    gate_type: hard_block
+    trigger: "Starting quality review before spec compliance review"
+    message: "Review order: spec compliance BEFORE code quality."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Start on main/master without consent"
+    description: "Risking production codebase"
+    severity: BLOCKER
+    prevention: "Use git worktrees, get consent"
+  - pattern: "Skip spec OR code quality reviews"
+    description: "Missing verification steps"
+    severity: BLOCKER
+    prevention: "Both reviews required"
+  - pattern: "Proceed with unfixed issues"
+    description: "Known issues left in code"
+    severity: BLOCKER
+    prevention: "Fix before moving on"
+  - pattern: "Dispatch multiple implementers in parallel"
+    description: "No coordination, potential conflicts"
+    severity: BLOCKER
+    prevention: "One subagent per task, sequential"
+  - pattern: "Make subagent read plan (provide full text)"
+    description: "Giving plan access causes scope creep"
+    severity: BLOCKER
+    prevention: "Extract task, provide context in brief"
+  - pattern: "Skip review loops"
+    description: "Issues not fixed"
+    severity: BLOCKER
+    prevention: "Re-review after fixes"
+  - pattern: "Move to next task with open issues"
+    description: "Accumulating technical debt"
+    severity: BLOCKER
+    prevention: "Close issues before moving on"
+  - pattern: "Ignore harness mistakes check"
+    description: "Repeating past failures"
+    severity: BLOCKER
+    prevention: "Check MISTAKES.md before each task"
+
+quick_ref:
+  trigger_line: "subagent, dispatch, delegate tasks"
+  key_constraint: "Fresh subagent per task + two-stage review (spec then quality)"
+  command_sequence: "Boot harness → Create TodoWrite → Extract task → Create brief → Dispatch implementer → Read result → Check mistakes → Dispatch spec reviewer → Fix if needed → Dispatch quality reviewer → Fix if needed → Log and repeat"
+  output_indicator: "All tasks complete, both reviews pass, logged to SESSIONS.md"
+  do_not:
+    - "Work on main/master"
+    - "Skip any review"
+    - "Dispatch parallel implementers"
+    - "Give subagent plan access"
+    - "Move on with open issues"
+  common_mistakes:
+    - mistake: "Not running harness boot"
+      fix: "Boot before starting"
+    - mistake: "Skipping spec review"
+      fix: "Always do spec before quality"
+    - mistake: "Not checking MISTAKES.md"
+      fix: "Check before each task"
+    - mistake: "One subagent reading plan"
+      fix: "Extract task text into brief"

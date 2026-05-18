@@ -1,0 +1,129 @@
+skill:
+  name: writing-skills
+  display_name: Writing Skills
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\writing-skills\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: documentation
+  tags: [skills, creating, editing, testing, verification, deployment, tdd]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "create new skill, edit existing skill, verify skill, test skill, deploy skill, skill creation"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 8
+
+behavior:
+  summary: "TDD applied to process documentation — create skills via RED-GREEN-REFACTOR cycle"
+  detailed_description: >
+    Writing skills IS Test-Driven Development applied to process documentation.
+    TDD Mapping: Test case = pressure scenario with subagent, Production code = Skill document (SKILL.md).
+    Test fails = agent violates rule without skill (baseline). Test passes = agent complies with skill present.
+    Refactor = close loopholes while maintaining compliance.
+    REQUIRED: Understand test-driven-development before using this.
+    SKILL.md Structure: Frontmatter (name, description only), Overview, When to Use, Core Pattern, Quick Reference.
+    Claude Search Optimization: Description = When to Use NOT What skill does. Rich description with triggering conditions.
+    Token efficiency: getting-started workflows <150 words, frequently-loaded <200, others <500.
+    The Iron Law: NO SKILL WITHOUT A FAILING TEST FIRST.
+  process:
+    - step: 1
+      action: "RED: Write failing test — run pressure scenario WITHOUT skill"
+      mandatory: true
+      output: "Document baseline behavior, exact rationalizations"
+      verification: "See what agents naturally do"
+    - step: 2
+      action: "GREEN: Write minimal skill — address specific rationalizations"
+      mandatory: true
+      output: "SKILL.md addressing baseline failures"
+      verification: "Test passes with skill"
+    - step: 3
+      action: "REFACTOR: Close loopholes — add explicit counters"
+      mandatory: true
+      output: "Bulletproof skill"
+      verification: "Re-test until no new rationalizations"
+    - step: 4
+      action: "Create SKILL.md with frontmatter (name, description)"
+      mandatory: true
+      output: "SKILL.md file"
+      verification: "Name uses letters/numbers/hyphens, description starts with Use when"
+    - step: 5
+      action: "Test skill with pressure scenarios"
+      mandatory: true
+      output: "Verified compliance"
+      verification: "Agent follows rule under pressure"
+    - step: 6
+      action: "Deploy skill (commit and push)"
+      mandatory: true
+      output: "Skill deployed"
+      verification: "Git push to fork"
+
+  entry_conditions:
+    - condition: "Need to create, edit, or verify a skill"
+      check: "TDD background understood (superpowers:test-driven-development)"
+  exit_conditions:
+    - condition: "Skill verified and deployed"
+      check: "RED-GREEN-REFACTOR completed, commit pushed"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: ws_001
+    gate_type: hard_block
+    trigger: "Writing skill without failing test first"
+    message: "The Iron Law: NO SKILL WITHOUT A FAILING TEST FIRST"
+    blocking_command: null
+  - gate_id: ws_002
+    gate_type: hard_block
+    trigger: "Deploying untested skill"
+    message: "Untested skills have issues — deploy after testing only"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Writing skill before testing"
+    description: "Violates The Iron Law"
+    severity: BLOCKER
+    prevention: "Delete code, start over with test first"
+  - pattern: "Narrative example (session-specific story)"
+    description: "Too specific, not reusable"
+    severity: MAJOR
+    prevention: "Use pattern examples, not narrative"
+  - pattern: "Multi-language code examples"
+    description: "Mediocre quality, maintenance burden"
+    severity: MAJOR
+    prevention: "One excellent example in most relevant language"
+  - pattern: "Generic labels in flowcharts"
+    description: "Labels should have semantic meaning"
+    severity: MINOR
+    prevention: "Use descriptive labels, not helper1, step2"
+  - pattern: "Description summarizes workflow"
+    description: "Claude may follow description instead of reading skill"
+    severity: BLOCKER
+    prevention: "Description = When to Use, NOT What skill does"
+
+quick_ref:
+  trigger_line: "create skill, edit skill, verify skill, test skill"
+  key_constraint: "RED-GREEN-REFACTOR: Test first, write minimal skill, close loopholes"
+  command_sequence: "RED (baseline) → GREEN (skill) → REFACTOR (loopholes) → Deploy"
+  output_indicator: "Test passing with skill, rationalizations countered"
+  do_not:
+    - "Write code before test"
+    - "Deploy untested skills"
+    - "Summarize workflow in description"
+    - "Use narrative examples"
+    - "Skip testing because confident"
+  common_mistakes:
+    - mistake: "Skill is obviously clear to me"
+      fix: "Clear to you ≠ clear to other agents — test it"
+    - mistake: "It's just a reference"
+      fix: "References have gaps — test retrieval"
+    - mistake: "No time to test"
+      fix: "Untested skill wastes more time fixing later"

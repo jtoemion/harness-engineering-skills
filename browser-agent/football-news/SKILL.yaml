@@ -1,0 +1,137 @@
+skill:
+  name: football-news
+  display_name: Football News Scraping
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\browser-agent\football-news\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: automation
+  subcategory: sports-news
+  tags: [football, soccer, news, scraping, transfers, obsidian-vault]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "football news"
+      type: keyword
+      required: true
+    - condition: "scrape football news"
+      type: keyword
+      required: false
+    - condition: "football transfers"
+      type: keyword
+      required: false
+    - condition: "Premier League news"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: simple
+  weight: 90
+
+behavior:
+  summary: "Scrapes football news from web sources and creates properly formatted news files in the Obsidian vault with entity wikilinking."
+  detailed_description: "Uses web search as primary tool since X.com requires opencode-browser. Workflow: Check for duplicates via scorer → Search for news → Fetch FULL article via webfetch → Create news files with required frontmatter format → Update tracker. MANDATORY: Full article text, not summaries. Every entity must be wikilinked. Scoring system prioritizes reliability (Tier 1 sources: Fabrizio Romano, David Ornstein, BBC, Sky, ESPN = 30pts), news type (Breaking=25, Transfer=20), recency (Today=10), uniqueness (+10 if new)."
+  process:
+    - step: 1
+      action: "Check existing news files to avoid duplicates"
+      mandatory: true
+      output: "List of existing news filenames"
+      verification: "Get-ChildItem on entities/news folder"
+      failure_mode: "Proceed but note potential duplicates"
+    - step: 2
+      action: "Run scorer to prioritize what to fetch"
+      mandatory: true
+      output: "TOP 15 news by read value, LOW value list"
+      verification: "python score.py on vault path"
+      failure_mode: "Continue without scoring guidance"
+    - step: 3
+      action: "Search web for football news"
+      mandatory: true
+      output: "List of article URLs from search"
+      verification: "websearch returns results with URLs"
+      failure_mode: "Report no results found"
+    - step: 4
+      action: "Fetch FULL article content via webfetch (NOT search snippet)"
+      mandatory: true
+      output: "Complete article text with quotes, context, details"
+      verification: "webfetch returns full article body"
+      failure_mode: "Cannot proceed without article content"
+    - step: 5
+      action: "Create news file with required format and wikilinks"
+      mandatory: true
+      output: "Markdown file at entities/news/YYYY-MM-DD-topic-source.md"
+      verification: "File created with entities array and tags"
+      failure_mode: "File write fails → retry write"
+    - step: 6
+      action: "Update tracker after scraping"
+      mandatory: true
+      output: "Tracker refreshed with new entries"
+      verification: "python init-tracker.py completes"
+      failure_mode: "Continue without tracker update"
+  entry_conditions:
+    - condition: "Vault path accessible"
+      check: "C:/Users/jtoem/Assets/News/football exists"
+    - condition: "User requests football news"
+      check: "Task involves football/soccer news"
+  exit_conditions:
+    - condition: "News files created with full article content"
+      check: "File contains FULL article text, not summary"
+    - condition: "All entities wikilinked"
+      check: "Every club, player, manager has [[wikilink]]"
+    - condition: "Frontmatter correct: entities first, tags second"
+      check: "entities array before tags array in frontmatter"
+  output_destination:
+    path: "C:/Users/jtoem/Assets/News/football/entities/news/"
+    format: "markdown"
+    overwrite: false
+
+gates:
+  - gate_id: full_article_fetch
+    gate_type: hard_block
+    trigger: "Using search snippet/summary instead of webfetch for full article"
+    message: "MUST use webfetch to get complete article. Search results only provide headlines - full content contains quotes, context, details."
+    blocking_command: null
+  - gate_id: entity_wikilinking
+    gate_type: hard_block
+    trigger: "Creating news file without wikilinking all entities"
+    message: "Every named entity (clubs, players, managers, competitions) MUST have [[wikilink]] in both content and frontmatter entities array."
+    blocking_command: null
+  - gate_id: frontmatter_order
+    gate_type: hard_block
+    trigger: "tags before entities in frontmatter"
+    message: "MUST have 'entities:' array before 'tags:' array in frontmatter. Entities FIRST, tags SECOND."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Summarizing articles instead of full content"
+    description: "Using search snippets instead of full article text loses critical context, quotes, and details."
+    severity: BLOCKER
+    prevention: "Always use webfetch to retrieve complete article before creating news file."
+  - pattern: "Forgetting to wikilink entities"
+    description: "Omitting [[wikilink]] for clubs, players, managers breaks vault interconnectivity."
+    severity: BLOCKER
+    prevention: "Every named entity mentioned in article must have [[wikilink]] in content AND frontmatter."
+  - pattern: "Creating duplicates"
+    description: "Not checking existing news before creating new file wastes storage and causes confusion."
+    severity: MAJOR
+    prevention: "Check entities/news folder before creating new file. Use scorer to identify already-tracked news."
+  - pattern: "Wrong frontmatter order"
+    description: "tags before entities violates the required schema and breaks parsing."
+    severity: BLOCKER
+    prevention: "Always place entities array before tags array in frontmatter YAML."
+
+quick_ref:
+  trigger_line: "Scrape football news for Obsidian vault"
+  key_constraint: "MUST fetch full article via webfetch - never use search snippets. Every entity MUST be wikilinked."
+  command_sequence: "1. Check existing files → 2. Run scorer → 3. Search web → 4. Fetch full article via webfetch → 5. Create file with wikilinks → 6. Update tracker"
+  output_indicator: "News files created at entities/news/ with FULL article content and all entities wikilinked"
+  do_not:
+    - "Use search snippets instead of webfetch"
+    - "Skip entity wikilinking"
+    - "Put tags before entities in frontmatter"
+    - "Create duplicates without checking vault"
+  common_mistakes:
+    - mistake: "Writing summary instead of full article"
+      fix: "Use webfetch to get complete article - write full content, not condensed summary"
+    - mistake: "Missing wikilinks for some entities"
+      fix: "Review article for all club, player, manager, competition names and add [[wikilink]] to each"

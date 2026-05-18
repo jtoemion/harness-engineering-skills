@@ -1,0 +1,130 @@
+skill:
+  name: retrospective
+  display_name: Retrospective & ILL Synthesis
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\retrospective\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: quality
+  subcategory: lessons-learned
+  tags: [retrospective, lessons, synthesis, pipeline, captures, mistakes, patterns]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "close session"
+      type: keyword
+      required: true
+    - condition: "session close"
+      type: keyword
+      required: true
+    - condition: "lessons learned"
+      type: keyword
+      required: false
+  mode_required: full
+  min_task_complexity: any
+  weight: 100
+
+behavior:
+  summary: Mandatory closing protocol that extracts pipeline lessons AND synthesizes ILL captures into actionable patterns, fires at every session close with two-section output.
+  detailed_description: >
+    The retrospective skill combines two functions: (1) Pipeline Lessons - always runs at session close, answers what was planned vs what happened, extracts lessons by category (Estimation, Scope, Tooling, Pattern, Anti-pattern, Blocker), writes to JSON knowledge graph (mistakes.json, patterns.json), checks for recurring issues, (2) Moment Captures - runs only if ILL captures >= 1, gathers captures, groups by tag, quantifies time/cost, generates synthesis markdown, promotes patterns (3+ sessions across 2+ projects), archives processed captures.
+  process:
+    - step: 1
+      action: "Pipeline Review - Answer what was planned vs what happened"
+      mandatory: true
+      output: "Comparison of original plan vs reality"
+      verification: "All deviations identified"
+      failure_mode: "Missing deviations loses lesson signal"
+    - step: 2
+      action: "Extract Lessons by category"
+      mandatory: true
+      output: "Classified lessons: Estimation, Scope, Tooling, Pattern, Anti-pattern, Blocker"
+      verification: "Each deviation classified into a category"
+      failure_mode: "Unclassified lessons lack actionable insight"
+    - step: 3
+      action: "Write to JSON Knowledge Graph"
+      mandatory: true
+      output: "Append to .memory/mistakes.json and .memory/patterns.json"
+      verification: "Entries include required fields (error, cause, lesson, status, category)"
+      failure_mode: "Missing JSON entries loses knowledge"
+    - step: 4
+      action: "Check for Recurring Issues"
+      mandatory: true
+      output: "Flag patterns appearing 2+ times, files causing repeated problems, estimation errors"
+      verification: "Scan previous entries, escalate if recurring"
+      failure_mode: "Missing recurrence loses systemic insight"
+    - step: 5
+      action: "Check ILL Captures - Count entries in captures.md and wins.md"
+      mandatory: true
+      output: "Capture count"
+      verification: "If >=1, run synthesis. If 0, skip Section 2."
+      failure_mode: "Running when no captures wastes effort"
+    - step: 6
+      action: "ILL Synthesis - Gather captures, group by tag, quantify, generate, promote, archive"
+      mandatory: false
+      output: "Synthesis markdown in .memory/ill/synthesis.md"
+      verification: "Pattern → cost → fix structure, promotion candidates flagged"
+      failure_mode: "Lost pattern identification"
+    - step: 7
+      action: "Combined Output - Announce retrospective complete"
+      mandatory: true
+      output: "Summary with pipeline, deviations, lessons, captures, recurring, files written"
+      verification: "All fields populated"
+      failure_mode: "Incomplete output loses summary"
+  entry_conditions:
+    - condition: "Session close initiated in FULL mode"
+      check: "User says close session or equivalent"
+    - condition: "Pipeline just completed"
+      check: "Work stages finished"
+  exit_conditions:
+    - condition: "Pipeline lessons extracted and written to JSON"
+      check: "mistakes.json and patterns.json updated"
+    - condition: "ILL synthesis done if captures >=1"
+      check: "synthesis.md written or skips noted"
+  output_destination:
+    path: ".memory/"
+    format: json
+    overwrite: false
+
+gates:
+  - gate_id: mandatory-close
+    gate_type: hard_block
+    trigger: "Session close without retrospective in FULL mode"
+    message: "Retrospective is MANDATORY at every session close in FULL mode."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Skipping retrospective on smooth pipelines"
+    description: "Smooth pipelines have patterns worth replicating. Capture what went right."
+    severity: MINOR
+    prevention: "Always run - smooth is still data"
+  - pattern: "Thinking I'll remember lessons for next time"
+    description: "You're stateless. Write it down."
+    severity: MAJOR
+    prevention: "Always write to JSON"
+  - pattern: "Not enough captures to synthesize"
+    description: "Even 1 capture has signal. Old threshold of 3 was too high."
+    severity: MINOR
+    prevention: "Run synthesis if >=1 captures"
+  - pattern: "Thinking ILL synthesis is separate"
+    description: "Merged. One close ritual, two sections."
+    severity: MINOR
+    prevention: "Both sections in one retrospective"
+
+quick_ref:
+  trigger_line: "Every session close in FULL mode"
+  key_constraint: "MANDATORY at EVERY session close - not optional"
+  command_sequence: "Pipeline Review → Extract Lessons → Write JSON → Check Recurring → Check ILL Captures (if >=1: Gather→Group→Quantify→Generate→Promote→Archive) → Output Summary"
+  output_indicator: "Combined output with pipeline summary, deviations count, lessons captured, captures synthesized, files written"
+  do_not:
+    - "Skip on smooth pipelines"
+    - "Assume memory is perfect"
+    - "Skip if <3 captures (threshold is now 1)"
+  common_mistakes:
+    - mistake: "Nothing to capture on smooth pipeline"
+      fix: "Smooth pipelines have patterns too. Always capture."
+    - mistake: "I'll remember this"
+      fix: "You're stateless. Write to JSON."
+    - mistake: "Not enough captures to synthesize"
+      fix: "Threshold is 1, not 3. Run if >=1."

@@ -1,0 +1,130 @@
+skill:
+  name: e2e-scaffold
+  display_name: E2E Test Infrastructure Scaffold
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\harness\e2e-scaffold\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: testing
+  subcategory: infrastructure
+  tags: [e2e, testing, scaffold, infrastructure, playwright, vitest]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "e2e scaffold | set up e2e testing | e2e infrastructure | scaffold e2e"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 95
+  disambiguation_rule: |
+    test-review = "Are my EXISTING tests good quality?" (review/audit)
+    test-driven-development = "Am I WRITING new code? Write tests first!" (process)
+    e2e-scaffold = "Do I need E2E test INFRASTRUCTURE setup?" (scaffolding)
+
+behavior:
+  summary: Scaffold complete E2E testing infrastructure tailored to any project's architecture.
+  detailed_description: |
+    Analyzes project type, state management, test framework. Generates TestFixtures,
+    ScenarioBuilder, TestHelpers, AsyncAssert, and example test. 3-step process:
+    ANALYZE.md → GENERATE.md → VERIFY.md. Architecture-driven generation adapts to
+    web-app, API, mobile, desktop, game. Write-as-you-go — each file written to disk
+    as generated, not batched at end.
+
+  process:
+    - step: 1
+      action: Run ANALYZE.md — detect project type, state mgmt, test framework, domain entities
+      mandatory: true
+      output: Project analysis with detected type + framework
+      verification: Project type identified, framework confirmed
+      failure_mode: Wrong detection = wrong infrastructure code
+
+    - step: 2
+      action: Run GENERATE.md — create E2E infrastructure files (TestFixtures, ScenarioBuilder, TestHelpers, AsyncAssert)
+      mandatory: true
+      output: All infrastructure files written to disk
+      verification: All expected files exist
+      failure_mode: Missing framework check = broken infrastructure
+
+    - step: 3
+      action: Run VERIFY.md — generate example test, run verification, confirm infrastructure works
+      mandatory: true
+      output: Example test runs and passes
+      verification: Test execution exits 0
+      failure_mode: Skipping verification = faith-based infrastructure
+
+  entry_conditions:
+    - condition: "Test framework exists in project (jest, vitest, pytest, xcode, etc.)"
+      check: "Look for tests/, package.json, pytest.ini, or similar"
+    - condition: "Application state management identifiable"
+      check: "Framework detected in step 1"
+    - condition: "No existing E2E infrastructure at target directory"
+      check: "Target directory is empty or specified"
+
+  exit_conditions:
+    - condition: "All infrastructure files exist on disk"
+      check: "Files written match expected output list"
+    - condition: "Example test runs and passes"
+      check: "Test execution exits 0"
+
+  output_destination:
+    path: project-root/e2e/ (or specified directory)
+    format: javascript/typescript
+    overwrite: false
+
+gates:
+  - gate_id: no-preflight-skip
+    gate_type: hard_block
+    trigger: Agent attempts to generate infrastructure before analyzing project
+    message: "HARD-GATE: Preflight validation required — detect project type and framework first."
+    blocking_command: null
+
+  - gate_id: no-batch-writes
+    gate_type: hard_block
+    trigger: Agent accumulates all files and writes at end instead of write-as-you-go
+    message: "HARD-GATE: Write each infrastructure file immediately after generating it."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: Skip preflight validation
+    description: Missing framework or state manager = broken infrastructure
+    severity: BLOCKER
+    prevention: Always validate prerequisites before generating
+  - pattern: Generate code before analysis
+    description: Architecture analysis drives all generation — wrong detection = wrong code
+    severity: BLOCKER
+    prevention: Analyze first, then generate
+  - pattern: Skip verification step
+    description: Unverified infrastructure is faith, not engineering
+    severity: MAJOR
+    prevention: Run the test — verify infrastructure actually works
+
+components:
+  files_written:
+    - path: e2e/TestFixtures.{ts,js}
+      format: typescript
+      required: true
+      template: null
+    - path: e2e/ScenarioBuilder.{ts,js}
+      format: typescript
+      required: true
+      template: null
+    - path: e2e/TestHelpers.{ts,js}
+      format: typescript
+      required: true
+      template: null
+    - path: e2e/AsyncAssert.{ts,js}
+      format: typescript
+      required: true
+      template: null
+
+quick_ref:
+  trigger_line: "Fires on 'e2e scaffold', 'set up e2e testing', 'e2e infrastructure', 'scaffold e2e'"
+  key_constraint: "HARD-GATE: Analyze before generate, write-as-you-go, verify with real test"
+  command_sequence: "ANALYZE.md (detect project) → GENERATE.md (write files) → VERIFY.md (run test)"
+  output_indicator: "After: e2e/ directory has TestFixtures, ScenarioBuilder, TestHelpers, AsyncAssert + passing test"
+  do_not:
+    - "Do NOT skip preflight validation"
+    - "Do NOT batch all writes at end"
+    - "Do NOT skip verification step"

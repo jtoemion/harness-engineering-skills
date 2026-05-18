@@ -1,0 +1,147 @@
+skill:
+  name: requesting-code-review
+  display_name: Requesting Code Review
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\requesting-code-review\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: quality
+  subcategory: review-request
+  tags: [code-review, PR, merge, subagent, reviewer, code-reviewer]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "task complete"
+      type: keyword
+      required: false
+    - condition: "feature complete"
+      type: keyword
+      required: false
+    - condition: "before merge"
+      type: keyword
+      required: false
+    - condition: "request review"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 70
+
+behavior:
+  summary: Dispatch code-reviewer subagent to catch issues before they cascade, with mandatory review points at task completion, major features, and before merge.
+  detailed_description: >
+    This skill dispatches the code-reviewer subagent at key points: (1) After each task in subagent-driven development - catch issues before compound, (2) After completing major feature - ensure feature quality, (3) Before merge to main - final checkpoint, (4) Optional: when stuck (fresh perspective), before refactoring (baseline check), after fixing complex bug. Process: get git SHAs (BASE and HEAD), dispatch superpowers:code-reviewer subagent with template placeholders (what was implemented, plan/requirements, SHAs, description), act on feedback (Critical: fix immediately, Important: fix before proceeding, Minor: note for later), push back if reviewer wrong with reasoning.
+  process:
+    - step: 1
+      action: "Determine if review point reached"
+      mandatory: true
+      output: "Decision to request review"
+      verification: "Mandatory: after task in subagent-dev, major feature, before merge"
+      failure_mode: "Missing mandatory review points allows issues to cascade"
+    - step: 2
+      action: "Get git SHAs - BASE and HEAD"
+      mandatory: true
+      output: "BASE_SHA and HEAD_SHA"
+      verification: "SHAs valid and represent change range"
+      failure_mode: "Invalid SHAs break subagent diff"
+    - step: 3
+      action: "Dispatch code-reviewer subagent"
+      mandatory: true
+      output: "Subagent review results"
+      verification: "Subagent returns with strengths, issues, assessment"
+      failure_mode: "Subagent failure leaves review incomplete"
+    - step: 4
+      action: "Fill template placeholders"
+      mandatory: true
+      output: "Populated template"
+      verification: "All placeholders filled: WHAT, PLAN, BASE, HEAD, DESC"
+      failure_mode: "Missing placeholders cause incomplete review"
+    - step: 5
+      action: "Act on feedback - Fix Critical immediately"
+      mandatory: true
+      output: "Critical fixes applied"
+      verification: "Critical issues resolved before proceeding"
+      failure_mode: "Unfixed Critical issues break things"
+    - step: 6
+      action: "Act on feedback - Fix Important before proceeding"
+      mandatory: true
+      output: "Important fixes applied"
+      verification: "Important issues resolved before next task"
+      failure_mode: "Important issues compound if not fixed"
+    - step: 7
+      action: "Act on feedback - Note Minor for later"
+      mandatory: false
+      output: "Minor issues noted"
+      verification: "Minor issues documented for future"
+      failure_mode: "Minor issues forgotten"
+    - step: 8
+      action: "Push back if reviewer wrong - with technical reasoning"
+      mandatory: false
+      output: "Pushback with reasoning"
+      verification: "Technical reasoning provided, code/tests showing it works"
+      failure_mode: "Invalid pushback without evidence"
+  entry_conditions:
+    - condition: "Task completed in subagent-driven development"
+      check: "Task finished, about to move to next"
+    - condition: "Major feature implementation complete"
+      check: "Feature code written and tests pass"
+    - condition: "About to merge to main"
+      check: "Ready for merge, all tests pass"
+  exit_conditions:
+    - condition: "Review completed and feedback addressed"
+      check: "Critical fixed, Important fixed or noted, assessment received"
+    - condition: "Ready to proceed or pushback submitted"
+      check: "Next action clear"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: mandatory-review-points
+    gate_type: warning
+    trigger: "At task complete in subagent-dev without review request"
+    message: "Review after EACH task in subagent-driven development to catch issues before compounding."
+    blocking_command: null
+  - gate_id: critical-unfixed
+    gate_type: hard_block
+    trigger: "Attempting to proceed with unfixed Critical issues"
+    message: "Critical issues must be fixed immediately before proceeding."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Skipping review because it's simple"
+    description: "Simple code still benefits from review"
+    severity: MINOR
+    prevention: "Always request review at mandatory points"
+  - pattern: "Ignoring Critical issues"
+    description: "Critical issues break things"
+    severity: BLOCKER
+    prevention: "Fix Critical immediately"
+  - pattern: "Proceeding with unfixed Important issues"
+    description: "Important issues compound"
+    severity: MAJOR
+    prevention: "Fix Important before proceeding"
+  - pattern: "Arguing with valid technical feedback"
+    description: "Valid feedback should be addressed"
+    severity: MAJOR
+    prevention: "Address valid feedback or provide counter-evidence"
+
+quick_ref:
+  trigger_line: "After task in subagent-dev, major feature complete, before merge"
+  key_constraint: "Request review at mandatory points - Critical fixes immediately, Important fixes before proceeding"
+  command_sequence: "Check if review point → Get SHAs (BASE, HEAD) → Dispatch code-reviewer subagent → Fill template → Fix Critical → Fix Important → Note Minor → Pushback if wrong with reasoning"
+  output_indicator: "Assessment received, Critical fixed, Important fixed or documented"
+  do_not:
+    - "Skip review because simple"
+    - "Ignore Critical issues"
+    - "Proceed with unfixed Important issues"
+    - "Argue with valid feedback without evidence"
+  common_mistakes:
+    - mistake: "Skipping review on simple tasks"
+      fix: "Review catches issues regardless of complexity"
+    - mistake: "Ignoring Critical issues"
+      fix: "Critical = fix immediately"
+    - mistake: "Not fixing Important before proceeding"
+      fix: "Important = fix before next task"

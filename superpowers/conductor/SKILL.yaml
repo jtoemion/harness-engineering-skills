@@ -1,0 +1,156 @@
+skill:
+  name: conductor
+  display_name: Conductor - Autonomous Workflow Orchestrator
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\conductor\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: automation
+  subcategory: workflow-orchestration
+  tags: [pipeline, sequence, orchestration, stages, workflow, skill-order, context-budget]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "multi-concern"
+      type: keyword
+      required: true
+    - condition: "vague idea"
+      type: keyword
+      required: false
+    - condition: "approved spec"
+      type: keyword
+      required: false
+    - condition: "plan ready"
+      type: keyword
+      required: false
+    - condition: "new feature"
+      type: keyword
+      required: false
+    - condition: "UI"
+      type: keyword
+      required: false
+    - condition: "bug"
+      type: keyword
+      required: false
+    - condition: "multiple tasks"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 50
+
+behavior:
+  summary: Autonomous workflow orchestrator that designs exact skill sequences and drives pipelines to completion, enforcing max 3 stages per session with explicit approval gates.
+  detailed_description: >
+    The Conductor implements a 6-phase pipeline: (1) Intent Analysis - classify against Intent Matrix and assign Complexity Tier, (2) Pipeline Construction - build skill sequence respecting context budget (max 3 stages) and atomic task rules (≤3 files), (3) Pipeline Proposal - present for approval with GO/ADJUST/SKIP/SWAP, (4) Await Approval - explicit GO required before execution, (5) Orchestrated Execution - announce each stage, pass outputs forward, handle session splits if needed, (6) Completion.
+  process:
+    - step: 1
+      action: "Intent Analysis - Classify against Intent Matrix"
+      mandatory: true
+      output: "Skill assignment based on signal type"
+      verification: "Correct skill mapped from Intent Matrix"
+      failure_mode: "Wrong skill assignment leads to inefficient pipeline"
+    - step: 2
+      action: "Assign Complexity Tier"
+      mandatory: true
+      output: "Tier classification (Simple/Medium/Large/Ultrathink)"
+      verification: "Tier matches task complexity"
+      failure_mode: "Incorrect tier causes pipeline misestimation"
+    - step: 3
+      action: "Pipeline Construction - Build skill sequence"
+      mandatory: true
+      output: "Ordered list of skills to invoke"
+      verification: "Skills ordered correctly, no missing prerequisites"
+      failure_mode: "Wrong order breaks skill dependencies"
+    - step: 4
+      action: "Check context budget - max 3 stages per session"
+      mandatory: true
+      output: "Split pipeline if more than 3 stages"
+      verification: "Pipeline divided into 3-stage chunks"
+      failure_mode: "Exceeding 3 stages causes context loss"
+    - step: 5
+      action: "Atomic task rules - max 3 files per task"
+      mandatory: true
+      output: "Atomic task definitions"
+      verification: "Each task scoped to ≤3 files"
+      failure_mode: "Tasks too large lose atomicity"
+    - step: 6
+      action: "Pipeline Proposal - Present for approval"
+      mandatory: true
+      output: "Proposal with GO/ADJUST/SKIP/SWAP options"
+      verification: "User explicitly responds with one of four options"
+      failure_mode: "Proceeding without approval violates protocol"
+    - step: 7
+      action: "Await Approval - Wait for explicit GO"
+      mandatory: true
+      output: "User GO signal"
+      verification: "GO received before execution"
+      failure_mode: "Executing without GO violates protocol"
+    - step: 8
+      action: "Orchestrated Execution - Announce each stage"
+      mandatory: true
+      output: "Stage-by-stage execution with output passing"
+      verification: "Each stage announced, outputs passed forward"
+      failure_mode: "Silent execution loses tracking"
+    - step: 9
+      action: "Session split if needed - max 3 stages per session"
+      mandatory: false
+      output: "Staged execution across multiple sessions"
+      verification: "Remaining stages documented for continuation"
+      failure_mode: "Continuing without split loses context"
+  entry_conditions:
+    - condition: "Multi-concern task or signal requiring skill orchestration"
+      check: "Intent Matrix entry identified"
+    - condition: "No existing pipeline for this task"
+      check: "No pre-existing pipeline definition"
+  exit_conditions:
+    - condition: "All stages executed or session split appropriately"
+      check: "Pipeline complete or continuation documented"
+    - condition: "User received explicit stage announcements"
+      check: "Announcements made for each stage"
+  output_destination:
+    path: ".memory/activeContext.md"
+    format: markdown
+    overwrite: false
+
+gates:
+  - gate_id: max-stages
+    gate_type: hard_block
+    trigger: "Pipeline has more than 3 stages"
+    message: "Pipeline exceeds 3 stages. Must split into multiple sessions."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Skipping pipeline, assuming I know the skills"
+    description: "You know the primary skill but not the cascade. Always build pipeline."
+    severity: MAJOR
+    prevention: "Always run Phase 1-3 to build explicit pipeline"
+  - pattern: "Trying to fit 5 stages in one session"
+    description: "Max 3 stages per session. Always split."
+    severity: BLOCKER
+    prevention: "Check context budget, split if >3 stages"
+  - pattern: "Carrying context mentally without explicit passing"
+    description: "Explicit carrying is required. Mental tracking is insufficient."
+    severity: MAJOR
+    prevention: "Pass outputs explicitly between stages"
+  - pattern: "Skipping scope-guard"
+    description: "Small tasks grow silently. Always include scope-guard."
+    severity: MAJOR
+    prevention: "Include scope-guard in pipeline"
+
+quick_ref:
+  trigger_line: "Multi-concern tasks requiring skill orchestration"
+  key_constraint: "MAX 3 stages per session - split if more"
+  command_sequence: "Phase 1: Intent Analysis → Phase 2: Build Pipeline (check context budget) → Phase 3: Proposal → Phase 4: Await GO → Phase 5: Orchestrate → Phase 6: Complete"
+  output_indicator: "Pipeline with skill sequence, max 3 stages, GO received before execution"
+  do_not:
+    - "Skip pipeline construction"
+    - "Fit >3 stages in one session"
+    - "Proceed without explicit GO"
+    - "Skip scope-guard"
+  common_mistakes:
+    - mistake: "Assuming I know the skills without building pipeline"
+      fix: "Always build explicit pipeline via Phase 1-3"
+    - mistake: "Trying to fit everything in one session"
+      fix: "Max 3 stages. Split if needed."

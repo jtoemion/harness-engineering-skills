@@ -1,0 +1,140 @@
+skill:
+  name: writing-plans
+  display_name: "Writing Implementation Plans"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\writing-plans\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: planning
+  tags:
+    - planning
+    - implementation
+    - tasks
+    - specification
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "create implementation plan"
+      type: keyword
+      required: true
+    - condition: "write plan"
+      type: keyword
+      required: false
+    - condition: "plan this"
+      type: keyword
+      required: false
+    - condition: "spec or requirements for multi-step task"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 90
+
+behavior:
+  summary: "Write comprehensive implementation plans with bite-sized tasks. Assume the engineer has zero context. Document everything: files to touch, code, testing, how to verify."
+  detailed_description: "Write comprehensive implementation plans assuming the engineer has zero context and questionable taste. Document everything they need to know: which files to touch, exact code, testing approach, how to verify. Give them whole plan as bite-sized tasks (2-5 minutes each). DRY. YAGNI. TDD. Frequent commits. Announce at start: 'I'm using the writing-plans skill to create the implementation plan.' Save to docs/plans/YYYY-MM-DD-<feature-name>.md."
+  process:
+    - step: 1
+      action: "Create plan document with proper header"
+      mandatory: true
+      output: "Plan file with header including goal, architecture, tech stack"
+      verification: "Header contains all required sections"
+      failure_mode: "Missing context for implementer"
+    - step: 2
+      action: "Break feature into bite-sized tasks (2-5 minutes each)"
+      mandatory: true
+      output: "Multiple tasks with clear boundaries"
+      verification: "Each task is one action, 2-5 minutes"
+      failure_mode: "Large tasks overwhelm implementer"
+    - step: 3
+      action: "Document each task with exact file paths, code, commands"
+      mandatory: true
+      output: "Complete task specification"
+      verification: "Exact paths, complete code, expected output"
+      failure_mode: "Implementer guesses, produces wrong result"
+    - step: 4
+      action: "Include TDD cycle: write failing test, run, implement, verify"
+      mandatory: true
+      output: "Each task follows red-green-refactor"
+      verification: "Test-first approach in plan"
+      failure_mode: "Implementation without tests"
+    - step: 5
+      action: "Save plan to docs/plans/YYYY-MM-DD-<feature-name>.md"
+      mandatory: true
+      output: "Plan file saved to correct location"
+      verification: "File exists at correct path"
+      failure_mode: "No plan saved for execution"
+    - step: 6
+      action: "Offer execution choice: subagent-driven or parallel session"
+      mandatory: true
+      output: "User chooses execution method"
+      verification: "User selects approach"
+      failure_mode: "No handoff to implementation"
+  entry_conditions:
+    - condition: "Design is approved"
+      check: "User approved design from brainstorming skill"
+    - condition: "Context is available"
+      check: "Design doc exists with architecture, requirements"
+  exit_conditions:
+    - condition: "Plan saved to docs/plans/"
+      check: "File exists with proper header and tasks"
+    - condition: "User approves plan"
+      check: "User confirms plan is ready for execution"
+    - condition: "Execution method chosen"
+      check: "User selects subagent-driven or parallel session"
+  output_destination:
+    path: docs/plans/YYYY-MM-DD-<feature-name>.md
+    format: markdown
+    overwrite: false
+
+gates:
+  - gate_id: plan_before_implementation
+    gate_type: hard_block
+    trigger: "Attempting to implement without written plan"
+    message: "Plan must be written and approved before implementation begins."
+    blocking_command: null
+  - gate_id: user_approval_before_execution
+    gate_type: hard_block
+    trigger: "Starting implementation without user approval of plan"
+    message: "User must approve the plan before implementation begins."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Skipping to implementation without plan"
+    description: "Starting code without documented plan"
+    severity: BLOCKER
+    prevention: "Always create plan first"
+  - pattern: "Vague task descriptions"
+    description: "'Add validation' without specifics"
+    severity: MAJOR
+    prevention: "Exact file paths, complete code, commands"
+  - pattern: "Large tasks instead of bite-sized"
+    description: "Tasks take hours, not minutes"
+    severity: MAJOR
+    prevention: "Break tasks into 2-5 minute actions"
+  - pattern: "No verification in tasks"
+    description: "Missing how to verify the step works"
+    severity: MAJOR
+    prevention: "Include expected output for each step"
+
+quick_ref:
+  trigger_line: "create implementation plan, write plan, spec for multi-step task"
+  key_constraint: "Plan is written and user-approved before any implementation"
+  command_sequence: "Create header with goal/architecture → Break into bite-sized tasks → Document each with exact paths/code → Include TDD cycle → Save to docs/plans/ → Offer execution choice"
+  output_indicator: "Plan in docs/plans/, user approved, execution method chosen"
+  do_not:
+    - "Start implementation without plan"
+    - "Skip user approval"
+    - "Use vague descriptions"
+    - "Skip verification steps"
+  common_mistakes:
+    - mistake: "Writing code instead of planning"
+      fix: "Create plan first, then implement"
+    - mistake: "Not providing exact file paths"
+      fix: "Use exact paths throughout"
+    - mistake: "Skipping TDD in tasks"
+      fix: "Every task should have red-green-refactor"
+    - mistake: "Not including commit step"
+      fix: "Frequent commits in each task"

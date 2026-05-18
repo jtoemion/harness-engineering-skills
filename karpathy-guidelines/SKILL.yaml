@@ -1,0 +1,107 @@
+skill:
+  name: karpathy-guidelines
+  display_name: Karpathy Coding Guidelines
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\karpathy-guidelines\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: quality
+  subcategory: coding-guidelines
+  tags: [code-quality, simplicity, surgical-changes, assumptions, success-criteria]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "writing code"
+      type: keyword
+      required: true
+    - condition: "reviewing code"
+      type: keyword
+      required: false
+    - condition: "refactoring"
+      type: keyword
+      required: false
+    - condition: "implementation"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: simple
+  weight: 60
+
+behavior:
+  summary: "Behavioral guidelines to reduce common LLM coding mistakes - simplicity, surgical changes, surface assumptions, verify success."
+  detailed_description: "Derived from Andrej Karpathy's observations on LLM coding pitfalls. Four core principles: 1) Think Before Coding - don't assume, don't hide confusion, surface tradeoffs; 2) Simplicity First - minimum code that solves the problem, nothing speculative; 3) Surgical Changes - touch only what must, clean up only your own mess; 4) Goal-Driven Execution - define success criteria, loop until verified. Tradeoff: these guidelines bias toward caution over speed. For trivial tasks, use judgment."
+  process:
+    - step: 1
+      action: "Before implementing: State assumptions explicitly"
+      mandatory: true
+      output: "Assumptions declared before code"
+      verification: "Assumptions in response before implementation"
+      failure_mode: "Proceed but note assumption uncertainty"
+    - step: 2
+      action: "If multiple interpretations exist, present them"
+      mandatory: true
+      output: "Options enumerated for user choice"
+      verification: "Tradeoffs surfaced, not picked silently"
+      failure_mode: "Pick one silently"
+    - step: 3
+      action: "Push back on overcomplication - ask 'could this be simpler?'"
+      mandatory: true
+      output: "Simpler solution or justified complexity"
+      verification: "Check against senior engineer standard"
+      failure_mode: "Write complex code without justification"
+    - step: 4
+      action: "Define success criteria before starting"
+      mandatory: true
+      output: "Verifiable goal stated"
+      verification: "Criteria enable independent verification"
+      failure_mode: "Vague 'make it work' criteria"
+  entry_conditions:
+    - condition: "Coding task requested"
+      check: "User asks to write, edit, review, or refactor code"
+  exit_conditions:
+    - condition: "Implementation matches success criteria"
+      check: "Criteria defined at start are satisfied"
+    - condition: "Changes are surgical - trace to request"
+      check: "Every changed line traces to user's explicit request"
+  output_destination:
+    path: "Code files"
+    format: "code"
+    overwrite: false
+
+gates:
+  - gate_id: assumption_surface
+    gate_type: warning
+    trigger: "Implementing without stating assumptions"
+    message: "Before implementation: declare assumptions. If uncertain, ask. Don't hide confusion."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Overcomplicating code"
+    description: "Adding features, abstractions, or flexibility not requested creates technical debt."
+    severity: MAJOR
+    prevention: "Ask: 'Would a senior engineer say this is overcomplicated?' If yes, simplify."
+  - pattern: "Changing unrelated code"
+    description: "Editing adjacent code, comments, or formatting that wasn't requested creates noise."
+    severity: MAJOR
+    prevention: "Every changed line should trace directly to user's request. Don't 'improve' what wasn't asked."
+  - pattern: "Vague success criteria"
+    description: "'Make it work' requires constant clarification. Strong criteria enable independent verification."
+    severity: MAJOR
+    prevention: "Transform 'Add validation' to 'Write tests for invalid inputs, then make them pass'."
+
+quick_ref:
+  trigger_line: "Write, review, or refactor code"
+  key_constraint: "Make surgical changes only - every line must trace to user's request. Simplicity first, nothing speculative."
+  command_sequence: "1. State assumptions → 2. Present tradeoffs if multiple interpretations → 3. Push back on complexity → 4. Define success criteria → 5. Implement → 6. Verify"
+  output_indicator: "Code that solves the problem with minimal changes, success criteria verifiable"
+  do_not:
+    - "Add features not requested"
+    - "Refactor what isn't broken"
+    - "Use vague success criteria"
+    - "Skip assumption declaration"
+  common_mistakes:
+    - mistake: "Writing 200 lines when 50 would solve it"
+      fix: "If code is 4x longer than needed, rewrite. Ask 'would a senior say this is overcomplicated?'"
+    - mistake: "Improving adjacent code"
+      fix: "Touch only what you must. Don't refactor unrelated code even if you'd do it differently."

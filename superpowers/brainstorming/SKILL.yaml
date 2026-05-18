@@ -1,0 +1,129 @@
+skill:
+  name: brainstorming
+  display_name: "Brainstorming Ideas Into Designs"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\brainstorming\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: design
+  tags:
+    - design
+    - creative
+    - requirements
+    - planning
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "create feature"
+      type: keyword
+      required: true
+    - condition: "build component"
+      type: keyword
+      required: false
+    - condition: "add functionality"
+      type: keyword
+      required: false
+    - condition: "modify behavior"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: simple
+  weight: 100
+
+behavior:
+  summary: "Collaborative dialogue to turn ideas into fully formed designs and specs, with user approval before implementation."
+  detailed_description: "Help turn ideas into fully formed designs through natural conversation. Explore project context first, ask clarifying questions one at a time to refine the idea, propose 2-3 approaches with trade-offs, present the design scaled to complexity, get user approval, write design doc to docs/plans/, and transition to implementation via writing-plans skill."
+  process:
+    - step: 1
+      action: "Explore project context — check files, docs, recent commits"
+      mandatory: true
+      output: "Understanding of current project state"
+      verification: "Read relevant files and documentation"
+      failure_mode: "Proceeding without context leads to misaligned designs"
+    - step: 2
+      action: "Ask clarifying questions — one at a time, understand purpose/constraints/success criteria"
+      mandatory: true
+      output: "Refined understanding of what to build"
+      verification: "User provides clear answers"
+      failure_mode: "Multiple questions at once overwhelms user"
+    - step: 3
+      action: "Propose 2-3 approaches with trade-offs and your recommendation"
+      mandatory: true
+      output: "Multiple design options with trade-offs"
+      verification: "Options are distinct and have clear pros/cons"
+      failure_mode: "Single approach without alternatives limits creativity"
+    - step: 4
+      action: "Present design — in sections scaled to complexity, get user approval after each section"
+      mandatory: true
+      output: "Approved design ready for documentation"
+      verification: "User explicitly approves each section"
+      failure_mode: "Proceeding without approval risks wasted work"
+    - step: 5
+      action: "Write design doc — save to docs/plans/YYYY-MM-DD-<topic>-design.md and commit"
+      mandatory: true
+      output: "Design document saved to docs/plans/"
+      verification: "File exists and is committed to git"
+      failure_mode: "No documentation loses institutional knowledge"
+    - step: 6
+      action: "Transition to implementation — invoke writing-plans skill"
+      mandatory: true
+      output: "Implementation plan created"
+      verification: "writing-plans skill is invoked"
+      failure_mode: "Skipping to implementation without plan causes chaos"
+  entry_conditions:
+    - condition: "User has an idea or feature request"
+      check: "User expresses intent to create, modify, or add something"
+    - condition: "No existing design document for this feature"
+      check: "No approved design in docs/plans/"
+  exit_conditions:
+    - condition: "Design is documented and approved by user"
+      check: "Design doc exists, committed to git, user approval obtained"
+    - condition: "writing-plans skill is invoked"
+      check: "Next step is planning, not implementation"
+  output_destination:
+    path: docs/plans/YYYY-MM-DD-<topic>-design.md
+    format: markdown
+    overwrite: false
+
+gates:
+  - gate_id: no_implementation_before_design_approval
+    gate_type: hard_block
+    trigger: "Attempting to write code, scaffold project, or take implementation action before user approves design"
+    message: "HARD-GATE: Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "This is too simple to need a design"
+    description: "Every project needs design, even simple ones. Unexamined assumptions cause wasted work."
+    severity: BLOCKER
+    prevention: "Present design even if just a few sentences, get user approval before proceeding"
+  - pattern: "Skipping writing-plans and going directly to implementation"
+    description: "The ONLY skill to invoke after brainstorming is writing-plans"
+    severity: BLOCKER
+    prevention: "Always invoke writing-plans, never frontend-design or other implementation skills"
+  - pattern: "Multiple questions in one message"
+    description: "Overwhelms user and reduces quality of responses"
+    severity: MAJOR
+    prevention: "Ask one question per message, break complex topics into multiple questions"
+  - pattern: "Presenting design without getting explicit approval"
+    description: "User might not agree but you proceed anyway"
+    severity: MAJOR
+    prevention: "Wait for explicit user approval before moving forward"
+
+quick_ref:
+  trigger_line: "create feature, build component, add functionality, modify behavior"
+  key_constraint: "NO implementation until user approves the design"
+  command_sequence: "Explore context → Ask questions → Propose approaches → Present design → Get approval → Write doc → Invoke writing-plans"
+  output_indicator: "Design doc in docs/plans/ with user approval, writing-plans invoked"
+  do_not:
+    - "Write code before design approval"
+    - "Skip the writing-plans step"
+    - "Ask multiple questions at once"
+    - "Proceed without user approval"
+  common_mistakes:
+    - mistake: "Claiming project is simple so skipping design"
+      fix: "Every project needs design, even if just a few sentences"
+    - mistake: "Moving to implementation immediately"
+      fix: "Must invoke writing-plans, no exceptions"

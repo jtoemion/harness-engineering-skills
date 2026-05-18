@@ -1,0 +1,157 @@
+skill:
+  name: executing-plans
+  display_name: "Executing Implementation Plans"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\executing-plans\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: execution
+  tags:
+    - execution
+    - plan
+    - batch
+    - checkpoint
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "execute implementation plan"
+      type: keyword
+      required: true
+    - condition: "run plan"
+      type: keyword
+      required: false
+    - condition: "implement plan"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: complex
+  weight: 85
+
+behavior:
+  summary: "Load plan, review critically, execute tasks in batches, report for review between batches. Batch execution with checkpoints for architect review."
+  detailed_description: "Load plan, review critically, execute tasks in batches, report for review between batches. Core principle: Batch execution with checkpoints for architect review. Announce at start: 'I'm using the executing-plans skill to implement this plan.' Default batch size: first 3 tasks. After each batch: show what was implemented, show verification output, write Implementation Retrospective, say 'Ready for feedback.' Use using-git-worktrees before starting. After completion: invoke finishing-a-development-branch."
+  process:
+    - step: 1
+      action: "Load and Review Plan — Read plan file, review critically"
+      mandatory: true
+      output: "Plan understood with questions/concerns identified"
+      verification: "Can explain the plan back"
+      failure_mode: "Missing plan context causes wrong execution"
+    - step: 2
+      action: "Raise concerns if any before starting"
+      mandatory: true
+      output: "Clarified plan or approval to proceed"
+      verification: "User confirms plan is good"
+      failure_mode: "Executing flawed plan wastes time"
+    - step: 3
+      action: "Set up isolated workspace with git worktrees"
+      mandatory: true
+      output: "Clean workspace for implementation"
+      verification: "Worktree created, not on main/master"
+      failure_mode: "Working on main risks codebase"
+    - step: 4
+      action: "Execute Batch — Default first 3 tasks"
+      mandatory: true
+      output: "Tasks completed with verification"
+      verification: "Each task follows steps exactly, verifications run"
+      failure_mode: "Skipping verification misses issues"
+    - step: 5
+      action: "Report — Show implementation, verification output, Implementation Retrospective"
+      mandatory: true
+      output: "Complete report ready for review"
+      verification: "Includes what, verification, retrospective"
+      failure_mode: "No report means no review opportunity"
+    - step: 6
+      action: "Wait for feedback before continuing"
+      mandatory: true
+      output: "Feedback received or proceed signal"
+      verification: "User explicitly says continue"
+      failure_mode: "Continuing without feedback risks direction drift"
+    - step: 7
+      action: "Continue or Complete — Apply changes if needed, execute next batch or finish"
+      mandatory: true
+      output: "All tasks complete or next batch ready"
+      verification: "All tasks done, tests pass"
+      failure_mode: "Incomplete execution"
+    - step: 8
+      action: "Complete Development — Invoke finishing-a-development-branch"
+      mandatory: true
+      output: "Branch completed per skill workflow"
+      verification: "finishing-a-development-branch invoked"
+      failure_mode: "Not completing branch properly"
+  entry_conditions:
+    - condition: "Implementation plan exists"
+      check: "Plan file in docs/plans/"
+    - condition: "Plan is approved"
+      check: "User approved the plan"
+  exit_conditions:
+    - condition: "All tasks completed and verified"
+      check: "Tests pass, all tasks done"
+    - condition: "finishing-a-development-branch invoked"
+      check: "Proper completion workflow started"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: review_before_execution
+    gate_type: warning
+    trigger: "Starting implementation without reviewing plan critically first"
+    message: "Review plan critically first, raise any questions before starting."
+    blocking_command: null
+  - gate_id: no_main_branch
+    gate_type: hard_block
+    trigger: "Starting implementation on main/master branch without explicit consent"
+    message: "NEVER start implementation on main/master branch without explicit user consent. Use git worktrees."
+    blocking_command: null
+  - gate_id: checkpoint_between_batches
+    gate_type: warning
+    trigger: "Continuing to next batch without reporting for review"
+    message: "Report after each batch, wait for feedback before continuing."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Executing without reviewing plan first"
+    description: "Missing potential issues in the plan"
+    severity: BLOCKER
+    prevention: "Review critically, raise concerns"
+  - pattern: "Working on main/master branch"
+    description: "Risking production codebase"
+    severity: BLOCKER
+    prevention: "Use git worktrees"
+  - pattern: "Skipping verifications"
+    description: "Assuming tasks work without checking"
+    severity: BLOCKER
+    prevention: "Run all verifications as specified"
+  - pattern: "Continuing without feedback"
+    description: "No checkpoint between batches"
+    severity: MAJOR
+    prevention: "Report and wait for feedback"
+  - pattern: "Not stopping when blocked"
+    description: "Guessing instead of asking for help"
+    severity: MAJOR
+    prevention: "Stop and ask for clarification"
+
+quick_ref:
+  trigger_line: "execute implementation plan, run plan, implement plan"
+  key_constraint: "Batch execution with checkpoints, never on main branch"
+  command_sequence: "Review plan → Set up worktree → Execute batch (3 tasks) → Report with retrospective → Wait for feedback → Continue or finish"
+  output_indicator: "All tasks done, tests pass, finishing-a-development-branch invoked"
+  do_not:
+    - "Skip plan review"
+    - "Work on main/master"
+    - "Skip verifications"
+    - "Continue without feedback"
+    - "Push through blockers"
+  common_mistakes:
+    - mistake: "Not reviewing plan critically"
+      fix: "Read and understand, raise questions"
+    - mistake: "No checkpoint between batches"
+      fix: "Report after each batch, wait"
+    - mistake: "Continuing when blocked"
+      fix: "Stop, ask for clarification"
+    - mistake: "Not invoking finishing-a-development-branch"
+      fix: "Always invoke after all tasks complete"

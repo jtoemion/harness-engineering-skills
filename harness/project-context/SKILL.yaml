@@ -1,0 +1,118 @@
+skill:
+  name: project-context
+  display_name: Project Context Generator
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\harness\project-context\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: documentation
+  tags:
+    - project-context
+    - documentation
+    - AI-rules
+    - persistent
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "project context | generate context | .context | AI rules for this project"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: simple
+  weight: 80
+
+behavior:
+  summary: "Generate and maintain project-context.md — persistent AI rules and patterns for a codebase."
+  detailed_description: "Creates project-context.md capturing critical rules, patterns, and gotchas AI agents need. Unlike session memory (resets), project-context persists across sessions. Includes technology stack, critical rules, naming conventions, common patterns, architecture decisions, API conventions, testing requirements, known gotchas. Also enforces Obsidian vault rules for football news vault (flat structure, bare wikilinks, entities first)."
+  process:
+    - step: 1
+      action: "Check if project-context.md already exists"
+      mandatory: true
+      output: "Existing file found or not found"
+      verification: "File check complete"
+      failure_mode: "Overwriting existing context without reviewing first"
+    - step: 2
+      action: "Gather project information — tech stack, patterns, gotchas"
+      mandatory: true
+      output: "Raw project information"
+      verification: "Information collected"
+      failure_mode: "Incomplete information = incomplete context"
+    - step: 3
+      action: "Generate or update project-context.md using template"
+      mandatory: true
+      output: "project-context.md written to project root"
+      verification: "File exists with all required sections"
+      failure_mode: "Missing sections = context not complete"
+  entry_conditions:
+    - condition: "Project exists with code to analyze"
+      check: "Project root exists"
+  exit_conditions:
+    - condition: "project-context.md exists at project root"
+      check: "File exists with all required sections"
+
+gates:
+  - gate_id: "no-overwrite-without-review"
+    gate_type: "hard_block"
+    trigger: "Project-context.md exists and user asks to generate without reviewing existing"
+    message: "HARD-GATE: Existing project-context.md found. Review it first before updating."
+    blocking_command: ""
+
+anti_patterns:
+  - pattern: "Skip project context, rely on memory"
+    description: "Session reset clears context — rules must be persistent"
+    severity: "MAJOR"
+    prevention: "Generate project-context.md for every project"
+  - pattern: "Using common sense instead of explicit rules"
+    description: "Explicit rules prevent drift across sessions"
+    severity: "MAJOR"
+    prevention: "Document all gotchas explicitly"
+
+obsidian_vault_rules:
+  vault_path: "C:\\Users\\jtoem\\Assets\\News\\football\\"
+  enforced_rules:
+    - rule_id: "flat-structure-no-prefixes"
+      description: "Directory IS the category. No NATION-, CLUB-, LEAGUE-, COMP-, PLAYER- prefixes."
+      example_correct: "Nations/Argentina.md, Clubs/Arsenal-FC.md, Leagues/Premier-League.md"
+      example_wrong: "Nations/NATION-Argentina.md, Clubs/CLUB-Arsenal-FC.md"
+    - rule_id: "wikilinks-bare"
+      description: "Wikilinks reference bare names, not paths."
+      example_correct: "[[Manchester-City]], [[Arsenal-FC]], [[Argentina]]"
+      example_wrong: "[[Clubs/Manchester-City]], [[Nations/Argentina]]"
+    - rule_id: "frontmatter-order"
+      description: "entities: array BEFORE tags: array in ALL notes."
+      example_correct: "entities: - Arsenal-FC - Eddie-Howe tags: news arsenal"
+      example_wrong: "tags: before entities:"
+    - rule_id: "new-entity-dedicated-folder"
+      description: "If an entity does not exist in the vault, create it in the appropriate folder immediately."
+      folder_map:
+        Persons: "managers, coaches, pundits, owners, referees"
+        Players: "footballers"
+        Concepts: "Title-Race, Relegation, Transfer"
+        Nations: "country/national team"
+        Clubs: "football clubs"
+        Leagues: "domestic leagues"
+        Competitions: "cups, tournaments"
+    - rule_id: "news-note-structure"
+      description: "Mandatory structure for all inbox/scraped articles"
+      template: "type news date YYYY-MM-DD source Source url URL entities tags"
+    - rule_id: "scrape-articles-full-content"
+      description: "ALWAYS fetch FULL article text with URL and wikilinks."
+      requirements:
+        - "Fetch FULL article text"
+        - "Include url: field"
+        - "Wikilink every named entity"
+
+components:
+  files_written:
+    - path: "project-root/project-context.md"
+      format: "markdown"
+      required: true
+      template: ""
+
+quick_ref:
+  trigger_line: "project context, generate context, .context, AI rules for this project"
+  key_constraint: "project-context.md persists across sessions"
+  command_sequence: "Check existing → Gather info → Generate/Update"
+  output_indicator: "project-context.md exists at project root"

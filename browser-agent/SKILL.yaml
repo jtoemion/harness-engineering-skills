@@ -1,0 +1,119 @@
+skill:
+  name: browser-agent
+  display_name: Browser Automation Framework
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\browser-agent\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: automation
+  subcategory: browser-automation
+  tags: [browser, automation, playwright, chrome, web-scraping, map-site, recipes]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "automating web tasks"
+      type: keyword
+      required: true
+    - condition: "map site"
+      type: keyword
+      required: false
+    - condition: "browser workflow"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 80
+
+behavior:
+  summary: "Browser automation framework with auto-discovery, deterministic recipes, and autonomous repair for web task execution."
+  detailed_description: "browser-agent provides site mapping, recipe execution, and failure autorepair. Uses Playwright for headless/public pages and opencode-browser (Chrome) for login walls and bot detection. MANDATORY failure-retry loop writes to failures.md and reads before retry. Site-specific knowledge lives in domain-skills folder with nav.md, forms.md, selectors.md, failures.md, and _meta.yaml."
+  process:
+    - step: 1
+      action: "Check site _meta.yaml for backend declaration (chrome vs playwright)"
+      mandatory: true
+      output: "Backend selection determined"
+      verification: "_meta.yaml backend field read"
+      failure_mode: "Default to playwright if no meta found"
+    - step: 2
+      action: "Map site structure if no recipes exist"
+      mandatory: true
+      output: "Site structure documented in nav.md/forms.md"
+      verification: "Selectors captured in selectors.md"
+      failure_mode: "Skip mapping if recipes already exist"
+    - step: 3
+      action: "Execute recipe steps in sequence"
+      mandatory: true
+      output: "Recipe execution results"
+      verification: "verify steps pass"
+      failure_mode: "Trigger failure-retry loop"
+    - step: 4
+      action: "On failure: Write to failures.md → Read → Extract fix → Retry × 2"
+      mandatory: true
+      output: "Failure resolved or escalated to user"
+      verification: "Success or user escalation"
+      failure_mode: "After 3 attempts, report to user"
+  entry_conditions:
+    - condition: "Target URL or site identified"
+      check: "User provides URL or site name"
+    - condition: "Site has domain-skill folder OR new site to map"
+      check: "Folder exists at domain-skills/<site>/ or user requests mapping"
+    - condition: "Backend determined from _meta.yaml"
+      check: "backend: chrome or playwright declared"
+  exit_conditions:
+    - condition: "Recipe steps completed successfully"
+      check: "All verify steps pass"
+    - condition: "Failure documented and retried up to 3×"
+      check: "failures.md updated, max 3 attempts"
+    - condition: "Session close: fallback selectors logged to selectors.md"
+      check: "_meta.yaml fallback_log cleared"
+  output_destination:
+    path: "browser-agent/domain-skills/<site>/"
+    format: "markdown"
+    overwrite: false
+
+gates:
+  - gate_id: backend_enforcement
+    gate_type: hard_block
+    trigger: "Site has backend: chrome in _meta.yaml but using playwright_browser_* or chrome-devtools_*"
+    message: "Site declares chrome backend. MUST use opencode-browser via _backends/chrome_backend.py. Playwright and CDP are forbidden."
+    blocking_command: null
+  - gate_id: failure_retry_loop
+    gate_type: hard_block
+    trigger: "Any recipe step fails without logging to failures.md"
+    message: "Every failure MUST trigger failure-retry loop: write to failures.md → read → extract fix → retry. Do not skip this."
+    blocking_command: null
+  - gate_id: entity_wikilinking
+    gate_type: warning
+    trigger: "Extracted article/news content without wikilinking entities"
+    message: "ALL extracted entities (clubs, players, managers, competitions) MUST have [[wikilink]] format in content and frontmatter."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Using Playwright for sites with backend: chrome"
+    description: "Using playwright_browser_* tools when site _meta.yaml declares chrome backend violates the backend selection rule."
+    severity: BLOCKER
+    prevention: "Check _meta.yaml before choosing tools. If chrome, use _backends/chrome_backend.py only."
+  - pattern: "Skipping failure-retry loop"
+    description: "Failing to write to failures.md and retry before escalating is a mandatory workflow violation."
+    severity: BLOCKER
+    prevention: "Implement retry loop per failure: log → read → apply fix → retry → escalate after 3."
+  - pattern: "Summarizing instead of full content"
+    description: "Using search snippets instead of full article text via webfetch loses critical context."
+    severity: MAJOR
+    prevention: "Always use webfetch to get complete article content. Do not rely on search result summaries."
+
+quick_ref:
+  trigger_line: "Automate web tasks, map site structure, run browser recipes"
+  key_constraint: "Backend selection is mandatory - check _meta.yaml first, never use Playwright/CDP when site declares chrome"
+  command_sequence: "1. Check _meta.yaml for backend → 2. Map site or run recipe → 3. Execute steps → 4. On failure: log→read→retry→escalate"
+  output_indicator: "Recipe completes OR failures.md updated with retry count"
+  do_not:
+    - "Use playwright for chrome-backend sites"
+    - "Skip failure-retry loop"
+    - "Summarize articles instead of fetching full content"
+  common_mistakes:
+    - mistake: "Defaulting to Playwright without checking _meta.yaml"
+      fix: "Always read _meta.yaml first to determine correct backend"
+    - mistake: "Retrying without documenting in failures.md"
+      fix: "Write every failure to failures.md before retrying"

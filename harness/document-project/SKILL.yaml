@@ -1,0 +1,164 @@
+skill:
+  name: document-project
+  display_name: Document Project (Brownfield AI Context Generator)
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\harness\document-project\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: documentation
+  tags: [documentation, brownfield, scan, context-generation]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "document this project | generate project docs | full project documentation | scan this codebase | document project | update .docs | re-document"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: moderate
+  weight: 85
+  disambiguation_rule: |
+    document-project = Full documentation generator (3 scan modes, produces architecture docs, dev guides, etc.)
+    project-context = Lightweight persistent rules file (~100 lines, gotchas + patterns for AI)
+
+behavior:
+  summary: Generate comprehensive project documentation enabling AI agents to work with existing codebases.
+  detailed_description: |
+    Uses enforce.py as the sole instruction source. Phase-driven: phase_1 through phase_6 executed
+    sequentially. Outputs CONTEXT.md, project-overview, architecture, source-tree, dev-guide, deep-dives.
+    Newspaper Logic format mandatory for all output. Prevents agent from reading FULL_SCAN.md for instructions.
+
+  process:
+    - step: 1
+      action: Determine mode (initial_scan | full_rescan | deep_dive) based on project state
+      mandatory: true
+      output: mode selection
+      verification: mode flag set
+      failure_mode: Wrong mode = wrong scan scope
+
+    - step: 2
+      action: Run `python enforce.py start --mode <mode> --level <level> --agent --force`
+      mandatory: true
+      output: Phase 1 instructions from enforce.py
+      verification: enforce.py output received
+      failure_mode: Missing --agent flag in automated context
+
+    - step: 3
+      action: Execute phase instructions from enforce.py output ONLY (not from FULL_SCAN.md)
+      mandatory: true
+      output: Phase output file written to disk
+      verification: File exists with required sections
+      failure_mode: Reading wrong instruction source breaks enforcement chain
+
+    - step: 4
+      action: Call `python enforce.py done phase_N` — repeat for all phases 1-6
+      mandatory: true
+      output: Phase validation pass
+      verification: enforce.py exits 0
+      failure_mode: Calling done before work complete = exit 1 + fix-retry loop
+
+    - step: 5
+      action: Run `python enforce.py validate` then `python enforce.py anchor-check`
+      mandatory: true
+      output: Final validation
+      verification: All checks pass
+      failure_mode: Anchor check fails = documentation incomplete
+
+  entry_conditions:
+    - condition: "Project has existing code to document"
+      check: "Project root exists with source files"
+    - condition: "User selected scan mode and level"
+      check: "Mode and level flags provided to enforce.py"
+
+  exit_conditions:
+    - condition: "enforce.py validate exits 0"
+      check: "All phase outputs pass validation"
+    - condition: "enforce.py anchor-check exits 0"
+      check: "Documentation is internally consistent"
+
+  output_destination:
+    path: project-root/CONTEXT.md + project-root/.docs/*.md
+    format: markdown (Newspaper Logic)
+    overwrite: false
+
+gates:
+  - gate_id: enforce-py-only
+    gate_type: hard_block
+    trigger: Agent reads FULL_SCAN.md or DEEP_DIVE.md for phase instructions
+    message: "HARD-GATE: enforce.py is the ONLY instruction source. Read FULL_SCAN.md only for human reference."
+    blocking_command: null
+
+  - gate_id: no-phase-skip
+    gate_type: hard_block
+    trigger: Agent attempts to call enforce.py done phase_N without phases 1 through N-1 passing
+    message: "HARD-GATE: Phases must complete in order. No skipping."
+    blocking_command: null
+
+  - gate_id: no-fake-done
+    gate_type: hard_block
+    trigger: Agent calls enforce.py done before output file exists with required sections
+    message: "HARD-GATE: Verify file exists and has required sections before calling done."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: Reading FULL_SCAN.md for instructions
+    description: Agent bypasses enforcement chain by reading reference docs as instructions
+    severity: BLOCKER
+    prevention: Instructions come ONLY from enforce.py output
+
+  - pattern: Calling done before work complete
+    description: Agent calls phase done without verifying output file exists and has required content
+    severity: BLOCKER
+    prevention: Verify file exists, non-empty, no TODO/TBD/placeholder before calling done
+
+  - pattern: Batch output across phases
+    description: Agent accumulates context instead of writing each phase's output immediately
+    severity: MAJOR
+    prevention: Write-as-you-go — each phase file written immediately upon completion
+
+components:
+  files_read:
+    - path: harness/document-project/enforce.py
+      purpose: Sole instruction source for phase execution
+      min_lines: null
+
+  files_written:
+    - path: project-root/CONTEXT.md
+      format: markdown
+      required: true
+      template: null
+    - path: project-root/.docs/architecture.md
+      format: markdown
+      required: true
+      template: null
+    - path: project-root/.docs/source-tree.md
+      format: markdown
+      required: true
+      template: null
+    - path: project-root/.docs/dev-guide.md
+      format: markdown
+      required: true
+      template: null
+
+integration:
+  calls:
+    - called_skill: null
+      call_phase: during
+      call_step: 2
+      reason: enforce.py IS the sub-skill — called directly as subprocess
+
+quick_ref:
+  trigger_line: "Fires on 'document this project', 'generate project docs', 'scan this codebase', 'update .docs', 're-document'"
+  key_constraint: "HARD-GATE: enforce.py is the ONLY instruction source — not FULL_SCAN.md"
+  command_sequence: "Select mode → Start enforcer → Read output → Execute → enforce.py done → Repeat × 6 → validate"
+  output_indicator: "After: project-root/CONTEXT.md + .docs/*.md exist and pass validate + anchor-check"
+  do_not:
+    - "Do NOT read FULL_SCAN.md for phase instructions"
+    - "Do NOT skip phases or call done before work is verified"
+    - "Do NOT touch .docs/.scan-state.json directly"
+  common_mistakes:
+    - mistake: Agent reads FULL_SCAN.md instead of enforce.py output
+      fix: HARD-GATE fires. enforce.py is mandatory at every phase boundary."
+    - mistake: Agent calls done phase 3 before phase 2 passes
+      fix: enforce.py exits 2 (protocol error). Run enforce.py status --agent to correct sequence.

@@ -1,0 +1,120 @@
+skill:
+  name: building-vault-cli-tools
+  display_name: Building Vault CLI Tools
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\building-vault-cli-tools\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: cli-tools
+  tags: [python, cli, obsidian, vault, markdown, yaml, tools]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "build CLI, vault tool, vault-analyst, vault-writer, Python CLI for Obsidian"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 7
+
+behavior:
+  summary: "Build Python CLI tools for Obsidian vault maintenance and content generation"
+  detailed_description: >
+    Turn a build spec into working Python CLI tools using a coding agent, then document runtime usage.
+    vault_utils.py: write_frontmatter handles 3 cases (has fm, no fm, empty). Registry lookup with case-insensitive matching.
+    vault-analyst.py: audit is purely read-only (zero side effects), fix uses transaction pattern (read all, compute changes, write).
+    Duplicate detection: same source + same date + 2+ overlapping entities. threads: exclude entities in >60% of files.
+    vault-writer.py: entity auto-generated boundary is sacred, digest must import score.py, story-arc source table is honest.
+    All commands support --json flag. Dry-run is first-class. Warn and skip, never raise. Dotfile exclusion on all globs.
+  process:
+    - step: 1
+      action: "Create vault_utils.py with write_frontmatter handling 3 cases"
+      mandatory: true
+      output: "vault_utils.py with read/write/frontmatter, registry, normalize, get_all_news_files"
+      verification: "write_frontmatter tested for 3 cases"
+    - step: 2
+      action: "Create vault-analyst.py with audit, fix, threads, heat, story, retrospective"
+      mandatory: true
+      output: "vault-analyst.py — audit is read-only, fix is transaction pattern"
+      verification: "audit returns data structures, never writes"
+    - step: 3
+      action: "Create vault-writer.py with entity, digest, story-arc"
+      mandatory: true
+      output: "vault-writer.py — entity uses auto-generated boundary, digest imports score.py"
+      verification: "digest imports score.py, not reimplemented"
+    - step: 4
+      action: "Implement --json flag on all commands"
+      mandatory: true
+      output: "JSON output for programmatic consumption"
+      verification: "All commands support --json"
+    - step: 5
+      action: "Implement --dry-run on all write operations"
+      mandatory: true
+      output: "Dry-run is first-class, compute changes first, then print or apply"
+      verification: "dry-run prints without modifying"
+    - step: 6
+      action: "Implement dotfile exclusion on all file scans"
+      mandatory: true
+      output: "Skip .obsidian/ and other dotfiles"
+      verification: "f.name.startswith('.') continues"
+
+  entry_conditions:
+    - condition: "User needs to build Python CLI tools for Obsidian vault"
+      check: "Build spec available or skill creates one"
+  exit_conditions:
+    - condition: "All tools functional with --dry-run and --json support"
+      check: "Commands tested and working"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: bvct_001
+    gate_type: hard_block
+    trigger: "audit function writes files"
+    description: "Audit must be purely read-only — returns data structures only"
+    blocking_command: null
+  - gate_id: bvct_002
+    gate_type: hard_block
+    trigger: "write_frontmatter doesn't handle 3 cases"
+    message: "Must handle: file has fm (preserve body), file has no fm (create), file is empty (fm only)"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "audit function modifying files"
+    description: "Audit must be purely read-only — becomes untrustworthy as diagnostic"
+    severity: BLOCKER
+    prevention: "Never call write_frontmatter in audit functions"
+  - pattern: "digest reimplementing score.py"
+    description: "Reimplemented scoring diverges over time"
+    severity: BLOCKER
+    prevention: "Import scoring from score.py directly"
+  - pattern: "write_frontmatter loses body content"
+    description: "Preserves body content — three distinct cases"
+    severity: BLOCKER
+    prevention: "Test function in isolation before anything else"
+  - pattern: "Not excluding dotfiles"
+    description: ".obsidian/ breaks frontmatter parsing"
+    severity: MAJOR
+    prevention: "Skip files starting with dot on all globs"
+
+quick_ref:
+  trigger_line: "build CLI, vault tool, vault-analyst, vault-writer"
+  key_constraint: "write_frontmatter 3 cases + audit read-only + dry-run first-class + --json all commands"
+  command_sequence: "vault_utils → vault_analyst → vault_writer → test all commands"
+  output_indicator: "python vault-analyst.py audit --json"
+  do_not:
+    - "Have audit write any files"
+    - "Reimplement scoring in digest"
+    - "Lose body content on frontmatter write"
+    - "Skip dotfile exclusion"
+    - "Raise on errors (warn and skip)"
+  common_mistakes:
+    - mistake: "write_frontmatter is most dangerous function"
+      fix: "Test in isolation — all other functions depend on it"
+    - mistake: "Missing --json flag"
+      fix: "Every command must support --json"

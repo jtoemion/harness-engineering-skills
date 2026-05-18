@@ -1,0 +1,112 @@
+skill:
+  name: vault-tools
+  display_name: Vault Analysis Tools
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\browser-agent\vault-tools\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: obsidian-vault
+  tags: [vault, analysis, audit, fix-wikilinks, health-score, tools]
+  compliance_level: flexible
+
+trigger:
+  conditions:
+    - condition: "analyze vault"
+      type: keyword
+      required: true
+    - condition: "audit the vault"
+      type: keyword
+      required: false
+    - condition: "fix wikilinks"
+      type: keyword
+      required: false
+    - condition: "vault health"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: simple
+  weight: 70
+
+behavior:
+  summary: "CLI tools for analyzing and maintaining the Obsidian football news vault. Tools return JSON for LLM reasoning."
+  detailed_description: "Two CLI tools: vault-analyst.py for auditing/fixing/analysis, vault-writer.py for generating content. Core principle: LLM parses --json output → reasons → proposes actions → user decides. NEVER relay raw human-readable output directly. Adaptive workflow: after audit, parse JSON → call suggest → categorize findings → present conversationally. Chain rules: audit → suggest → fix → audit. Health score tracks progress with deltas."
+  process:
+    - step: 1
+      action: "Run audit/analysis command with --json flag"
+      mandatory: true
+      output: "Structured JSON data about vault state"
+      verification: "Command returns valid JSON"
+      failure_mode: "Report error, continue if partial data"
+    - step: 2
+      action: "Parse JSON output - do NOT relay raw text"
+      mandatory: true
+      output: "Structured findings for reasoning"
+      verification: "JSON parsed into workable data structure"
+      failure_mode: "Relay raw output as fallback"
+    - step: 3
+      action: "Call suggest command to get prioritized action list"
+      mandatory: true
+      output: "Prioritized fix suggestions"
+      verification: "suggest returns actionable items"
+      failure_mode: "Proceed without suggestion"
+    - step: 4
+      action: "Categorize findings: fixable/low-risk, fixable/medium-risk, human-required, opportunity"
+      mandatory: true
+      output: "Categorized actions ready for user presentation"
+      verification: "All findings categorized"
+      failure_mode: "Leave uncategorized"
+    - step: 5
+      action: "Present findings conversationally, NOT as wall of text"
+      mandatory: true
+      output: "User-facing summary with proposed actions"
+      verification: "User can understand and respond"
+      failure_mode: "Raw output relay"
+  entry_conditions:
+    - condition: "Vault path accessible"
+      check: "C:/Users/jtoem/Assets/News/football exists"
+    - condition: "vault-analyst.py available"
+      check: "Tool is installed and executable"
+  exit_conditions:
+    - condition: "User presented with categorized findings and action options"
+      check: "Conversation allows user to choose action"
+    - condition: "Health score delta reported if fixes applied"
+      check: "Before/after score comparison provided"
+  output_destination:
+    path: "Console/JSON"
+    format: "JSON/text"
+    overwrite: false
+
+gates:
+  - gate_id: json_parsing
+    gate_type: warning
+    trigger: "Relaying raw command output without parsing JSON"
+    message: "MUST parse --json output before presenting. Present conversationally with actionable categories, not wall of text."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Relaying raw output to user"
+    description: "Directly showing command output instead of parsing and reasoning defeats the tool purpose."
+    severity: MAJOR
+    prevention: "Parse JSON → reason → propose actions → user decides. Never just echo output."
+  - pattern: "Skipping suggest after audit"
+    description: "Running audit without calling suggest misses prioritized action list."
+    severity: MINOR
+    prevention: "audit --json → suggest → categorize → present"
+  - pattern: "Not reporting health score delta"
+    description: "Applying fixes without showing improvement metric loses progress visibility."
+    severity: MINOR
+    prevention: "Report health score before and after: 'Health score improved from 87 → 92'"
+
+quick_ref:
+  trigger_line: "Analyze or audit Obsidian football vault"
+  key_constraint: "Parse JSON output and present conversationally - never relay raw text. Always call suggest after audit."
+  command_sequence: "1. Run audit/analysis --json → 2. Parse JSON → 3. Call suggest → 4. Categorize findings → 5. Present conversationally"
+  output_indicator: "User presented with categorized findings and action choices, health score delta if applicable"
+  do_not:
+    - "Relay raw command output"
+    - "Skip suggest call"
+    - "Skip health score delta reporting"
+  common_mistakes:
+    - mistake: "Showing wall of text instead of conversation"
+      fix: "Parse JSON, categorize as fixable/medium-risk/human-required, present as 'Found 44 files missing fields, want me to fix the duplicate first?'"

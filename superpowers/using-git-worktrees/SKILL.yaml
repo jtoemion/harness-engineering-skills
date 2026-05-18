@@ -1,0 +1,152 @@
+skill:
+  name: using-git-worktrees
+  display_name: Using Git Worktrees
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\using-git-worktrees\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: utility
+  subcategory: workspace-isolation
+  tags: [git, worktree, isolation, directory, baseline, feature-branch]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "feature work"
+      type: keyword
+      required: true
+    - condition: "isolation"
+      type: keyword
+      required: false
+    - condition: "new branch"
+      type: keyword
+      required: false
+    - condition: "worktree"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 60
+
+behavior:
+  summary: Systematic directory selection with safety verification for reliable git worktree isolation when starting feature work.
+  detailed_description: >
+    This skill creates isolated git worktrees with priority-based directory selection: (1) Check for .worktrees/ directory, if exists use it (verify ignored), (2) If .worktrees/ doesn't exist, check worktrees/ (use if exists, verify ignored), (3) If both exist, use .worktrees/, (4) If neither exists, check CLAUDE.md for directory preference or ask user, (5) If directory not in .gitignore, add and commit, (6) Auto-detect project setup (package.json, Cargo.toml, etc.) and install dependencies, (7) Verify baseline by running tests before declaring ready. Announce at start: "I'm using the using-git-worktrees skill to set up an isolated workspace."
+  process:
+    - step: 1
+      action: "Check for .worktrees/ directory"
+      mandatory: true
+      output: "Directory existence check"
+      verification: "Test-Path .worktrees/"
+      failure_mode: "Missing check causes inconsistent behavior"
+    - step: 2
+      action: "Check for worktrees/ directory if .worktrees/ not found"
+      mandatory: false
+      output: "Directory existence check"
+      verification: "Test-Path worktrees/"
+      failure_mode: "Missing check"
+    - step: 3
+      action: "Select directory based on priority"
+      mandatory: true
+      output: "Selected directory path"
+      verification: ".worktrees > worktrees > CLAUDE.md > ask user"
+      failure_mode: "Wrong priority order"
+    - step: 4
+      action: "Verify directory is in .gitignore"
+      mandatory: true
+      output: "Git ignore verification"
+      verification: "git check-ignore on directory"
+      failure_mode: "Unignored worktree pollutes git"
+    - step: 5
+      action: "Add to .gitignore if not ignored"
+      mandatory: false
+      output: "Added to .gitignore and committed"
+      verification: "git add .gitignore && git commit"
+      failure_mode: "Worktree contents tracked"
+    - step: 6
+      action: "Create worktree with git worktree add"
+      mandatory: true
+      output: "New worktree created"
+      verification: "git worktree add succeeds"
+      failure_mode: "Worktree creation fails"
+    - step: 7
+      action: "Auto-detect project setup"
+      mandatory: false
+      output: "Detected project type and setup command"
+      verification: "Check for package.json, Cargo.toml, go.mod, etc."
+      failure_mode: "Missing setup leaves broken state"
+    - step: 8
+      action: "Install dependencies if detected"
+      mandatory: false
+      output: "Dependencies installed"
+      verification: "npm install / cargo build / etc."
+      failure_mode: "Missing dependencies break work"
+    - step: 9
+      action: "Verify baseline - run tests"
+      mandatory: true
+      output: "Test results"
+      verification: "Tests pass in new worktree"
+      failure_mode: "Can't distinguish new bugs from pre-existing"
+    - step: 10
+      action: "Report failures if tests fail"
+      mandatory: true
+      output: "Failure report to user"
+      verification: "User informed of failures"
+      failure_mode: "Proceeding with failing baseline"
+  entry_conditions:
+    - condition: "Starting feature work needing isolation"
+      check: "Feature/bug/new work initiated"
+    - condition: "No existing worktree for this work"
+      check: "Worktree doesn't already exist"
+  exit_conditions:
+    - condition: "Worktree created, verified ignored, baseline tests pass"
+      check: "All verification steps complete"
+    - condition: "User informed of worktree path and ready state"
+      check: "Announcement made"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: ignore-check
+    gate_type: hard_block
+    trigger: "Worktree directory not verified as ignored"
+    message: "Must verify directory is in .gitignore before creating worktree."
+    blocking_command: null
+  - gate_id: baseline-fail
+    gate_type: hard_block
+    trigger: "Tests fail during baseline verification"
+    message: "Baseline tests fail. Cannot proceed - cannot distinguish new bugs from pre-existing failures."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Skipping ignore check"
+    description: "Worktree contents get tracked, pollute git"
+    severity: BLOCKER
+    prevention: "Always run git check-ignore"
+  - pattern: "Proceeding with failing tests"
+    description: "Can't distinguish new bugs from pre-existing"
+    severity: BLOCKER
+    prevention: "Report failures, ask user before proceeding"
+  - pattern: "Assuming directory location"
+    description: "Creates inconsistency, violates conventions"
+    severity: MAJOR
+    prevention: "Follow priority: .worktrees > worktrees > CLAUDE.md > ask"
+
+quick_ref:
+  trigger_line: "Starting feature work needing isolation"
+  key_constraint: "ALWAYS verify directory is ignored before creating worktree"
+  command_sequence: "Check .worktrees/ → Check worktrees/ → Select priority → Verify ignored → Add to .gitignore if needed → Create worktree → Auto-detect setup → Install deps → Run baseline tests → Announce ready"
+  output_indicator: "Worktree created at path, baseline tests pass, user informed"
+  do_not:
+    - "Skip ignore check"
+    - "Proceed with failing baseline tests"
+    - "Assume directory location"
+  common_mistakes:
+    - mistake: "Skipping ignore check"
+      fix: "Always verify with git check-ignore"
+    - mistake: "Proceeding with failing tests"
+      fix: "Report failures, ask user"
+    - mistake: "Assuming directory"
+      fix: "Follow priority order"

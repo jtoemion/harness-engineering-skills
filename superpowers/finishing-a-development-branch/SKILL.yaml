@@ -1,0 +1,113 @@
+skill:
+  name: finishing-a-development-branch
+  display_name: Finishing a Development Branch
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\finishing-a-development-branch\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: git-workflow
+  tags: [git, merge, pr, branch, cleanup, worktree, integration]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "finish, complete, merge, close branch, cleanup branch, create PR, done with branch"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 8
+
+behavior:
+  summary: "Guides completion of development work by presenting structured options for merge, PR, or cleanup"
+  detailed_description: >
+    Use when implementation is complete, all tests pass, and you need to decide how to integrate the work.
+    Core principle: Verify tests → Present 4 options → Execute choice → Clean up worktree.
+    Step 1: Verify tests pass. Step 2: Determine base branch. Step 3: Present 4 options (Merge, PR, Keep, Discard).
+    Step 4: Execute choice. Step 5: Cleanup worktree (Options 1, 2, 4 only).
+  process:
+    - step: 1
+      action: "Verify tests pass — run test suite"
+      mandatory: true
+      output: "Test results showing pass/fail"
+      verification: "All tests pass before proceeding"
+    - step: 2
+      action: "Determine base branch"
+      mandatory: true
+      output: "Base branch name (main/master)"
+      verification: "git merge-base HEAD main/master"
+    - step: 3
+      action: "Present exactly 4 options: Merge locally, Push PR, Keep branch, Discard"
+      mandatory: true
+      output: "Structured choice presentation"
+      verification: "4 options presented, no explanation"
+    - step: 4
+      action: "Execute selected option"
+      mandatory: true
+      output: "Merge/PR created/branch kept/discard confirmed"
+      verification: "Follow correct path for each option"
+    - step: 5
+      action: "Cleanup worktree (Options 1, 2, 4 only)"
+      mandatory: true
+      output: "Worktree removed or preserved based on option"
+      verification: "Option 3 keeps worktree, others cleanup"
+
+  entry_conditions:
+    - condition: "Implementation is complete and tests pass (or user claims they do)"
+      check: "Test verification step completes"
+  exit_conditions:
+    - condition: "User selects option and workflow completes"
+      check: "Option 4 requires typed 'discard' confirmation"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: fdb_001
+    gate_type: hard_block
+    trigger: "Tests failing"
+    message: "Cannot proceed with merge/PR until tests pass. Show failures."
+    blocking_command: null
+  - gate_id: fdb_002
+    gate_type: hard_block
+    trigger: "Discard without confirmation"
+    message: "Require typed 'discard' for Option 4"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Proceeding with failing tests"
+    description: "Merge broken code or create failing PR"
+    severity: BLOCKER
+    prevention: "Always verify tests before offering options"
+  - pattern: "Open-ended questions"
+    description: "Ambiguous direction without structured options"
+    severity: MAJOR
+    prevention: "Present exactly 4 structured options"
+  - pattern: "Auto cleanup worktree for Option 3"
+    description: "Remove worktree when user might need it"
+    severity: BLOCKER
+    prevention: "Only cleanup for Options 1 and 4"
+  - pattern: "No confirmation for discard"
+    description: "Accidentally delete work"
+    severity: BLOCKER
+    prevention: "Require typed 'discard' confirmation"
+
+quick_ref:
+  trigger_line: "finish, complete, merge, PR, done with branch"
+  key_constraint: "Verify tests → 4 options → Execute → Cleanup worktree"
+  command_sequence: "Test → Base branch → Options → Execute → Cleanup"
+  output_indicator: "Implementation complete. What would you like to do? [4 options]"
+  do_not:
+    - "Proceed with failing tests"
+    - "Ask open-ended questions"
+    - "Auto cleanup worktree (Options 2, 3)"
+    - "Discard without confirmation"
+    - "Force-push without explicit request"
+  common_mistakes:
+    - mistake: "Skipping test verification"
+      fix: "Always verify tests before offering options"
+    - mistake: "Automatic worktree cleanup"
+      fix: "Only cleanup for Options 1 and 4"

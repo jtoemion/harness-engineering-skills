@@ -1,0 +1,124 @@
+skill:
+  name: systematic-debugging
+  display_name: "Systematic Debugging"
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\systematic-debugging\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: debugging
+  tags:
+    - debugging
+    - bug-fix
+    - root-cause
+    - investigation
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "debug"
+      type: keyword
+      required: true
+    - condition: "bug"
+      type: keyword
+      required: true
+    - condition: "test failure"
+      type: keyword
+      required: true
+    - condition: "unexpected behavior"
+      type: keyword
+      required: true
+    - condition: "fix this"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 95
+
+behavior:
+  summary: "Find root cause before proposing any fix. Four-phase systematic approach: root cause investigation, pattern analysis, hypothesis testing, implementation and verification."
+  detailed_description: "ALWAYS find root cause before attempting fixes. Symptom fixes are failure. The skill enforces four phases: (1) Root Cause - read errors, reproduce, check changes, gather evidence; (2) Pattern - find working examples, compare; (3) Hypothesis - form theory, test minimally; (4) Implementation - create test, fix, verify. No exceptions to the iron law: NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST."
+  process:
+    - step: 1
+      action: "Phase 1: Root Cause Investigation — Read errors, reproduce bug, check recent changes, gather evidence"
+      mandatory: true
+      output: "Understanding of WHAT happened and WHY"
+      verification: "Can explain root cause in one sentence"
+      failure_mode: "Proceeding without understanding causes symptom-only fixes"
+    - step: 2
+      action: "Phase 2: Pattern Analysis — Find working examples, compare to broken code"
+      mandatory: true
+      output: "Identified differences between working and broken"
+      verification: "Can list specific differences found"
+      failure_mode: "Without pattern analysis, fix might not address real issue"
+    - step: 3
+      action: "Phase 3: Hypothesis and Testing — Form theory about root cause, test minimally"
+      mandatory: true
+      output: "Confirmed hypothesis or new hypothesis to test"
+      verification: "Hypothesis explains the bug, testable"
+      failure_mode: "Untested hypothesis leads to wrong fixes"
+    - step: 4
+      action: "Phase 4: Implementation — Create test case, implement fix, verify"
+      mandatory: true
+      output: "Bug resolved, tests pass"
+      verification: "All tests pass, original bug no longer occurs"
+      failure_mode: "No verification means no confirmation fix works"
+  entry_conditions:
+    - condition: "Bug, test failure, or unexpected behavior is reported"
+      check: "Clear description of what went wrong"
+  exit_conditions:
+    - condition: "Root cause is identified and verified"
+      check: "Can explain what caused the bug and why"
+    - condition: "Fix is implemented and tests pass"
+      check: "All tests pass, original symptom resolved"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: no_fixes_without_root_cause
+    gate_type: hard_block
+    trigger: "Attempting to propose a fix without completing Phase 1 root cause investigation"
+    message: "IRON LAW: NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST. You cannot proceed to fixing until you have completed Phase 1."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Quick fix for now"
+    description: "First fix sets pattern, doing it wrong creates technical debt"
+    severity: BLOCKER
+    prevention: "Always do it right, find root cause first"
+  - pattern: "Just try X and see"
+    description: "Random attempts waste time and don't address root cause"
+    severity: BLOCKER
+    prevention: "Form hypothesis, test it systematically"
+  - pattern: "I see the problem"
+    description: "Seeing symptoms is not understanding root cause"
+    severity: BLOCKER
+    prevention: "Investigate until you can explain WHY"
+  - pattern: "One more fix attempt (after 2+ failures)"
+    description: "3+ failures indicates architectural problem, not simple bug"
+    severity: BLOCKER
+    prevention: "Stop, re-analyze from Phase 1"
+  - pattern: "Reference too long, I'll adapt"
+    description: "Partial understanding guarantees bugs"
+    severity: BLOCKER
+    prevention: "Read full context, understand completely"
+
+quick_ref:
+  trigger_line: "debug, bug, test failure, unexpected behavior"
+  key_constraint: "NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST"
+  command_sequence: "Phase 1: Read errors, reproduce, check changes → Phase 2: Find working examples, compare → Phase 3: Form hypothesis, test minimally → Phase 4: Create test, fix, verify"
+  output_indicator: "Root cause identified, fix implemented, all tests pass"
+  do_not:
+    - "Propose fixes without root cause investigation"
+    - "Skip phases and go straight to implementation"
+    - "Assume you understand without investigating"
+    - "Try multiple random fixes"
+  common_mistakes:
+    - mistake: "Seeing symptoms and assuming root cause"
+      fix: "Investigate until you can explain WHY it happens"
+    - mistake: "Skipping pattern analysis"
+      fix: "Always compare working vs broken code"
+    - mistake: "Implementing fix without test"
+      fix: "Create test case before fixing"

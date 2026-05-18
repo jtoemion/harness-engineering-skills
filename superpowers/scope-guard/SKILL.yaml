@@ -1,0 +1,133 @@
+skill:
+  name: scope-guard
+  display_name: Scope Guard - Scope Creep Detection
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\scope-guard\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: scope-management
+  tags: [scope, drift, creep, files, task, atomic]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "file edit"
+      type: keyword
+      required: true
+    - condition: "implementation stage"
+      type: keyword
+      required: false
+    - condition: "scope deviation"
+      type: keyword
+      required: false
+  mode_required: any
+  min_task_complexity: any
+  weight: 90
+
+behavior:
+  summary: Lightweight inline check during implementation stages that detects scope drift and surfaces deviations without blocking, enforcing atomic task rules.
+  detailed_description: >
+    Scope Guard runs inside other stages, intercepting file operations. Before any file edit during implementation: (1) Check if file in task's declared scope, (2) If YES → proceed with no output, (3) If NO → surface immediately with options (Add to scope with approval, Create new atomic task, Abort edit). Tracks Scope Expansion Tally: 1st → surface and allow with approval, 2nd → surface with warning about splitting, 3rd → force pause requiring split. Scope defined at pipeline approval time - files listed = in scope, everything else = out of scope. Test files for in-scope implementation files are always in scope.
+  process:
+    - step: 1
+      action: "Check if file is in task's declared scope"
+      mandatory: true
+      output: "Scope check result"
+      verification: "File path compared against declared scope"
+      failure_mode: "Missing check allows drift"
+    - step: 2
+      action: "If YES - proceed with no output"
+      mandatory: true
+      output: "Edit proceeds"
+      verification: "File is in declared scope"
+      failure_mode: "N/A - no output needed"
+    - step: 3
+      action: "If NO - surface scope drift immediately"
+      mandatory: true
+      output: "Scope drift alert with options"
+      verification: "Alert displays declared scope, new file, options"
+      failure_mode: "Silent drift loses tracking"
+    - step: 4
+      action: "Track Scope Expansion Tally"
+      mandatory: true
+      output: "Expansion count"
+      verification: "Count incremented on each drift"
+      failure_mode: "Missing count loses tracking"
+    - step: 5
+      action: "1st expansion - surface, allow with approval"
+      mandatory: false
+      output: "Alert with approval request"
+      verification: "User confirms or declines"
+      failure_mode: "Proceeding without approval"
+    - step: 6
+      action: "2nd expansion - surface with warning"
+      mandatory: false
+      output: "Alert with warning about splitting"
+      verification: "Warning displayed"
+      failure_mode: "Missing warning"
+    - step: 7
+      action: "3rd+ expansion - force pause, split required"
+      mandatory: false
+      output: "Force pause with split requirement"
+      verification: "Task split enforced"
+      failure_mode: "Continuing without split"
+  entry_conditions:
+    - condition: "Implementation stage active with declared scope"
+      check: "Scope declared at pipeline approval time"
+    - condition: "About to edit a file"
+      check: "File edit operation initiated"
+  exit_conditions:
+    - condition: "Scope drift surfaced and addressed"
+      check: "User approved expansion, new task created, or edit aborted"
+    - condition: "Expansion tally managed appropriately"
+      check: "3+ expansions force split"
+  output_destination:
+    path: null
+    format: null
+    overwrite: null
+
+gates:
+  - gate_id: force-split
+    gate_type: hard_block
+    trigger: "3+ scope expansions in one task"
+    message: "3+ scope expansions. This task is no longer atomic. Split required."
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Adding files without surfacing drift"
+    description: "That's how scope creep starts. Surface it."
+    severity: BLOCKER
+    surface: "Always surface when touching files outside scope"
+  - pattern: "Claiming test files are out of scope"
+    description: "Test files for in-scope code are always in scope."
+    severity: BLOCKER
+    surface: "Test files = in scope for their implementation code"
+  - pattern: "Adding to scope without approval"
+    description: "Scope changes require user approval or explicit confirmation."
+    severity: BLOCKER
+    surface: "Get user approval before expanding scope"
+  - pattern: "Assuming file is obviously needed"
+    description: "If it was obvious, it should have been in original scope."
+    severity: MAJOR
+    surface: "Surface it anyway - let user confirm"
+
+quick_ref:
+  trigger_line: "Any file edit during implementation stage"
+  key_constraint: "Surface drift before ANY edit on files outside declared scope"
+  command_sequence: "Check if file in scope → YES: proceed | NO: surface with options → Track expansion tally → 1st: allow with approval | 2nd: warn | 3rd: force split"
+  output_indicator: "Scope drift alert shown, expansion count tracked, split enforced at 3+"
+  do_not:
+    - "Edit files outside scope without surfacing"
+    - "Claim test files are out of scope"
+    - "Add to scope without approval"
+    - "Assume file is needed without surfacing"
+  common_mistakes:
+    - mistake: "Adding just one more file"
+      fix: "Surface it - that's how creep starts"
+    - mistake: "Test file seems out of scope"
+      fix: "Test files for in-scope code are always in scope"
+    - mistake: "Adding to scope myself"
+      fix: "Requires user approval"
+    - mistake: "Assuming file is obviously needed"
+      fix: "If obvious, it should have been in original scope"

@@ -1,0 +1,109 @@
+﻿skill:
+  name: dev-journey-log
+  display_name: Development Journey Log
+  version: "1.0"
+  last_updated: "2026-05-18"
+  file_path: C:\Users\jtoem\.config\opencode\skills\superpowers\dev-journey-log\SKILL.md
+  skills_root: C:\Users\jtoem\.config\opencode\skills
+  category: process
+  subcategory: documentation
+  tags: [development, journey, changelog, feature-map, documentation, audit]
+  compliance_level: strict
+
+trigger:
+  conditions:
+    - condition: "feature, fix, refactor, update, add, remove, route, component, button, form, endpoint, schema, config, dependency, page, screen, modal, flow, user can, user sees, user clicks, deploy, migrate, integrate"
+      type: keyword
+      required: true
+  mode_required: any
+  min_task_complexity: any
+  weight: 8
+
+behavior:
+  summary: "Maintains three files after every code change — DEVELOPMENT_JOURNEY.md, FEATURE_MAP.md, .memory/SESSIONS.md"
+  detailed_description: >
+    Maintains two living documents after every code change. DEVELOPMENT_JOURNEY.md (append-only changelog of every modification).
+    FEATURE_MAP.md (user interaction and hierarchy map showing how users move through the app).
+    .memory/SESSIONS.md (chronological session audit for cross-tool sync).
+    Trigger keywords: feature, fix, refactor, update, add, remove, route, component, button, form, endpoint, schema,
+    config, dependency, page, screen, modal, flow, user can, user sees, user clicks, deploy, migrate, integrate.
+    Run after every file touch, feature add/remove, route/component/schema/config/dependency change.
+  process:
+    - step: 1
+      action: "List every file modified, added, or deleted"
+      mandatory: true
+      output: "File list"
+      verification: "All files captured"
+    - step: 2
+      action: "Update DEVELOPMENT_JOURNEY.md — append new entry at top"
+      mandatory: true
+      output: "New entry at top of changelog"
+      verification: "Append-only, never edit past entries"
+    - step: 3
+      action: "Update FEATURE_MAP.md — edit existing block or add new"
+      mandatory: true
+      output: "Updated feature block"
+      verification: "Update in-place, never delete"
+    - step: 4
+      action: "Update .memory/SESSIONS.md — append entry at bottom"
+      mandatory: true
+      output: "New session entry at bottom"
+      verification: "Append-only for sync"
+    - step: 5
+      action: "End reply with confirmation"
+      mandatory: true
+      output: "📋 Journey logged + 🗺️ Feature map updated"
+      verification: "Confirmation format matches"
+
+  entry_conditions:
+    - condition: "Any code change — file touched, feature added/removed, route/component/schema/config/dependency change"
+      check: "Trigger keyword detected or code change made"
+  exit_conditions:
+    - condition: "All three files updated"
+      check: "DEVELOPMENT_JOURNEY, FEATURE_MAP, SESSIONS all updated"
+
+output_destination:
+  path: null
+  format: text
+  overwrite: false
+
+gates:
+  - gate_id: djl_001
+    gate_type: warning
+    trigger: "Code change without journey update"
+    message: "Every code change requires journey and feature map update"
+    blocking_command: null
+
+anti_patterns:
+  - pattern: "Editing past entries in DEVELOPMENT_JOURNEY.md"
+    description: "Append-only — never edit past entries"
+    severity: BLOCKER
+    prevention: "If something wrong, write new fix entry"
+  - pattern: "Deleting feature blocks in FEATURE_MAP.md"
+    description: "Mark removed features [REMOVED] — never delete"
+    severity: BLOCKER
+    prevention: "Set Status: [REMOVED] and add removal date"
+  - pattern: "Not listing every file individually"
+    description: "Must list each file — never 'various files'"
+    severity: MINOR
+    prevention: "List every file individually"
+  - pattern: "Backend-only changes without noting"
+    description: "Note 'No user-facing interaction' in block"
+    severity: MINOR
+    prevention: "Document backend-only changes"
+
+quick_ref:
+  trigger_line: "feature, fix, refactor, add, remove, route, component, etc."
+  key_constraint: "DEVELOPMENT_JOURNEY append-only, FEATURE_MAP edit-in-place, SESSIONS append-only"
+  command_sequence: "List files → Update JOURNEY (top) → Update MAP (in-place) → Update SESSIONS (bottom)"
+  output_indicator: "📋 Journey logged: [date] — [title] | 🗺️ Feature map updated: [section]"
+  do_not:
+    - "Edit past entries in DEVELOPMENT_JOURNEY"
+    - "Delete feature blocks in FEATURE_MAP"
+    - "Skip listing individual files"
+    - "Update in wrong order (journey top, sessions bottom)"
+  common_mistakes:
+    - mistake: "Editing past entries"
+      fix: "Append-only — new fix entry if something wrong"
+    - mistake: "Deleting features"
+      fix: "Mark [REMOVED], never delete"

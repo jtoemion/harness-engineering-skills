@@ -30,6 +30,13 @@ Format: `[DATE] | [CATEGORY]` — each entry encodes an assumption that failed.
 
 ## Entry Template (DO NOT DELETE THIS LINE)
 <!-- New entries go below this line -->
+## [2026-05-18] | SUBAGENT SCHEMA DIVERGENCE — DUPLICATE VS IMPORT
+**Error**     : Build subagent created local copy of _write_incident() instead of importing from shared incident.py
+**Cause**     : Brief showed code blocks from the plan spec. Subagent reproduced them as new functions rather than importing existing shared module.
+**Lesson**    : Briefs for shared resources must explicitly state: "Import from [path]. Do NOT create new functions." Show the import statement, not the function body.
+**References**: session_close.py (duplicated), incident.py (canonical), SUBAGENT_PROTOCOL.md (brief template)
+**Status**    : ACTIVE
+
 ## [2026-05-17] | FIRESTORE SECURITY RULES — ANONYMOUS PROXY UID MISMATCH
 **Error**     : FirebaseError: Missing or insufficient permissions when creating sessions
 **Cause**     : `CreateSessionModal.tsx` passed `userProfile?.uid` as `tutorId`. For PIN login (anonymous proxy auth), `uid` is the anonymous Firebase UID, but Firestore `getRealUserId()` resolves to the real user ID via session doc lookup — causing a rule mismatch.

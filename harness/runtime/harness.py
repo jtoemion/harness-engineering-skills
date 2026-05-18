@@ -124,6 +124,42 @@ def _parse_stale_output(lines: list[str]) -> tuple[list[dict], bool]:
     return results, has_stale
 
 
+def _check_incident_patterns() -> list[dict]:
+    """Scan incidents for recurring patterns. Returns list of pattern dicts."""
+    incidents_dir = WORKSPACE_ROOT / ".memory" / "incidents"
+    if not incidents_dir.exists():
+        return []
+
+    incidents = []
+    for f in incidents_dir.glob("*.json"):
+        try:
+            incidents.append(json.loads(f.read_text(encoding="utf-8")))
+        except Exception:
+            pass
+
+    if not incidents:
+        return []
+
+    from collections import Counter
+    step_counts = Counter(inc["step_name"] for inc in incidents)
+
+    patterns = []
+    for step_name, count in step_counts.items():
+        if count >= 2:
+            examples = [inc for inc in incidents if inc["step_name"] == step_name]
+            latest = max(examples, key=lambda x: x["timestamp"])
+            patterns.append({
+                "step_name": step_name,
+                "count": count,
+                "error_types": list(set(inc["error_type"] for inc in examples)),
+                "latest_error": latest["error_message"],
+                "latest_timestamp": latest["timestamp"],
+                "data_loss_risk": latest.get("data_loss_risk", "UNKNOWN"),
+            })
+
+    return patterns
+
+
 def _print_boot_status_report(mode: str, state: HarnessState) -> None:
     """Print Boot Status Report in exact format."""
     memory_status = "WARM" if (WORKSPACE_ROOT / ".memory").exists() else "N/A"
@@ -147,6 +183,15 @@ def _print_boot_status_report(mode: str, state: HarnessState) -> None:
         incident_count = len(list(incidents_dir.glob("*.json")))
         if incident_count > 0:
             print(f"  Incidents: {incident_count} on record")
+            # Check for recurring incident patterns
+            if incident_count >= 2:
+                patterns = _check_incident_patterns()
+                if patterns:
+                    print(f"  ⚠️ Recurring failures detected:")
+                    for p in patterns:
+                        print(f"    {p['step_name']}: {p['count']}x — {p['error_types'][0]}")
+                        print(f"      Latest: {p['latest_error'][:80]}")
+                    print(f"    >>> Consider adding to MISTAKES.md if not already tracked")
     if mode == "full" and state.boot_receipt:
         print(f"  Boot Receipt : {state.boot_receipt.get('mistakes_loaded', 0)} mistakes, {state.boot_receipt.get('patterns_loaded', 0)} patterns, {state.boot_receipt.get('variables_loaded', 0)} variables")
     print(f"  Harness : LOADED +")
@@ -478,7 +523,14 @@ def cmd_gate(args: argparse.Namespace) -> int:
             if mod_time <= state.boot_time:
                 print("  WARN: No mistakes or patterns logged since boot")
                 print("  Consider running retrospective before closing (writes to mistakes.json/patterns.json)")
-        
+
+        # Check for unprocessed incident patterns
+        incident_patterns = _check_incident_patterns()
+        if incident_patterns:
+            print(f"  WARN: {len(incident_patterns)} recurring incident pattern(s) detected")
+            for p in incident_patterns:
+                print(f"    {p['step_name']}: {p['count']}x — consider promoting to MISTAKES.md")
+
         if not state.verification_logged:
             print("  BLOCK: verification_logged = False")
             print("  Run: harness verify-done")

@@ -133,12 +133,13 @@ Write results to SUBAGENT_RESULT.md before returning.
 ```markdown
 # Subagent Result: [TYPE] — [TASK NAME]
 
-**Status**   : [SUCCESS | PARTIAL | FAILED]
-**Summary**  : [What was done — max 300 words]
-**Evidence** : [Key findings with file:line refs]
-**Next**     : [Recommended next steps]
-**Files**    : [Any files modified — path only]
-**Mistakes** : [Any issues encountered]
+**Status**        : [SUCCESS | PARTIAL | FAILED]
+**Summary**       : [What was done — max 300 words]
+**Evidence**      : [Key findings with file:line refs]
+**Verify Output** : [Output of the Verify command, or "N/A" if no command specified]
+**Next**          : [Recommended next steps]
+**Files**         : [Any files modified — ABSOLUTE path only]
+**Mistakes**      : [Any issues encountered]
 ```
 
 ---
@@ -148,10 +149,16 @@ Write results to SUBAGENT_RESULT.md before returning.
 ```
 1. READ SUBAGENT_RESULT.md — ONLY this file
 2. EXTRACT: Status, Summary, Evidence, Next, Files
-3. LOG any mistakes to {SKILLS_ROOT}\harness\MISTAKES.md
-4. UPDATE .memory/ with findings
-5. IF parallel dispatch → wait for remaining
-6. CONTINUE
+3. VERIFY: Run the Verify command from the brief
+   - If it PASSES → continue
+   - If it FAILS → log failure, re-dispatch build subagent with error output
+   - If no Verify command was specified → WARN and continue
+4. VERIFY FILES: Confirm each file in Result.Files exists at the EXPECTED path
+   - If path doesn't match brief's Files/Scope → flag as [PATH MISMATCH]
+5. LOG any mistakes to {SKILLS_ROOT}\harness\MISTAKES.md
+6. UPDATE .memory/ with findings
+7. IF parallel dispatch → wait for remaining
+8. CONTINUE
 ```
 
 ---
@@ -177,6 +184,8 @@ Write results to SUBAGENT_RESULT.md before returning.
 | Brief exceeds 1 page | Split into 2 briefs |
 | Subagent returns raw file content | REJECT — return summary only |
 | Main agent wants to read files directly | STOP — dispatch explore instead |
+| Subagent creates a file outside brief scope | REJECT — file must be in Files/Scope or explicitly requested |
+| Brief references shared module from another task | Add explicit import instruction: "Import from [path]. Do NOT recreate." |
 
 ---
 

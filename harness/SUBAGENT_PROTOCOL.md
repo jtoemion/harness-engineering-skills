@@ -88,8 +88,10 @@ Rules:
 3. CREATE SUBAGENT_BRIEF.md for each subagent
 4. DISPATCH subagents (parallel if independent)
 5. WAIT for all SUBAGENT_RESULT.md
-6. COMPILE results
-7. PRESENT to user
+6. CHECKPOINT each result (see CHECKPOINTING below)
+7. COMPILE results
+8. WRITE Implementation Retrospective (see template below)
+9. PRESENT to user
 ```
 
 **Main agent touches ZERO implementation files.**
@@ -160,6 +162,73 @@ Write results to SUBAGENT_RESULT.md before returning.
 7. IF parallel dispatch → wait for remaining
 8. CONTINUE
 ```
+
+---
+
+## IMPLEMENTATION RETROSPECTIVE (mandatory after plan execution)
+
+After ALL subagent results are collected and checkpointed, the main agent MUST write
+an Implementation Retrospective before presenting to user. This is an **execution journal**
+for the human — not the same as the session-close retrospective (which extracts abstract
+lessons for the knowledge graph).
+
+**Trigger:** Every plan execution that dispatches 2+ subagents.
+**Audience:** The human, immediately.
+**Format:** Present as the response to the user (not a separate file).
+
+### Template
+
+```markdown
+# Implementation Retrospective — [Plan Name]
+
+## 📋 Planning Phase
+**What I did:** [How the plan was decomposed, how many tasks, dispatch decision (parallel vs sequential)]
+
+| # | Task | Phase | Type | Status |
+|---|------|-------|------|--------|
+| 1 | [task name] | [phase] | [explore/build/review] | ✅/⚠️/❌ |
+
+## 🏗️ Execution — Task by Task
+
+### Task N: [name] — [✅/⚠️/❌]
+**What the subagent did:** [2-3 sentences]
+**Challenge:** [What went wrong or was unexpected. "None" if clean.]
+**How I overcame it:** [Resolution. Omit if no challenge.]
+
+## 🔍 Post-Execution Verification
+
+| File | Check | Result |
+|------|-------|--------|
+| [file] | [what was checked] | ✅/❌ |
+
+## 📊 Challenge Summary
+
+| Challenge | Type | How Handled |
+|-----------|------|-------------|
+| [issue] | [Implementation/Brief quality/Environment/...] | [resolution] |
+
+(If no challenges: "No challenges encountered — all tasks succeeded on first attempt.")
+
+## 💡 Key Learnings
+1. [Concrete, actionable takeaway]
+2. [Another takeaway]
+
+(If nothing novel: "No new learnings — execution matched plan exactly.")
+
+## 📦 Current State
+```
+[git status or commit hash]
+M  [files changed]
+```
+```
+
+### Rules
+
+- **NEVER skip this.** Even a clean execution has value ("all 5 tasks parallel, zero conflicts" is a learning).
+- **Be honest about challenges.** If a subagent failed and was re-dispatched, say so.
+- **Keep it scannable.** Tables over prose. One sentence per field.
+- **Challenge Summary can be empty.** Write "No challenges" — don't fabricate drama.
+- **Key Learnings must be novel.** Don't repeat lessons already in `mistakes.json`. If a known pitfall fired, say "Known pitfall [M-XXX] was correctly avoided" instead.
 
 ---
 

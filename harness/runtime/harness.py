@@ -130,10 +130,13 @@ def _check_incident_patterns() -> list[dict]:
     if not incidents_dir.exists():
         return []
 
+    required_fields = {"step_name", "error_type", "error_message", "timestamp"}
     incidents = []
     for f in incidents_dir.glob("*.json"):
         try:
-            incidents.append(json.loads(f.read_text(encoding="utf-8")))
+            inc = json.loads(f.read_text(encoding="utf-8"))
+            if all(k in inc for k in required_fields):
+                incidents.append(inc)
         except Exception:
             pass
 
@@ -240,9 +243,11 @@ def _generate_boot_receipt() -> dict:
         except Exception:
             pass
     
+    # Legacy systemPatterns.md — no longer used, JSON knowledge graph is source of truth
+    # Kept as optional receipt entry for backward compatibility during migration
     system_patterns = mem_dir / "systemPatterns.md"
     if system_patterns.exists():
-        receipt["files_read"].append("systemPatterns.md")
+        receipt["files_read"].append("systemPatterns.md (legacy)")
     
     return receipt
 
@@ -374,8 +379,10 @@ def _check_project_knowledge(task_input: str) -> tuple[list[dict], list[dict]]:
             for m in data.get("mistakes", []):
                 text = f"{m.get('error', '')} {m.get('lesson', '')}".lower()
                 entry_words = set(text.split())
+                if len(entry_words) < 3:
+                    continue  # Skip entries too short to score meaningfully
                 overlap = len(words & entry_words)
-                score = overlap / len(entry_words) if entry_words else 0
+                score = overlap / len(entry_words)
                 if score > 0.15:
                     mistakes.append(m)
         except Exception:
@@ -388,8 +395,10 @@ def _check_project_knowledge(task_input: str) -> tuple[list[dict], list[dict]]:
             for p in data.get("patterns", []):
                 text = f"{p.get('pattern', '')} {p.get('prevention', '')}".lower()
                 entry_words = set(text.split())
+                if len(entry_words) < 3:
+                    continue  # Skip entries too short to score meaningfully
                 overlap = len(words & entry_words)
-                score = overlap / len(entry_words) if entry_words else 0
+                score = overlap / len(entry_words)
                 if score > 0.15:
                     patterns.append(p)
         except Exception:
@@ -515,12 +524,18 @@ def cmd_gate(args: argparse.Namespace) -> int:
             print("=" * 60)
             return 1
         
-        # Check systemPatterns.md was modified since boot (if it exists)
-        system_patterns = WORKSPACE_ROOT / ".memory" / "systemPatterns.md"
-        if system_patterns.exists() and state.boot_time:
+        # Check if JSON knowledge files were updated since boot
+        if state.boot_time:
             import os
-            mod_time = datetime.fromtimestamp(os.path.getmtime(system_patterns), tz=timezone.utc)
-            if mod_time <= state.boot_time:
+            knowledge_updated = False
+            for kf in ("mistakes.json", "patterns.json"):
+                kf_path = WORKSPACE_ROOT / ".memory" / kf
+                if kf_path.exists():
+                    mod_time = datetime.fromtimestamp(os.path.getmtime(kf_path), tz=timezone.utc)
+                    if mod_time > state.boot_time:
+                        knowledge_updated = True
+                        break
+            if not knowledge_updated:
                 print("  WARN: No mistakes or patterns logged since boot")
                 print("  Consider running retrospective before closing (writes to mistakes.json/patterns.json)")
 

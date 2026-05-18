@@ -24,7 +24,7 @@ Format: `[DATE] | [CATEGORY]` — each entry encodes an assumption that failed.
 | Mistake catching | ⚠️ Partial | MISTAKES.md exists; gate enforcement added; still depends on agent compliance |
 | Boot receipt | ✅ Implemented | harness.py generates receipt at boot with knowledge file counts |
 | Pre-task gates | ✅ Implemented | Queries JSON knowledge + permission error diagnosis protocol |
-| Close verification gate | ✅ Implemented | Checks boot receipt, mistakes_checked, systemPatterns.md staleness |
+| Close verification gate | ✅ Implemented | Checks boot receipt, mistakes_checked, mistakes.json/patterns.json staleness |
 
 ---
 

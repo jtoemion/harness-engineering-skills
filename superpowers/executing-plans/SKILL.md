@@ -39,6 +39,7 @@ For each task:
 When batch complete:
 - Show what was implemented
 - Show verification output
+- Write **Implementation Retrospective** (see `SUBAGENT_PROTOCOL.md` → IMPLEMENTATION RETROSPECTIVE template)
 - Say: "Ready for feedback."
 
 ### Step 4: Continue

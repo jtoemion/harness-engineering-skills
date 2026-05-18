@@ -54,6 +54,13 @@ routing:
     weight: 80
     note: "Scrape football news from web sources"
 
+  - id: "context-handoff"
+    condition: "user says 'handoff' or 'context transfer' or 'brief another model' or 'prepare for [model]' or 'diagnostic payload' or 'make a handoff'"
+    skill_path: "superpowers/context-handoff/SKILL.md"
+    mode_required: "any"
+    weight: 78
+    note: "Generates forensic handoff payload for another AI model. Deploys explore subagents if .memory/.docs absent."
+
   - id: "workflow-builder"
     condition: "user says 'build a workflow' or 'create a skill' or 'convert a skill' or 'quality check workflow' or 'analyze skill'"
     skill_path: "harness/workflow-builder/SKILL.md"

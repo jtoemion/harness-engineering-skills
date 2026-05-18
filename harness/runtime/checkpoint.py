@@ -21,6 +21,7 @@ def _find_workspace_root() -> Path:
 WORKSPACE_ROOT = _find_workspace_root()
 
 from .state import HarnessState, load_state, save_state
+from .incident import _write_incident
 
 CHECKPOINT_STEPS = [
     ("update_active_context", "step_update_active_context"),
@@ -219,7 +220,15 @@ def run_checkpoint(task_description: str, state: HarnessState | dict | None = No
             continue
 
         step_fn = step_funcs[step_name]
-        success, message, state = step_fn(state, task_description)
+        try:
+            success, message, state = step_fn(state, task_description)
+        except Exception as e:
+            filepath = _write_incident(state, step_name, e, pipeline="checkpoint", step_index=i)
+            print(f"  [{i+1}/12] {step_display}... ✗ (EXCEPTION: {e})")
+            if filepath:
+                print(f"  Incident logged: {filepath}")
+            print("\n⚠️  CHECKPOINT FAILED")
+            return False
 
         if success:
             print(f"  [{i+1}/12] {step_display}... ✓ ({message})")

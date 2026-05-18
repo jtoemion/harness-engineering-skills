@@ -141,6 +141,12 @@ def _print_boot_status_report(mode: str, state: HarnessState) -> None:
     print(f"  Time    : {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}")
     print(f"  Mode    : {mode.upper()}")
     print(f"  Memory  : {memory_status}")
+    # Incident count
+    incidents_dir = WORKSPACE_ROOT / ".memory" / "incidents"
+    if incidents_dir.exists():
+        incident_count = len(list(incidents_dir.glob("*.json")))
+        if incident_count > 0:
+            print(f"  Incidents: {incident_count} on record")
     if mode == "full" and state.boot_receipt:
         print(f"  Boot Receipt : {state.boot_receipt.get('mistakes_loaded', 0)} mistakes, {state.boot_receipt.get('patterns_loaded', 0)} patterns, {state.boot_receipt.get('variables_loaded', 0)} variables")
     print(f"  Harness : LOADED +")
@@ -381,6 +387,17 @@ def _gate_pre_task(task_input: str) -> tuple[int, RouteResult | None]:
         print("  >>> ACTION REQUIRED: You MUST explicitly acknowledge and incorporate")
         print("  >>> these lessons into your plan BEFORE execution. Do not ignore them.")
         print()
+
+    # Generate pasteable Pitfalls block for subagent briefs
+    if proj_mistakes:
+        print()
+        print("  SUBAGENT PITFALLS (paste into brief):")
+        print("  ┌─────────────────────────────────────────")
+        for m in proj_mistakes[:5]:
+            mid = m.get('id', '?')
+            lesson = m.get('lesson', '')[:120]
+            print(f"  │ - [{mid}] {lesson}")
+        print("  └─────────────────────────────────────────")
 
     # Permission error diagnosis protocol
     permission_keywords = {"permission", "firebase", "firestore", "auth", "uid", "security rules", "access denied", "insufficient permissions", "getrealuserid", "anonymous"}

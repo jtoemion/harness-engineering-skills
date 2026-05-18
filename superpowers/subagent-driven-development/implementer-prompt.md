@@ -16,6 +16,18 @@ Task tool (general-purpose):
 
     [Scene-setting: where this fits, dependencies, architectural context]
 
+    ## Known Pitfalls
+
+    [PASTE relevant entries from .memory/mistakes.json that match this task's scope]
+    (Example: "[M-003] Do NOT pass bare `uid` for anonymous proxy — use actualUserId || uid")
+
+    If no pitfalls found, write: "No known pitfalls for this scope."
+
+    ## Verify
+
+    [Command to run when done — e.g. `npm run build && npx vitest run --reporter=verbose`]
+    Run this BEFORE reporting SUCCESS.
+
     ## Before You Begin
 
     If you have questions about:

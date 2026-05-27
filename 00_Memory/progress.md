@@ -1,2 +1,1 @@
-
-## [2026-05-09T11:52:13.456566+00:00] Checkpoint: fixed auth bug
+## [2026-05-27T18:45:00Z] Checkpoint: Fix extractJSON for MiniMax-M2.7 thinking model output

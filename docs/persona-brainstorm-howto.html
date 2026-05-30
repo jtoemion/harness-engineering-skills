@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persona Brainstorm — How-To Plan</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2e3347;
+    --text: #e8eaf0;
+    --muted: #8b90a5;
+    --accent: #7c6af7;
+    --accent2: #f76a8c;
+    --green: #5ce0a8;
+    --amber: #f5c542;
+    --red: #f76a6a;
+    --ink: #c9cdd8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin: 40px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 20px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 16px 0 8px;
+  }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 0 0 12px 20px; }
+  li { margin-bottom: 6px; }
+  .meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .meta .tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .meta .tag.accent { border-color: var(--accent); color: var(--accent); }
+  .meta .tag.green { border-color: var(--green); color: var(--green); }
+
+  /* ── lede ── */
+  .lede {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  /* ── card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .card h4 { margin-top: 0; }
+
+  /* ── table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  th {
+    background: var(--surface2);
+    text-align: left;
+    padding: 8px 12px;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge.green { background: rgba(92,224,168,0.12); color: var(--green); }
+  .badge.amber { background: rgba(245,197,66,0.12); color: var(--amber); }
+  .badge.accent { background: rgba(124,106,247,0.12); color: var(--accent); }
+  .badge.red { background: rgba(247,106,106,0.12); color: var(--red); }
+
+  /* ── timeline ── */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item { position: relative; margin-bottom: 28px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-item.done::before { background: var(--green); }
+  .timeline-item.warning::before { background: var(--amber); }
+  .tl-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .tl-head strong { font-size: 14px; color: var(--text); }
+  .tl-head .badge { margin-left: auto; }
+
+  /* ── ADR blocks ── */
+  .adr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .adr-header {
+    background: var(--surface2);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .adr-header .num {
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+  .adr-header .title { font-weight: 600; font-size: 14px; color: var(--text); }
+  .adr-body { padding: 20px 24px; }
+  .adr-body p { margin-bottom: 10px; }
+  .adr-body strong { color: var(--green); }
+  .adr-body em { color: var(--muted); font-style: normal; }
+  .adr-section { margin-bottom: 14px; }
+  .adr-section strong { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 4px; }
+
+  /* ── phase flow ── */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .phase-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .phase-box .phase-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .phase-box .phase-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .phase-box .phase-time { font-size: 12px; color: var(--muted); }
+
+  /* ── rule list ── */
+  .rule-list { list-style: none; margin: 0; }
+  .rule-list li {
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    background: var(--surface2);
+    border-radius: 4px;
+    border-left: 3px solid var(--accent);
+    font-size: 13px;
+  }
+  .rule-list li strong { color: var(--accent); }
+
+  /* ── exemplar q&a ── */
+  .qa {
+    background: var(--surface2);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .qa-q {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--amber);
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-q::before { content: 'Ezekiel: '; font-weight: 700; color: var(--accent); }
+  .qa-a {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--green);
+    border-bottom: 1px solid var(--border);
+  }
+  .qa-a::before { content: 'Jeremiah: '; font-weight: 700; color: var(--accent2); }
+  .qa-r {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text);
+    font-style: italic;
+  }
+
+  /* ── roadmap ── */
+  .roadmap-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .roadmap-cols { grid-template-columns: 1fr; } }
+  .road-col { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .road-col-head {
+    padding: 10px 16px;
+    background: var(--surface2);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .road-col-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .road-col-item:last-child { border-bottom: none; }
+  .road-col-item .ri-title { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .road-col-item .ri-meta { font-size: 11px; color: var(--muted); }
+
+  /* ── cta ── */
+  .cta {
+    background: linear-gradient(135deg, rgba(124,106,247,0.15), rgba(247,106,140,0.08));
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-top: 32px;
+    text-align: center;
+  }
+  .cta p { margin-bottom: 8px; color: var(--ink); }
+  .cta strong { color: #fff; }
+</style>
+</head>
+<body>
+
+<h1>Persona Brainstorm — How-To Plan</h1>
+<div class="meta">
+  <span class="tag accent">Methodology</span>
+  <span class="tag">Grill-with-Docs</span>
+  <span class="tag green">2 Personas</span>
+  <span class="tag">3 ADRs per session</span>
+  <span class="tag">Pastpapr LMS — 2026-05-30</span>
+</div>
+
+<div class="lede">
+This document is the full reference for running a <strong>Persona Brainstorm session</strong> — a structured client-dev discovery exercise that surfaces one high-impact concrete improvement per session. It covers the concept, role setup, step-by-step execution, the ADR format, and a complete roadmap for deploying the method on any project, illustrated with the Pastpapr LMS session from May 30, 2026.
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 — WHAT IS THIS AND WHY IT WORKS
+═══════════════════════════════════════════ -->
+<h2>1. What Is a Persona Brainstorm Session</h2>
+
+<p>A Persona Brainstorm session is a <strong>focused discovery exercise</strong> between two characters — a developer and a client — with a silent scribe documenting the outcome. The goal is not to enumerate features or vote on a backlog. It is to find <strong>one high-impact improvement that meaningfully changes the product</strong>, grounded in real contradictions, not aspirations.</p>
+
+<p>It is called a "grill" session because the developer pushes — one question at a time — until the client gives a concrete pain statement, not a vague wish. The developer reads the codebase and project history first so every question is grounded in evidence, not assumptions.</p>
+
+<h3>Why it works</h3>
+<ul>
+<li><strong>Developers ask better questions when they've read the docs first.</strong> They notice anomalies: features marked "done" but with untested next steps, systems marked "in_progress" for months, deprecated code that still deploys, contradictions between code and history.</li>
+<li><strong>Clients speak more precisely when they have full project context.</strong> Before the session, load Jeremiah (the client persona) with all project documentation. When a client answers from real knowledge — not guesses — the friction surfaces faster.</li>
+<li><strong>The ADR format forces specificity.</strong> "Improve the UX" is not an ADR. "Add a 3-field TutorSessionNoteModal with a Firestore write" is. If a developer can read it and start building without asking a follow-up question, it's a good ADR.</li>
+<li><strong>Three ADRs is the cap.</strong> Discovery without resolution is conversation. Three finished ADRs is a strong session. More than three means nothing was committed deeply enough.</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — THE PERSONAS
+═══════════════════════════════════════════ -->
+<h2>2. The Three Personas</h2>
+
+<table>
+  <thead><tr><th>Name</th><th>Role</th><th>Responsibility</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Ezekiel</strong></td>
+      <td>Developer</td>
+      <td>Reads all project docs (.docs/, .memory/). Asks one pointed question at a time. Translates client answers into architectural decisions. Writes ADRs in real time. <em>Never monologues.</em></td>
+    </tr>
+    <tr>
+      <td><strong>Jeremiah</strong></td>
+      <td>Client</td>
+      <td>Loaded with full project context. Answers from real product knowledge, user pain, workflow gaps — not aspirations. Speaks in concrete examples. <em>Not Judah. The user does not answer as Jeremiah. Jeremiah is the product owner.</em></td>
+    </tr>
+    <tr>
+      <td><strong>Megumi</strong></td>
+      <td>Observer / Scribe</td>
+      <td>Documents CLOSED questions to CONTEXT.md with G-Q# IDs. Writes completed ADRs to ADR.md. Silent unless format corrections are needed. Pushes output to correct repo immediately after the session.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Critical rule: Jeremiah is not the user</h3>
+<p>If Judah (the user) answers a question instead of Jeremiah, Megumi redirects: <em>"Let's keep Jeremiah in character — what's the client answer here?"</em>. This prevents the session from collapsing into a free-form chat and forces every answer to come from product context.</p>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 3 — SESSION STRUCTURE
+═══════════════════════════════════════════ -->
+<h2>3. Session Structure</h2>
+
+<div class="phase-grid">
+  <div class="phase-box">
+    <div class="phase-num">Phase 1 — Orientation</div>
+    <div class="phase-title">Contradiction First</div>
+    <div class="phase-time">~5 minutes</div>
+  </div>
+  <div class="phase-box">
+    <div class="phase-num">Phase 2 — Discovery</div>
+    <div class="phase-title">3 Question Rounds</div>
+    <div class="phase-time">~20 minutes</div>
+  </div>
+  <div class="phase-box">
+    <div class="phase-num">Phase 3 — ADR Writing</div>
+    <div class="phase-title">Real-Time Decisions</div>
+    <div class="phase-time">~10 minutes</div>
+  </div>
+  <div class="phase-box">
+    <div class="phase-num">Phase 4 — Skill Save</div>
+    <div class="phase-title">Reusable Asset</div>
+    <div class="phase-time">Post-session</div>
+  </div>
+</div>
+
+<h3>Phase 1 — Orientation</h3>
+<p>Ezekiel opens. Not with "what do you want?" but with a specific, documented contradiction found from reading the code:</p>
+
+<ul>
+<li>"The report card is marked LIVE but the next step in the progress log is a manual E2E test. Did that ever get verified?"</li>
+<li>"League reset is manual only, but the Firebase Cloud Functions with the old XP thresholds are still deployed. Is this a dual-write risk?"</li>
+<li>"EPIC-1 is listed 'in_progress' after months with no commits. Is the data still split across two curriculum models?"</li>
+</ul>
+<p>Good opening questions share a structure: <em>specific observation + implicit "which is the live state?"</em>. They come from the codebase, not from the user's stated preferences.</p>
+
+<h3>Phase 2 — Discovery (3 Rounds)</h3>
+<ul>
+<li><strong>Round 1:</strong> One question about the product loop. How do users actually engage daily vs monthly? Closes surface-level questions fast.</li>
+<li><strong>Round 2:</strong> Pushes on the thread that seemed most real from Round 1. Ezekiel presses until Jeremiah gives a <em>concrete pain statement</em> — not "could we have X" but "we keep running into Y."</li>
+<li><strong>Round 3:</strong> Pivot to a second theme if one exists. If Jeremiah gives a soft answer, Ezekiel pushes: <em>"Can you give me a specific example of when that came up?"</em></li>
+</ul>
+
+<h3>Phase 3 — ADR Writing</h3>
+<p>After each confirmed improvement:</p>
+<ol>
+<li>Ezekiel states the context — what the problem is, one sentence</li>
+<li>Jeremiah responds — what users are actually feeling</li>
+<li>Ezekiel writes the ADR using the template in real time</li>
+<li>Megumi confirms it was saved to ADR.md</li>
+</ol>
+
+<h3>Phase 4 — Skill Save</h3>
+<p>After the session: offer to save the method as a reusable skill with full session example. The skill lives in <code>~/.hermes/skills/persona-brainstorm/SKILL.md</code> and gets pushed to <code>jtoemion/harness-engineering-skills</code>.</p>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 4 — THE ADR FORMAT
+════════════════=================== ========= -->
+<h2>4. The ADR Format</h2>
+
+<div class="card">
+  <h4>ADR Template</h4>
+  <div class="adr-section">
+    <strong>Context</strong>
+    What's wrong or missing. One paragraph — specific, not aspirational. No "wouldn't it be nice."
+  </div>
+  <div class="adr-section">
+    <strong>Decision</strong>
+    What we're doing. Concrete and specific. Include specific files/components if applicable.
+  </div>
+  <div class="adr-section">
+    <strong>What to build (v1)</strong>
+    Concrete scope — specific files, features, UI components. Be surgical to prevent scope creep.
+  </div>
+  <div class="adr-section">
+    <strong>What is deliberately excluded</strong>
+    v1 boundaries. Explicitly stated so scope doesn't creep post-hoc.
+  </div>
+  <div class="adr-section">
+    <strong>Why this is high-impact</strong>
+    Product-level rationale — how does this change the user's week, not the code's structure?
+  </div>
+  <div class="adr-section">
+    <strong>Verification</strong>
+    Specific acceptance criteria a developer can run — real tests, not "should work well."
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 5 — CONTEXT.MD TRACKING
+═══════════════════════════════════════════ -->
+<h2>5. CONTEXT.md Tracking (G-Q# Format)</h2>
+
+<p>As questions are asked and answered, Megumi documents them in CONTEXT.md with G-Q# IDs. Each entry tracks:</p>
+<ul>
+<li>Question text</li>
+<li>Answer summary</li>
+<li>Status: <span class="badge green">Closed</span> · <span class="badge amber">To Jeremiah</span> · <span class="badge accent">ADR-N</span></li>
+</ul>
+
+<table>
+  <thead><tr><th>ID</th><th>Topic</th><th>Question</th><th>Answer</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>G-Q1</strong></td>
+      <td>Report card</td>
+      <td>"Marked LIVE but next step is manual E2E test — did that ever get verified?"</td>
+      <td>"Fine."</td>
+      <td><span class="badge green">Closed</span></td>
+    </tr>
+    <tr>
+      <td><strong>G-Q2</strong></td>
+      <td>League automation</td>
+      <td>"Dual-write risk with deprecated Firebase functions?"</td>
+      <td>"We are not using those. Parking those automations for now."</td>
+      <td><span class="badge green">Closed</span> — parked</td>
+    </tr>
+    <tr>
+      <td><strong>G-Q3</strong></td>
+      <td>Curriculum model</td>
+      <td>"Is live data split across old/new paths?"</td>
+      <td>"Tutors settled on new model. Old code is dead weight — excised, not migrated."</td>
+      <td><span class="badge accent">ADR-002</span></td>
+    </tr>
+    <tr>
+      <td><strong>G-Q4</strong></td>
+      <td>Engagement</td>
+      <td>"What keeps students returning daily vs monthly?"</td>
+      <td>"Quiz loop is the hook. Product is looking backward. No real-time tutor capture."</td>
+      <td><span class="badge accent">ADR-001</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 6 — THE PASTPAPR SESSION IN FULL
+═══════════════════════════════════════════ -->
+<h2>6. The Pastpapr LMS Session (May 30, 2026)</h2>
+
+<h3>Context loaded before the session</h3>
+<ul>
+<li><code>.docs/project-overview.md</code> — architecture, tech stack, constraints</li>
+<li><code>.docs/architecture.md</code> — data flows, DAL/service/hook map</li>
+<li><code>.docs/dev-guide.md</code> — setup, gotchas, deployment</li>
+<li><code>.docs/source-tree.md</code> — full source tree with layer constraints</li>
+<li><code>.memory/feature_list.json</code> — 11 features, EPIC-1 in_progress</li>
+<li><code>.memory/decisions.json</code> — 3 decisions on record</li>
+<li><code>.memory/activeContext.md</code> — league fixes, report card status</li>
+<li><code>.memory/mistakes.json</code> — 29 patterns of failure</li>
+<li><code>.memory/progress.txt</code> — full session history</li>
+</ul>
+
+<h3>Session transcript (abridged)</h3>
+
+<div class="qa">
+  <div class="qa-q">Report card is marked IMPLEMENTATION COMPLETE & LIVE but the next step is a manual E2E test. Did that ever get verified?</div>
+  <div class="qa-a">Report card generator is fine.</div>
+  <div class="qa-r">G-Q1 closed. No ADR.</div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">League reset is manual only, but the Firebase functions with old thresholds (600/300/100) are still deployed while the client was updated to new thresholds (700/500/200). Is dual-write a real risk?</div>
+  <div class="qa-a">We are not using those Firebase functions. Parking those automations for now.</div>
+  <div class="qa-r">G-Q2 closed. No ADR. Architecture cleaned by implication.</div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">The curriculum model migration (EPIC-1) is still in_progress after months. Is live data split across old (Topic/SubjectMatter) and new (ClassworkTopic/ClassworkSubtopic) paths?</div>
+  <div class="qa-a">They settled on the new model. The old one is dead in practice. But the code still has both. That's noise for new developers. I want the old model excised — not migrated.</div>
+  <div class="qa-r">G-Q3 → ADR-002. Resolution: full excision of deprecated paths, not data migration.</div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">What keeps students returning daily vs monthly? What is the product's daily engagement hook?</div>
+  <div class="qa-a">The quiz loop works — XP, league tiers, weekly reset. Students have a reason to do more quizzes. But the product doesn't connect to what the tutor is doing all week. No notes taken during a 1-on-1. No record of what specifically tripped a student. The report card is looking backward. We have no real-time capture.</div>
+  <div class="qa-r">G-Q4 → ADR-001. Resolution: lightweight 3-field session observation capture linked to student profile.</div>
+</div>
+
+<div class="qa">
+  <div class="qa-q">The system tracks quiz failures per topic per student. Does it do anything proactive with that data?</div>
+  <div class="qa-a">No. A student fails a topic and gets no signal to revisit it. We have the data but we're not using it to drive behavior. A student who failed a topic last week has no prompt to revisit it before they forget.</div>
+  <div class="qa-r">G-Q5 → ADR-003. Resolution: "Review Due" widget uses existing quiz_attempts failure data to nudge proactive recall.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 7 — THE 3 ADRs GENERATED
+═══════════════════════════════════════════ -->
+<h2>7. ADRs Generated — Pastpapr LMS</h2>
+
+<div class="adr">
+  <div class="adr-header">
+    <span class="num">ADR-001</span>
+    <span class="title">TutorSessionNoteModal — Session Observation Capture</span>
+  </div>
+  <div class="adr-body">
+    <div class="adr-section">
+      <strong>Context</strong>
+      The Pastpapr loop is quiz-driven. Students earn XP, move up league tiers, complete quizzes — that works. But for tutors, there's no capture mechanism for what happens during a 1-on-1 session. Tutors observe specific things — what a student understood, what tripped them up, what to follow up on — and that information lives nowhere in the system. The product is looking backward without giving tutors a way to record what they're seeing in real time.
+    </div>
+    <div class="adr-section">
+      <strong>Decision</strong>
+      Add a lightweight structured session observation form linked to a student's profile. Three fields only: what the student understood, what the吾士 tripped them up, what to practice next. Output is a tutor note attached to the student document, visible at the next session and available as context when generating a report card.
+    </div>
+    <div class="adr-section">
+      <strong>What to build (v1)</strong>
+      <em> DAL:</em> <code>src/lib/dal/tutorNotesDAL.ts</code> — create/read/list tutor notes by studentId<br>
+      <em>Service:</em> <code>tutorNoteService.ts</code> — createTutorNote(studentId, {understood, struggled, practiceNext})<br>
+      <em>Hook:</em> <code>useTutorNotes.ts</code> — list by studentId<br>
+      <em>UI:</em> <code>TutorSessionNoteModal.tsx</code> — 3-field modal, inline in session flow<br>
+      <em>Firestore:</em> <code>tutorNotes/{noteId}</code> with studentId, classId, tutorId, understood, struggled, practiceNext, createdAt<br>
+      Wire from: <code>AttendanceConfirmationDialog.tsx</code> "Add note" button<br>
+      Integration: LLM report card prompt reads recent tutor notes as Layer 4 context injection
+    </div>
+    <div class="adr-section">
+      <strong>What is deliberately excluded</strong>
+      Free-text entry (v1: structured fields only) · Parent/student-facing note view · Automated task generation · Multi-student bulk note entry
+    </div>
+    <div class="adr-section">
+      <strong>Why this is high-impact</strong>
+      Tutors currently manage this mentally or in a separate system. Structured note capture makes Pastpapr feel like a teaching tool rather than a quiz engine. Notes create continuity between sessions — a student's next visit shows what they were struggling with last week, not just an XP counter.
+    </div>
+    <div class="adr-section">
+      <strong>Verification</strong>
+      Create a note from attendance confirmation → note appears in student profile · Note visible on next session in SessionSection · LLM narrative references recent tutor note (if present) · <code>npm run test:run</code> passes
+    </div>
+  </div>
+</div>
+
+<div class="adr">
+  <div class="adr-header">
+    <span class="num">ADR-002</span>
+    <span class="title">Curriculum Model Excision — Remove Deprecated Paths</span>
+  </div>
+  <div class="adr-body">
+    <div class="adr-section">
+      <strong>Context</strong>
+      Tutors have fully migrated to <code>ClassworkTopic → ClassworkSubtopic</code> (new model). The old <code>Topic → SubjectMatter</code> model is no longer used in production Firestore. The migration script exists but was never executed because the problem solved itself naturally. What remains is dead code that misleads new developers about which path is canonical.
+    </div>
+    <div class="adr-section">
+      <strong>Decision</strong>
+      Remove all code for the old curriculum model. Not a migration — full excision. No data migration required because the old collection is already empty.
+    </div>
+    <div class="adr-section">
+      <strong>What to build (v1)</strong>
+      Delete: <code>src/lib/dal/curriculumDAL.ts</code> (entire file)<br>
+      Remove: deprecated Topic/SubjectMatter methods from <code>curriculumService.ts</code><br>
+      Remove: <code>Topic</code>, <code>SubjectMatter</code> types from <code>src/types/curriculum.ts</code><br>
+      Remove: <code>topics</code>, <code>subjectMatter</code> match patterns from <code>firestore.rules</code><br>
+      Remove: old collection indexes from <code>firestore.indexes.json</code><br>
+      Keep: <code>scripts/migrate-curriculum-to-classwork.js</code> as historical reference, mark "DO NOT EXECUTE"
+    </div>
+    <div class="adr-section">
+      <strong>What is deliberately excluded</strong>
+      Data migration script execution (not needed — old data is already empty) · New model DAL/service/UI changes (already correct)
+    </div>
+    <div class="adr-section">
+      <strong>Why this is high-impact</strong>
+      New developers reading the codebase immediately see one canonical model. Removes accidental consumer risk. Cleaner architecture presentation for code reviews and onboarding. The codebase stops lying about what is real.
+    </div>
+    <div class="adr-section">
+      <strong>Verification</strong>
+      <code>npm run test:run</code> — all pass, no old-model references in test mocks · <code>npm run build</code> clean · ESLint clean · Manual: create ClassworkTopic/Subtopic, complete student attempt, XP writes correctly · Confirm no <code>Topic</code>, <code>SubjectMatter</code>, <code>getTopicsByClass</code> in codebase after removal
+    </div>
+  </div>
+</div>
+
+<div class="adr">
+  <div class="adr-header">
+    <span class="num">ADR-003</span>
+    <span class="title">Spaced Review Widget — Proactive Recall Signal</span>
+  </div>
+  <div class="adr-body">
+    <div class="adr-section">
+      <strong>Context</strong>
+      The system tracks quiz performance (pass/fail per topic per student). Currently, that data is only visible backward — in the report card or activity feed. A student who fails a topic receives no signal to revisit it. By the time a tutor notices a pattern, weeks have passed and the student has already forgotten the material. The system has the data to make a proactive recommendation but is not using it.
+    </div>
+    <div class="adr-section">
+      <strong>Decision</strong>
+      Add a "Review Due" widget to the student dashboard that surfaces topics where the student has a recent failure (within 7 days), ordered by decay — topics not revisited since failing. Direct link to the relevant quiz. No new collection needed — uses existing <code>quiz_attempts</code> data.
+    </div>
+    <div class="adr-section">
+      <strong>What to build (v1)</strong>
+      <em>Hook:</em> <code>useSpacedReview.ts</code> — query quiz_attempts for current student, find topics with status='incorrect' last 7 days, filter out topics already passed since failure, return sorted by decay score (time since failure × attempt count)<br>
+      <em>UI:</em> <code>SpacedReviewWidget.tsx</code> — compact card: "You missed X on [Topic] — review it" with quiz link · Hidden when 0 items · Badge count on nav<br>
+      <em>Firestore query:</em> studentId + status + createdAt (no new collection, use existing quiz_attempts)<br>
+      <em>Feature flag:</em> <code>spacedReview: true</code> in <code>src/config/features.ts</code><br>
+      <em>Config:</em> <code>STALE_WINDOW_DAYS</code> default 7 days
+    </div>
+    <div class="adr-section">
+      <strong>What is deliberately excluded</strong>
+      Tutor-facing view (v1: student only) · Email/push notification · Tutor-assigned review tasks · SM-2 spaced repetition algorithm
+    </div>
+    <div class="adr-section">
+      <strong>Why this is high-impact</strong>
+      The product using its own data to drive behavior. Students who get a prompt to revisit missed material retain it better. The competitive loop (XP + league) keeps students coming back — a review nudge adds genuine learning value on top of the gamification. Without this, Pastpapr is a quiz engine where students practice. With this, it starts to behave like a learning system.
+    </div>
+    <div class="adr-section">
+      <strong>Verification</strong>
+      Login as student with failed attempt last 7 days → widget shows topic with quiz link · Login as student with no failures → widget hidden · Click Review → QuizPlayer loads correct quiz · Widget removes item after student passes a retake · <code>npm run test:run</code> passes · Tutor/admin dashboard: widget does not appear
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 8 — ROADMAP
+═══════════════════════════════════════════ -->
+<h2>8. Roadmap — Deploying Persona Brainstorm on Any Project</h2>
+
+<div class="roadmap-cols">
+
+  <!-- Column 1: Preparation -->
+  <div class="road-col">
+    <div class="road-col-head">Phase 0 — Preparation (Before the session)</div>
+    <div class="road-col-item">
+      <div class="ri-title">Load project documentation</div>
+      <div class="ri-meta">Clone repo, read .docs/ and .memory/ in full. Aim for 30–60 min reading. Note contradictions, stale states, "in_progress" features with no commits.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Identify 2–3 contradictions</div>
+      <div class="ri-meta">Features marked done but with untested next steps. Deprecated systems still live. Dual code paths with different constants. Version skew between deployed and source.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Prepare Ezekiel's opening question</div>
+      <div class="ri-meta">From the most acute contradiction found. Specific, evidence-based, not exploratory. Structure: "I see X in the code but Y in the history — which is the live state?"</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Create ADR.md placeholder</div>
+      <div class="ri-meta">Empty file in project root. Megumi writes completed ADRs here in real time during the session.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Invite Jeremiah's context</div>
+      <div class="ri-meta">Ensure Jeremiah's loaded data covers: product identity, user workflow, known pain points, what's been tried and failed. If Jeremiah can't answer a question from context, flag it as a gap in product knowledge.</div>
+    </div>
+  </div>
+
+  <!-- Column 2: Session -->
+  <div class="road-col">
+    <div class="road-col-head">Phase 1 — Run the Session (30–45 min)</div>
+    <div class="road-col-item">
+      <div class="ri-title">Orientation (5 min)</div>
+      <div class="ri-meta">Ezekiel opens with known contradiction. One question. Wait for Jeremiah's answer before moving on.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Round 1 — Product loop (5–7 min)</div>
+      <div class="ri-meta">How do users engage with the system daily vs periodically? Where is the engagement hook, and where is the gap? Close surface-level questions fast.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Round 2 — Deep push (7–10 min)</div>
+      <div class="ri-meta">Push on the most real thread from Round 1. Press until Jeremiah gives a concrete pain statement. "Can you give me a specific example?" is the key reframe.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Round 3 — Second theme (5–7 min)</div>
+      <div class="ri-meta">Pivot if a second distinct theme exists. If not, go deeper on Round 2. Aim for 2–3 confirmed improvement themes before writing ADRs.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">ADR writing (10 min)</div>
+      <div class="ri-meta">Ezekiel drafts each ADR in real time. Megumi confirms each write to ADR.md. Cap at 3 ADRs total. Each ADR takes ~3 min to draft if the discovery was done right.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Session close — push immediately</div>
+      <div class="ri-meta">ADR.md + CONTEXT.md pushed to project repo before the session ends. No buffering. Skill pushed to harness-engineering-skills.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="roadmap-cols" style="margin-top: 16px;">
+
+  <!-- Column 3: Post-Session -->
+  <div class="road-col">
+    <div class="road-col-head">Phase 2 — Post-Session Actions</div>
+    <div class="road-col-item">
+      <div class="ri-title">Convert ADRs to implementation tasks</div>
+      <div class="ri-meta">Each ADR becomes a planning set: "What to build (v1)" items map to concrete files/features. Break down into test-first tasks. Use TDD on new files.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">ADR-002 specific: ESLint sweep</div>
+      <div class="ri-meta">After Curriculum Excision: run grep for Topic, SubjectMatter, getTopicsByClass. Run full test suite. Confirm zero old-model references.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">ADR-003 specific: Firestore index check</div>
+      <div class="ri-meta">Spaced Review: verify composite index exists for quiz_attempts (studentId + createdAt + status). If not, deploy index before building the widget.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">UX review gate</div>
+      <div class="ri-meta">All three ADRs require tutor/student UX review before implementation starts. Book a walkthrough with the actual user personas before writing code.</div>
+    </div>
+  </div>
+
+  <!-- Column 4: Skill Maintenance -->
+  <div class="road-col">
+    <div class="road-col-head">Phase 3 — Skill Maintenance</div>
+    <div class="road-col-item">
+      <div class="ri-title">Embed transcript in skill</div>
+      <div class="ri-meta">After each session, add the real transcript excerpt to the skill's "Example" section. Each run improves the skill's precision and examples.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">ADR template review</div>
+      <div class="ri-meta">After 3 sessions, review: are the ADRs specific enough that developers can start building without questions? If not, tighten the template.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Pattern logging</div>
+      <div class="ri-meta">If the same class of contradiction surfaces across projects (deprecated code, untested features, dual-write risks), log it as a pattern in .memory/mistakes.json.</div>
+    </div>
+    <div class="road-col-item">
+      <div class="ri-title">Quarterly re-grill</div>
+      <div class="ri-meta">Run a persona brainstorm session at the start of each quarter even if nothing feels broken. Product context shifts — run the session to surface what's changed.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 9 — KEY RULES CHEATSHEET
+═══════════════════════════════════════════ -->
+<h2>9. Key Rules Cheatsheet</h2>
+
+<ul class="rule-list">
+  <li><strong>One question at a time.</strong> Ezekiel asks ONE question, Jeremiah answers, Ezekiel responds. No piling.</li>
+  <li><strong>Jeremiah first.</strong> If Judah answers instead of Jeremiah, redirect: "Let's keep Jeremiah in character."</li>
+  <li><strong>No vague ADRs.</strong> "Improve UX" is not an ADR. "Add 3-field TutorSessionNoteModal with Firestore write" is. If a developer can't start building from it, it's not ready.</li>
+  <li><strong>ADR comes from friction, not aspiration.</strong> The strongest improvements are from real contradictions: code that exists but doesn't work, workflows that create risk, gaps between what the system does and what users need.</li>
+  <li><strong>Cap at 3 ADRs.</strong> Three finished ADRs is a strong session. More than three means nothing was committed deeply enough.</li>
+  <li><strong>Document in real time.</strong> Megumi writes G-Q# entries to CONTEXT.md as questions close. Writes completed ADRs to ADR.md immediately after drafting.</li>
+  <li><strong>Push before closing.</strong> ADR.md + CONTEXT.md pushed to project repo immediately after the session. Skill pushed to harness-engineering-skills. No buffering.</li>
+  <li><strong>Ezekiel never monologues.</strong> If Ezekiel is talking for more than 2 sentences, they're not asking a question — they're performing. Stop and ask Jeremiah.</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════
+     SECTION 10 — WHEN TO RUN / WHEN NOT TO
+═══════════════════════════════════════════ -->
+<h2>10. When to Run — And When Not To</h2>
+
+<table>
+  <thead><tr><th>Run It</th><th>Don't Run It</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Beginning of a new development cycle (kickoff)</td>
+      <td>When you already have a concrete spec — go straight to planning</td>
+    </tr>
+    <tr>
+      <td>Before committing a large investment (new EPIC)</td>
+      <td>When the user wants a list of 10 features — this is a focusing exercise, not a menu</td>
+    </tr>
+    <tr>
+      <td>When backlog grooming produces weak priorities</td>
+      <td>When stakeholders are not aligned — Jeremiah must speak with one voice</td>
+    </tr>
+    <tr>
+      <td>When the team knows "something is off" but can't name it</td>
+      <td>When the product context hasn't been loaded — Jeremiah answers from memory, not docs</td>
+    </tr>
+    <tr>
+      <td>After a major deployment or quarterly review</td>
+      <td>When only 1 person is available (requires developer + client + scribe roles)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="cta">
+  <p><strong>Skill location:</strong> <code>~/.hermes/skills/persona-brainstorm/SKILL.md</code></p>
+  <p><strong>Skill repo:</strong> <code>jtoemion/harness-engineering-skills</code></p>
+  <p><strong>Pastpapr outputs:</strong> <code>jtoemion/pastpapr/ADR.md</code> + <code>CONTEXT.md</code></p>
+  <p>Trigger: mention "persona brainstorm", "Ezekiel", "Jeremiah", or "grill session" to activate.</p>
+</div>
+
+</body>
+</html>

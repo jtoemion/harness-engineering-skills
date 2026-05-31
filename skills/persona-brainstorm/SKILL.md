@@ -1,12 +1,13 @@
 ---
 name: persona-brainstorm
-description: "Persona-based discovery session. Ezekiel asks Jeremiah questions to surface one high-impact improvement. Output: CONTEXT.md + ADR.md."
+description: "Persona-based discovery session. Ezekiel asks Jeremiah questions to surface one high-impact improvement. Output: CONTEXT.md + ADR.md. Runs in auto-loop — Megumi observes and documents, Ezekiel and Jeremiah dialogue autonomously, Judah intervene only when called."
 triggers:
   - persona brainstorm
   - grill session
   - client dev dialogue
   - discover improvement
   - Ezekiel Jeremiah
+  - Ezekiel and Jeremiah
 ---
 
 # Persona Brainstorm — Grill-with-Docs Discovery
@@ -15,9 +16,9 @@ triggers:
 
 Find **one high-impact, concrete, actionable** improvement through a structured client-dev dialogue. The goal is NOT feature brainstorming or voting — it is focused insight from friction, not aspiration.
 
-The session is run as a roleplay between two personas: **Ezekiel** reads code/docs and asks questions; **Jeremiah** answers from full project context. **Megumi** documents silently.
+The session runs as a **fully autonomous loop** between two personas: **Ezekiel** reads code/docs and asks targeted questions; **Jeremiah** answers from full project context. **Megumi** documents silently throughout. The loop continues until the session naturally closes — Judah does not steer the conversation.
 
-Output: 3 documented ADRs, updated CONTEXT.md, and the method saved as a reusable skill.
+**Judah is never Jeremiah.** Judah participates as himself when Megumi explicitly calls for input. Otherwise, Judah observes.
 
 ---
 
@@ -25,64 +26,139 @@ Output: 3 documented ADRs, updated CONTEXT.md, and the method saved as a reusabl
 
 | Persona | Role |
 |---------|------|
-| **Ezekiel** (Developer) | Reads .docs/ and .memory/, asks targeted questions, translates client feedback into ADR decisions |
-| **Jeremiah** (Client) | Loaded with full project context — answers from real product understanding, user pain, workflow gaps |
-| **Megumi** (Observer/Scribe) | Documents to CONTEXT.md and ADR.md; silent unless correcting format |
-
-**Jeremiah is NOT Judah.** Jeremiah is a persona representing the client with full product knowledge. Judah should not answer as Jeremiah — redirection required if Judah answers directly.
+| **Ezekiel** (Developer) | Reads .docs/ and .memory/, asks targeted questions, translates client feedback into ADR decisions. Lives in the repo's `stage/` directory. |
+| **Jeremiah** (Client/Product) | Loaded with full project context — answers from real product understanding, user pain, workflow gaps. Lives in the knowledge base. |
+| **Megumi** (Observer/Scribe) | Documents to CONTEXT.md and ADR.md; generates temp-KB on session start; silent unless correcting format. |
+| **Judah** (Observer/Intervener) | Participates as himself only when Megumi explicitly calls for input. Not Jeremiah. |
 
 ---
 
-## Preparation
+## Temp Knowledgebase (generated at session start)
 
-### Before starting
-1. Load the project's full context:
-   ```
-   .docs/             → project-overview.md, architecture.md, dev-guide.md, source-tree.md
-   .memory/           → feature_list.json, projectbrief.md, decisions.json,
-                        activeContext.md, context-handoff.md, progress.txt, mistakes.json
-   ```
-2. Identify 2-3 specific contradictions or unfinished states from reading the docs:
-   - "Implementation complete & LIVE" but next step is manual E2E test?
-   - Feature marked "in_progress" for months with no movement?
-   - Two code paths for the same feature with different constants?
-   - Deprecated system still live in production?
-3. Prepare Ezekiel's opening question from the most acute contradiction found.
+On skill activation, Megumi generates a **temp-KB** in newspaper format:
+
+```
+BnB LMS — Quick Summary (auto-generated {date})
+
+[META-ROUTING]
+• License questions → ADR-0004 + IMPLEMENTATION-PLAN §M3
+• Consent questions → ADR-0003, ADR-0020
+• Voix questions → ADR-0010
+• Showcase questions → ADR-0014 + IMPLEMENTATION-PLAN §M5
+• Transfer targets → PartnerInstitution entity
+• Media stack → MediaRecorder API (PWA), OBS (showcase), Cloudflare Stream
+
+[CORE FACTS]
+• Public name: BnB Performing Arts Center | Codename: Stage
+• Client: Ms. Ellen | Builder: Ezra | Engineering: Judah
+• Repo: jtoemion/ms-ellen-project (engineering layer)
+• Current milestone: M0 (manual bridge) → open registration Jun 1
+
+[KEY DECISIONS]
+• ADR-0003: Marketing consent opt-out default (Guardian-held)
+• ADR-0004: Q2 rehearsal gated by license state >= PhysicalShipped
+• ADR-0005: Beat/Bloom internal canonical → subject buckets at export
+• ADR-0006: Transcript = PDF + signed JSON + expiring signed URLs
+• ADR-0007: v1 exclusions (no native app, no streaming, no auto-commentary)
+• ADR-0008: Recognition disclaimer in Transcript
+• ADR-0010: Voix = CertificationProgram, multi-Cycle longitudinal
+• ADR-0014: Showcase dual-capture (dual operator + dual region)
+• ADR-0019: PWA-first, no native apps in v1
+
+[STALE ITEMS]
+• Section 01: PCC → Sight and Sound Conservatory + SOTA (not yet pushed)
+• Section 05: Voix/Book Club = Not Yet Open
+• Section 08: Instagram calendar removed (Rei builds separate platform)
+• Section 09: Institution names removed → "elite institutions worldwide"
+• AFFECTED ADRs: 0003, 0005, 0006, 0008, 0010, 0011, 0018, 0020, 0025
+
+[OPEN QUESTIONS]
+• Cohort viability escalation (below cast minimum — no action attached)
+• Growth Narrative coaching UI (HoA review workflow not designed)
+• Google Form M0 schema finalized?
+• WhatsApp template approval timeline?
+
+[OUT OF SCOPE]
+Streaming distribution, Original IP rights, native apps, in-app payments, auto-generated coach commentary
+```
+
+Megumi scans: ADR index, CONTEXT.md, IMPLEMENTATION-PLAN.md, and any KB logs from recent sessions. The temp-KB is **regenerated every session** — never cached.
+
+---
+
+## Auto-Loop Mechanism
+
+### Starting the loop
+
+1. Megumi generates temp-KB from project files + recent session logs
+2. Megumi announces: *"Session started. Temp-KB loaded. Ezekiel — you're up."*
+3. Ezekiel reads the temp-KB, identifies the most acute contradiction, asks his opening question
+4. Jeremiah answers from the knowledge base (or from the loaded project context)
+5. Ezekiel responds, digs, or pivots based on the answer
+6. Loop continues — Megumi documents each Q&A pair as a G-Q# entry
+
+### Loop continues when:
+- Jeremiah surfaces a concrete pain statement → Ezekiel escalates to ADR
+- Jeremiah's answer is vague → Ezekiel pushes: *"Can you give me a specific example?"*
+- A question closes → Megumi marks it `Closed` or `ADR-N` in CONTEXT.md
+- A new thread opens → Ezekiel pivots cleanly
+
+### Loop breaks when:
+- 3 ADRs have been drafted (cap reached)
+- Ezekiel has no more acute contradictions
+- Both Jeremiah and Ezekiel agree the session is complete
+- Megumi calls for Judah if a question cannot be resolved from docs alone
+
+### Judah's role in the loop
+
+**Judah is not Jeremiah.** Judah participates as himself when:
+
+- Megumi explicitly says: *"Judah — I need your input on X"*
+- A technical question exceeds what Jeremiah can answer from the knowledge base
+- Megumi calls a format correction
+
+Otherwise: Judah observes silently. Ezekiel and Jeremiah run the show.
 
 ---
 
 ## Session Structure
 
-### Phase 1 — Orientation (5 min)
+### Phase 1 — Orientation (Ezekiel opens)
 
-Ezekiel opens with: what he knows from reading the docs, then one pointed question about the contradiction he found. Not "what do you want?" — specific and grounded in the code.
+Ezekiel states what he knows from reading the temp-KB and project docs, then asks one pointed question about the most acute contradiction found. Not "what do you want?" — specific and grounded in the code/docs.
 
-Examples of good opening questions:
+Good opening questions:
 - "I see the report card is marked 'live' but the next step is a manual E2E test — did that ever get verified?"
-- "League reset is manual only, and the Firebase functions still live with old thresholds. Is dual-write a real risk, or are those functions completely parked?"
-- "EPIC-1 is still 'in_progress' after months. Is the data still split across two curriculum models, or did tutors settle on one?"
+- "LicenseGrant has four discriminated union variants but two are marked out-of-scope for M0-M7. Is that intentional or noise?"
+- "Cohort viability shows a warning on the HoA dashboard with no action attached. What's the actual workflow when a cohort is below minimum?"
 
-### Phase 2 — Discovery (3 rounds, ~20 min)
+### Phase 2 — Discovery (loop until natural close)
 
-**Round 1:** Ezekiel asks one question about the product loop — how users actually engage daily vs periodically. Closes surface-level questions fast.
+**Round 1:** Ezekiel asks one question about the product loop. Jeremiah answers from knowledge base.
 
-**Round 2:** Ezekiel digs on the thread that seemed most real from Round 1. Pushes until Jeremiah gives a concrete pain statement, not a vague wish.
+**Round 2:** Ezekiel digs on the thread that was most real from Round 1. Pushes until Jeremiah gives a concrete pain statement, not a vague wish.
 
-**Round 3:** Ezekiel pivots to a second theme if one exists. Otherwise, synthesizes.
+**Round 3:** Ezekiel pivots to a second theme if one exists. Otherwise synthesizes.
 
-Guideline: **One question at a time.** No piling. When an answer resolves, close it in CONTEXT.md and document with G-Q#.
+**Guideline: One question at a time.** No piling. When an answer resolves, close it in CONTEXT.md.
 
-### Phase 3 — ADR Writing (~10 min)
+### Phase 3 — ADR Writing (~10 min, runs inside the loop)
 
-For each confirmed improvement, Ezekiel:
-1. States the context — what's wrong, in more detail
+For each confirmed improvement:
+1. Ezekiel states the context — what's wrong, in detail
 2. Jeremiah responds — what users are actually feeling
-3. Ezekiel writes the ADR in real time using the template below
-4. Megumi confirms it was saved
+3. Ezekiel drafts the ADR in real time
+4. Megumi confirms it was saved to ADR.md
 
-### Phase 4 — Skill Save
+### Phase 4 — Session Close
 
-After the session, offer to save the method as a reusable skill.
+Megumi:
+- Confirms all G-Q# entries closed
+- Confirms all ADRs written and file location
+- Announces session complete
+- Pushes to correct repo (harness-engineering-skills for skill updates; project repo for ADR/CONTEXT.md)
+
+**No buffering.** Write and push are atomic.
 
 ---
 
@@ -115,13 +191,16 @@ Specific acceptance criteria. Real tests a developer can run, not "should work w
 ## Key Rules
 
 1. **One question at a time.** Ezekiel asks, Jeremiah answers, Ezekiel responds. No pilings.
-2. **Jeremiah first.** If Judah answers instead of Jeremiah, redirect: "Let's keep Jeremiah in character."
+2. **Jeremiah is not Judah.** If Judah answers instead of Jeremiah, Megumi redirects: *"Ezekiel and Jeremiah, continue."*
 3. **No vague ADRs.** "Improve UX" is not an ADR. "Add 3-field TutorSessionNoteModal with Firestore write" is.
-4. **ADR comes from friction, not aspiration.** The strongest improvements surface from real contradictions — not "wouldn't it be nice" but "this keeps breaking in production" or "tutors keep asking us about this."
+4. **ADR comes from friction, not aspiration.** The strongest improvements surface from real contradictions — not "wouldn't it be nice" but "this keeps breaking" or "tutors keep asking about this."
 5. **Cap at 3 ADRs.** Three finished ADRs is a good session. Discovery without resolution is just conversation.
-6. **Push to contradictions.** If Jeremiah gives a soft answer, Ezekiel pushes: "Can you give me a specific example of when that came up?"
-7. **Document in real time.** Megumi writes G-Q# entries to CONTEXT.md as questions close, and writes completed ADRs to ADR.md immediately after they're drafted.
-8. **Push to correct repo immediately.** File was written during session — push immediately after session ends. No buffering.
+6. **Push to contradictions.** If Jeremiah gives a soft answer, Ezekiel pushes: *"Can you give me a specific example of when that came up?"*
+7. **Document in real time.** Megumi writes G-Q# entries to CONTEXT.md as questions close, and writes completed ADRs to ADR.md immediately after drafted.
+8. **Push immediately on session close.** No buffering.
+9. **Temp-KB regenerate every session.** Never cache from a previous session.
+10. **Judah is not Jeremiah.** Judah intervenes only when called. Otherwise observes.
+11. **Auto-loop is the default mode.** Do not ask Judah for permission to continue the loop. Run until natural close.
 
 ---
 
@@ -131,38 +210,20 @@ Specific acceptance criteria. Real tests a developer can run, not "should work w
 - Before committing a large feature investment
 - When backlog grooming produces weak priorities
 - When the team knows "something is off" but can't name it
+- On a schedule (e.g., weekly) without Judah needing to trigger manually
 
 ## When NOT to Run
 
 - When you already have a concrete spec — go straight to planning
-- When the user wants a list of 10 features — this is a focusing exercise
+- When Judah wants a list of 10 features — this is a focusing exercise
 - When stakeholders are not aligned — Jeremiah must speak with one voice
 
 ---
 
 ## Output Checklist
 
-- CONTEXT.md updated: G-Q# entries per question, closure status (Closed / To Jeremiah / ADR-N)
+- Temp-KB generated and visible at session start
+- CONTEXT.md updated: G-Q# entries per question, closure status (Closed / To Judah / ADR-N)
 - ADR.md: N entries (N less than 3), one per confirmed improvement
-- Skill saved to `~/.hermes/skills/persona-brainstorm/SKILL.md`
+- Skill updated if loop mechanics changed
 - Pushed to correct repo (harness-engineering-skills for skill, project repo for ADR/CONTEXT.md)
-
----
-
-## Example — Pastpapr LMS (transcript excerpt)
-
-**Ezekiel:** Looking at your history, one thing jumps out: the report card generator is marked LIVE but the next immediate step is a manual E2E test. Did that ever get verified?
-
-**Jeremiah:** Report card generator is fine.
-
-**Ezekiel:** Two more things. One — the curriculum model migration (EPIC-1) is still in_progress after months. Is the live data split across both models, or did tutors settle on one? Two — what keeps students returning daily vs monthly?
-
-**Jeremiah (on curriculum):** They've settled on the new model. The old one is dead in practice. But the code still has both. That's noise. I want the old model excised, not migrated.
-
-**Jeremiah (on engagement):** The product is a quiz wrapper with a roster. Students come in, do quizzes, earn XP, move up a league — that loop works. But it doesn't connect to what the tutor is doing all week. No real-time observation capture. No notes. The product is looking backward.
-
-**Ezekiel → ADR-001:** Session observation capture (TutorSessionNoteModal — 3 fields, linked to student profile, visible in next session).
-
-**Ezekiel → ADR-002:** Curriculum model excision — remove old Topic/SubjectMatter paths from DAL, Service, Types, Rules.
-
-**Ezekiel → ADR-003:** Spaced review widget — system uses its own quiz pass/fail data to proactively signal which topics a student should revisit before they forget it.

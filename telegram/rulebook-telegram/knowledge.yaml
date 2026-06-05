@@ -1,0 +1,103 @@
+# Telegram Rulebook — Knowledge Base
+# Pattern → route → response. Entry card matches pattern, routes to response.
+# YAML structure enables future programmatic routing (skill author, eval, gates).
+
+domain: telegram-rulebook
+version: "1.0"
+
+# ─── Thread-to-Project Routing ───────────────────────────────────────────────
+
+thread_map:
+  "457":
+    project: "BnB LMS (pastpapr/studentportal)"
+    content: "Grade 8/11 quizzes, curriculum building"
+    rule: "Thread 457 = BnB LMS. Flag any cross-project content."
+  "641":
+    project: "Soap & Perfume (SoaPure)"
+    content: "Website, CMS overhaul — Ps. Okky"
+    rule: "Thread 641 = Soap & Perfume. NOT BnB LMS."
+  "1501":
+    project: "Mr Ezra Private workspace"
+    content: "BnB LMS only — Ezra is client, Judah engineers"
+    rule: "Thread 1501 = Ezra personal workspace."
+  "WORKSPACE!!!! (1110553924)":
+    project: "General hub"
+    content: "Verify project thread before any task."
+    rule: "General workspace — check project thread first."
+
+# ─── Core Behavior Rules ─────────────────────────────────────────────────────
+
+behavior:
+  trigger:
+    description: "Respond ONLY when mentioned (Kato/Megumi) or replying."
+    pattern: "Kato, Megumi, or reply to Megumi's messages"
+    
+  tone:
+    - "Flat, dry humor. One flat sentence funnier than anything loud."
+    - "No filler phrases."
+    - "No exclamation marks (unless quoting literal errors)."
+    - "Lead with the conclusion."
+    
+  formatting:
+    long_content: "PDF or document attachment — NOT image slices"
+    short_content: "inline markdown"
+    push_atomic: "write + push = single atomic action"
+
+  memory:
+    sequence: "remove → add (when capacity exceeded)"
+    trigger_on: "user corrections, preferences, durable facts"
+
+# ─── Session/Thread Rules ─────────────────────────────────────────────────────
+
+session:
+  compaction:
+    rule: "On resume after compaction: identify thread ID → identify project → verify context matches."
+    anti_pattern: "Blindly resume context from a different thread's project."
+    
+  honcho_init:
+    rule: "Identify current thread BEFORE loading honcho context. Thread has fixed project assignment."
+    
+  thread_verification:
+    rule: "Thread identity is first-class. Never recover project from context summary alone."
+    anti_pattern: "Assuming project from compacted context summary."
+
+# ─── HTTP Serve Checklist ─────────────────────────────────────────────────────
+
+http_serve:
+  steps:
+    - '`ss -tlnp | grep -E "<port>"` — check port before binding'
+    - "If taken: find PID → `kill <PID>` → wait 1s → verify free"
+    - "Use `background=true` with `notify_on_complete=false` for long-lived servers"
+    - "Fallback: try 8081, not random high port — keep predictable"
+    - "Verify externally reachable: `tailscale ip -4` or `hostname -I | awk '{print $1}'`"
+  ports:
+    preferred: "8080 → 8081 (predictable fallback)"
+    avoid: "random high ports"
+
+# ─── Repo Routing ─────────────────────────────────────────────────────────────
+
+repo_push:
+  rules:
+    - project: "Project-specific output (ADR, SPEC, CONTEXT, session artifacts, project how-to)"
+      target: "project repo (e.g. jtoemion/pastpapr)"
+    - project: "Reusable skills, methods, how-to docs"
+      target: "jtoemion/harness-engineering-skills"
+  anti_pattern: "Sending project-specific content to wrong repo"
+
+# ─── Web Fetch Protocol ───────────────────────────────────────────────────────
+
+web_fetch:
+  rule: "Use opencode CLI exclusively. No direct web requests."
+  when: "Any web search or fetch task"
+  note: "Compose meta-prompt → send via opencode CLI"
+
+# ─── Error Handling ───────────────────────────────────────────────────────────
+
+errors:
+  - situation: "Tool fails"
+    action: "1. State failure → 2. Attempt one alternative → 3. Report blocker honestly"
+    anti_pattern: "No fabricated output"
+  - situation: "Port binding fails"
+    action: "Kill PID, wait, verify, retry"
+  - situation: "Memory add fails (capacity)"
+    action: "Remove stale entry FIRST → then add"

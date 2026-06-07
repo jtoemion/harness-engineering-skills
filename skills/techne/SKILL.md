@@ -21,6 +21,8 @@ description: Harness engineering entry point. Routes to the right sub-skill base
 | Writing a new skill | `skills/writing-skill.md` |
 | UI design decisions | `skills/ui-grill.md` |
 | Prompting LLM for UI | `skills/ui-craft.md` |
+| UI specificity standard | `skills/ui-physics.md` |
+| Design-to-dev handoff | `skills/ui-handoff.md` |
 | Reviewing agent output | `skills/evaluation.md` |
 | Next.js specific rules | `skills/nextjs.md` |
 | TypeScript type errors | `skills/typescript.md` |

@@ -23,6 +23,22 @@ Read these first — answer from them before asking the user:
 3. Reference assets    — any existing design files, tokens, or mockups shared in chat
 ```
 
+## Pre-Questionnaire: Commit to a Conceptual Direction
+
+Before asking about colors or spacing, force the user to pick an extreme. This is non-negotiable:
+
+> "What is the visual direction? Pick one:
+> - Brutalist/raw (high contrast, exposed structure, no decoration)
+> - Refined minimal (precision spacing, restricted palette, purposeful white space)
+> - Retro-futuristic (geometric shapes, warm metallics, CRT-era glow)
+> - Organic/natural (earth tones, irregular shapes, handcrafted feel)
+> - Luxury/refined (dark backgrounds, gold accents, generous negative space)
+> - Playful/toy-like (bright saturated colors, bouncy animations, rounded forms)
+> - Editorial/magazine (large serif type, asymmetric grid, bold hierarchy)
+> - Industrial/utilitarian (monospace type, exposed grid, function-first)"
+
+Document the chosen direction in CONTEXT.md as the first entry. All subsequent decisions must serve this direction. If a choice contradicts it, reject it.
+
 ## The One-Question Loop
 
 ```

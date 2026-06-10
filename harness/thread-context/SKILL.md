@@ -76,12 +76,13 @@ Append to `~/.hermes/threads/<thread>/session.log` each turn:
 
 Current threads (name-based, not thread-number based):
 
-| Thread | Owner | Context File |
-|---|---|---|
-| ezra | Ezra Theodores | ~/.hermes/threads/ezra/context.md |
-| judah | Judah Zebaoth | ~/.hermes/threads/judah/context.md |
-| soapure | SoaPure | ~/.hermes/threads/soapure/context.md |
-| kanban | Kanban workers | ~/.hermes/threads/kanban/context.md |
+| Thread | Owner | Thread IDs | Purpose |
+|---|---|---|---|
+| ezra-personal | Ezra Theodores | 1501 + DM 6575927128 | Personal workspace — curriculums, content. STERILE. |
+| studentportal | Ezra Theodores | 1 (group -5218220874:6575927128) | EzraLMS/studentportal codebase — engineering |
+| judah | Judah Zebaoth | 495 (group -1003966031884:495) | harness-engineering-skills / SoaPure |
+| soapure | SoaPure | 641 (group -1003966031884:641) | soap-perfume-website / cosmic graph |
+| kanban | Kanban workers | N/A | Kanban task orchestration |
 
 ---
 

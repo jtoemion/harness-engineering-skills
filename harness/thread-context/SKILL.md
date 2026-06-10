@@ -80,7 +80,8 @@ Current threads (name-based, not thread-number based):
 |---|---|---|---|
 | ezra-personal | Ezra Theodores | 1501 + DM 6575927128 | Personal workspace — curriculums, content. STERILE. |
 | studentportal | Ezra Theodores | 1 (group -5218220874:6575927128) | EzraLMS/studentportal codebase — engineering |
-| judah | Judah Zebaoth | 495 (group -1003966031884:495) | harness-engineering-skills / SoaPure |
+| judah-home | Judah Zebaoth | Home (group -1003966031884:1110553924) | Judah's personal home — private |
+| judah-workspace | Judah Zebaoth | 495 (group -1003966031884:495) | General workspace — any topics |
 | soapure | SoaPure | 641 (group -1003966031884:641) | soap-perfume-website / cosmic graph |
 | kanban | Kanban workers | N/A | Kanban task orchestration |
 

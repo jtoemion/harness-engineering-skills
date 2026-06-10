@@ -83,7 +83,7 @@ Current threads (name-based, not thread-number based):
 | judah-home | Judah Zebaoth | Home (group -1003966031884:1110553924) | Judah's personal home — private |
 | judah-workspace | Judah Zebaoth | 495 (group -1003966031884:495) | General workspace — any topics |
 | soapure | SoaPure | 641 (group -1003966031884:641) | soap-perfume-website / cosmic graph |
-| kanban | Kanban workers | N/A | Kanban task orchestration |
+| kanban | Kanban workers | 6473 (group -1003966031884:6473) | Kanban task orchestration |
 
 ---
 
